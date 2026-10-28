@@ -40,6 +40,8 @@ export default function ProductsPage() {
     const cat = searchParams.get('category');
     if (cat) {
       setSelectedCategory(cat);
+    } else {
+      setSelectedCategory('All');
     }
   }, [searchParams]);
 

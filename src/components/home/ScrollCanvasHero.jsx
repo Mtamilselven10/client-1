@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, ChevronDown, Sparkles, CheckCircle2, Lock, Unlock } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ArrowRight, ChevronDown, Sparkles } from 'lucide-react';
 import { SHOP_NAME, SHOP_TAGLINE } from '../../config';
 import { useLanguage } from '../../context/LanguageContext';
 
-export default function ScrollCanvasHero({ isUnlocked = false, onComplete, onRewind }) {
+export default function ScrollCanvasHero() {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
   const canvasRef = useRef(null);
@@ -14,7 +14,6 @@ export default function ScrollCanvasHero({ isUnlocked = false, onComplete, onRew
   const [loadProgress, setLoadProgress] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
   const [currentFrameDisplay, setCurrentFrameDisplay] = useState(0);
-  const [isAnimationComplete, setIsAnimationComplete] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   // Cached frame images
@@ -28,22 +27,12 @@ export default function ScrollCanvasHero({ isUnlocked = false, onComplete, onRew
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     setPrefersReducedMotion(mediaQuery.matches);
-    if (mediaQuery.matches) {
-      setIsAnimationComplete(true);
-      isCompleteRef.current = true;
-      if (onComplete) onComplete();
-    }
     const handleChange = () => {
       setPrefersReducedMotion(mediaQuery.matches);
-      if (mediaQuery.matches) {
-        setIsAnimationComplete(true);
-        isCompleteRef.current = true;
-        if (onComplete) onComplete();
-      }
     };
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
-  }, [onComplete]);
+  }, []);
 
   // Draw frame on canvas with high DPI and Cover fit
   const drawFrame = useCallback((frameIndex) => {
@@ -187,22 +176,6 @@ export default function ScrollCanvasHero({ isUnlocked = false, onComplete, onRew
       setCurrentFrameDisplay(frameToDraw);
       drawFrame(frameToDraw);
 
-      // Check if animation has reached the 100% breakpoint
-      if (currentFrameIndexRef.current >= TOTAL_FRAMES - 1.5) {
-        if (!isCompleteRef.current) {
-          isCompleteRef.current = true;
-          setIsAnimationComplete(true);
-          if (onComplete) onComplete();
-        }
-      } else if (currentFrameIndexRef.current < TOTAL_FRAMES * 0.2) {
-        // Only if rewound near the beginning
-        if (isCompleteRef.current && window.scrollY <= 10) {
-          isCompleteRef.current = false;
-          setIsAnimationComplete(false);
-          if (onRewind) onRewind();
-        }
-      }
-
       animFrameIdRef.current = requestAnimationFrame(renderLoop);
     };
 
@@ -213,28 +186,7 @@ export default function ScrollCanvasHero({ isUnlocked = false, onComplete, onRew
         cancelAnimationFrame(animFrameIdRef.current);
       }
     };
-  }, [isLoaded, drawFrame, onComplete, onRewind]);
-
-  // Skip / Instant Unlock Handler
-  const handleUnlockBreakpoint = () => {
-    targetFrameIndexRef.current = TOTAL_FRAMES - 1;
-    currentFrameIndexRef.current = TOTAL_FRAMES - 1;
-    drawFrame(TOTAL_FRAMES - 1);
-    setCurrentFrameDisplay(TOTAL_FRAMES - 1);
-    isCompleteRef.current = true;
-    setIsAnimationComplete(true);
-    if (onComplete) onComplete();
-
-    // Smoothly scroll down after unlock
-    setTimeout(() => {
-      const target = document.getElementById('explore-section');
-      if (target) {
-        target.scrollIntoView({ behavior: 'smooth' });
-      } else {
-        window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
-      }
-    }, 250);
-  };
+  }, [isLoaded, drawFrame]);
 
   const handleScrollDownToExplore = () => {
     const target = document.getElementById('explore-section');
@@ -259,82 +211,19 @@ export default function ScrollCanvasHero({ isUnlocked = false, onComplete, onRew
     return () => window.removeEventListener('resize', handleResize);
   }, [drawFrame]);
 
-  // Strict Breakpoint Scroll/Wheel/Touch Interception Engine
+  // Smooth native window scroll scrubbing - no scroll-lock or preventDefault
   useEffect(() => {
     if (!isLoaded || prefersReducedMotion) return;
 
-    let touchStartY = 0;
-
-    // 1. Mouse wheel handler
-    const onWheel = (e) => {
-      // If animation is NOT complete:
-      if (!isCompleteRef.current) {
-        e.preventDefault();
-        const delta = e.deltaY;
-        // Normalize wheel delta for controlled, smooth frame advance
-        const step = (delta / 40) * 3.5;
-        targetFrameIndexRef.current = Math.max(
-          0,
-          Math.min(TOTAL_FRAMES - 1, targetFrameIndexRef.current + step)
-        );
-      } else {
-        // Animation IS complete (breakpoint reached):
-        // If at the top of the page and scrolling UP strongly, allow rewinding
-        if (window.scrollY === 0 && e.deltaY < -25 && targetFrameIndexRef.current > 0) {
-          // Allow gentle reverse scrub
-          targetFrameIndexRef.current = Math.max(0, targetFrameIndexRef.current - 4);
-        }
-        // Downward scrolling naturally scrolls the page down into the unlocked website!
-      }
+    const onScroll = () => {
+      const scrollY = window.scrollY;
+      const heroHeight = window.innerHeight;
+      const progress = Math.min(1, Math.max(0, scrollY / heroHeight));
+      targetFrameIndexRef.current = Math.round(progress * (TOTAL_FRAMES - 1));
     };
 
-    // 2. Touch handlers for mobile/tablet
-    const onTouchStart = (e) => {
-      touchStartY = e.touches[0].clientY;
-    };
-
-    const onTouchMove = (e) => {
-      const currentY = e.touches[0].clientY;
-      const deltaY = touchStartY - currentY;
-      touchStartY = currentY;
-
-      if (!isCompleteRef.current) {
-        e.preventDefault();
-        const step = (deltaY / 15) * 3;
-        targetFrameIndexRef.current = Math.max(
-          0,
-          Math.min(TOTAL_FRAMES - 1, targetFrameIndexRef.current + step)
-        );
-      }
-    };
-
-    // 3. Keyboard handlers (Down arrow, PageDown, Space)
-    const onKeyDown = (e) => {
-      if (!isCompleteRef.current && window.scrollY === 0) {
-        if (['ArrowDown', 'PageDown', 'Space'].includes(e.code)) {
-          e.preventDefault();
-          targetFrameIndexRef.current = Math.min(
-            TOTAL_FRAMES - 1,
-            targetFrameIndexRef.current + 18
-          );
-        } else if (['ArrowUp', 'PageUp'].includes(e.code)) {
-          e.preventDefault();
-          targetFrameIndexRef.current = Math.max(0, targetFrameIndexRef.current - 18);
-        }
-      }
-    };
-
-    window.addEventListener('wheel', onWheel, { passive: false });
-    window.addEventListener('touchstart', onTouchStart, { passive: true });
-    window.addEventListener('touchmove', onTouchMove, { passive: false });
-    window.addEventListener('keydown', onKeyDown, { passive: false });
-
-    return () => {
-      window.removeEventListener('wheel', onWheel);
-      window.removeEventListener('touchstart', onTouchStart);
-      window.removeEventListener('touchmove', onTouchMove);
-      window.removeEventListener('keydown', onKeyDown);
-    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, [isLoaded, prefersReducedMotion]);
 
   const progressPercent = Math.min(
@@ -441,80 +330,15 @@ export default function ScrollCanvasHero({ isUnlocked = false, onComplete, onRew
             </div>
           </div>
 
-          {/* Bottom Breakpoint Gate Status & Control Card */}
-          <div className="pointer-events-auto pb-3 sm:pb-6 w-full max-w-xl mx-auto px-4">
-            <motion.div
-              layout
-              className={`p-3.5 sm:p-4 rounded-card backdrop-blur-md border shadow-olive-lg transition-all duration-300 ${
-                isAnimationComplete
-                  ? 'bg-cream/95 border-olive text-ink shadow-olive-xl'
-                  : 'bg-ink/75 border-cream/25 text-cream'
-              }`}
+          {/* Scroll Down Indicator */}
+          <div className="pointer-events-auto pb-4 sm:pb-6">
+            <button
+              onClick={handleScrollDownToExplore}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-cream/90 hover:bg-cream text-olive font-bold text-xs uppercase tracking-wider shadow-olive-md transition-all duration-200 hover:scale-105"
             >
-              {/* Status Header */}
-              <div className="flex items-center justify-between gap-3 text-xs font-semibold mb-2">
-                <div className="flex items-center gap-2">
-                  {isAnimationComplete ? (
-                    <div className="flex items-center gap-1.5 text-olive font-extrabold uppercase tracking-wider text-[11px]">
-                      <CheckCircle2 className="w-4 h-4 text-olive" />
-                      <span>{t('hero.breakpointBadge')}</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1.5 text-cream/90 font-extrabold uppercase tracking-wider text-[11px]">
-                      <Lock className="w-3.5 h-3.5 text-cream animate-pulse" />
-                      <span>{t('hero.breakpointBadge')}</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="font-mono text-xs font-bold px-2 py-0.5 rounded-full bg-cream-deep/30 border border-current/20">
-                  {currentFrameDisplay + 1} / {TOTAL_FRAMES} ({progressPercent}%)
-                </div>
-              </div>
-
-              {/* Breakpoint Visual Progress Track */}
-              <div className="w-full h-2 rounded-full bg-black/25 overflow-hidden mb-3 border border-cream/20 shadow-inner">
-                <motion.div
-                  className={`h-full rounded-full transition-all duration-100 ${
-                    isAnimationComplete ? 'bg-olive' : 'bg-cream'
-                  }`}
-                  style={{ width: `${progressPercent}%` }}
-                />
-              </div>
-
-              {/* Breakpoint State Information & Dynamic Actions */}
-              {!isAnimationComplete ? (
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5 pt-0.5">
-                  <p className="text-[11px] sm:text-xs text-cream/80 text-center sm:text-left font-medium">
-                    {t('hero.breakpointNotice')}
-                  </p>
-                  <button
-                    data-testid="skip-to-unlock-btn"
-                    onClick={handleUnlockBreakpoint}
-                    className="shrink-0 px-3 py-1 rounded-full bg-cream/20 hover:bg-cream/30 text-cream text-[11px] font-bold border border-cream/30 transition-colors"
-                  >
-                    {t('hero.unlockButton')} →
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-2 pt-0.5">
-                  <div className="flex items-center justify-center gap-2 text-olive font-bold text-xs sm:text-sm">
-                    <Unlock className="w-4 h-4 text-olive" />
-                    <span>{t('hero.breakpointComplete')}</span>
-                  </div>
-                  <motion.button
-                    data-testid="scroll-down-prompt-btn"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handleScrollDownToExplore}
-                    className="w-full py-2.5 px-4 rounded-btn bg-olive text-cream font-bold text-xs sm:text-sm shadow-olive-md hover:bg-olive-dark transition-all flex items-center justify-center gap-2 animate-bounce cursor-pointer"
-                  >
-                    <span>{t('hero.scrollDownPrompt')}</span>
-                    <ChevronDown className="w-4 h-4" />
-                  </motion.button>
-                </div>
-              )}
-            </motion.div>
+              <span>{t('hero.exploreBtn')}</span>
+              <ChevronDown className="w-4 h-4 animate-bounce" />
+            </button>
           </div>
         </div>
       </section>

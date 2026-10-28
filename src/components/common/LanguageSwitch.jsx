@@ -3,13 +3,17 @@ import { motion } from 'framer-motion';
 import { Globe } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
-export default function LanguageSwitch({ className = "" }) {
+export default function LanguageSwitch({ className = "", isInline = false }) {
   const { language, setLanguage, toggleLanguage, t } = useLanguage();
 
   return (
     <div
       data-testid="language-switch"
-      className={`fixed top-3.5 right-14 lg:right-6 sm:top-4 z-50 flex items-center shadow-olive-md rounded-full bg-cream-light/95 backdrop-blur-md border border-olive/30 p-1 transition-all hover:border-olive ${className}`}
+      className={`${
+        isInline
+          ? 'relative flex items-center shadow-xs'
+          : 'fixed top-3.5 right-14 lg:right-6 sm:top-4 z-50 flex items-center shadow-olive-md'
+      } rounded-full bg-cream-light/95 backdrop-blur-md border border-olive/30 p-1 transition-all hover:border-olive ${className}`}
       role="region"
       aria-label="Language selection"
     >

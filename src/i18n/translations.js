@@ -24,7 +24,10 @@ export const TRANSLATIONS = {
       customerCare: "Customer Care",
       privacyPolicy: "Privacy & Policy",
       switchLanguage: "Switch Language",
-      currentLangLabel: "EN"
+      currentLangLabel: "EN",
+      menu: "Menu",
+      categories: "Categories",
+      allProducts: "All Products"
     },
     hero: {
       badge: "Pure & Authentic Since 1974",
@@ -272,7 +275,10 @@ export const TRANSLATIONS = {
       customerCare: "வாடிக்கையாளர் சேவை",
       privacyPolicy: "தனியுரிமைக் கொள்கை",
       switchLanguage: "மொழியை மாற்றுக",
-      currentLangLabel: "தமிழ்"
+      currentLangLabel: "தமிழ்",
+      menu: "மெனு",
+      categories: "வகைகள்",
+      allProducts: "அனைத்து பொருட்கள்"
     },
     hero: {
       badge: "1974 முதல் கலப்படமில்லா தூய்மை",
@@ -506,6 +512,19 @@ export const TRANSLATIONS = {
  */
 export const CATEGORY_TRANSLATIONS = {
   "All": { en: "All", ta: "அனைத்தும்" },
+  "Aachi Masala & Podi": { en: "Aachi Masala & Podi", ta: "ஆச்சி மசாலா & பொடி வகைகள்" },
+  "Tea & Coffee": { en: "Tea & Coffee", ta: "டீ & காபி தூள்" },
+  "Sugar & Sweeteners": { en: "Sugar & Sweeteners", ta: "சர்க்கரை & இனிப்புகள்" },
+  "Cooking Oil": { en: "Cooking Oil", ta: "சமையல் எண்ணெய்" },
+  "Dishwash": { en: "Dishwash", ta: "பாத்திரம் கழுவும் சோப் & லிக்விட்" },
+  "Laundry Detergent": { en: "Laundry Detergent", ta: "சலவை பவுடர் & லிக்விட்" },
+  "Bath Soap": { en: "Bath Soap", ta: "குளியல் சோப்புகள்" },
+  "Laundry Soap Bar": { en: "Laundry Soap Bar", ta: "சலவை சோப்பு கட்டிகள்" },
+  "Sakthi & Other Cooking Masalas": { en: "Sakthi & Other Masalas", ta: "சக்தி & சமையல் மசாலாக்கள்" },
+  "Rice": { en: "Rice", ta: "அரிசி வகைகள்" },
+  "Cleaning Products": { en: "Cleaning Products", ta: "சுத்தப்படுத்தும் பொருட்கள்" },
+  "Personal Care & Shampoo": { en: "Personal Care & Shampoo", ta: "ஷாம்பு & தனிநபர் பராமரிப்பு" },
+  "Other Grocery Essentials": { en: "Other Grocery Essentials", ta: "இதர மளிகைப் பொருட்கள்" },
   "Cold Pressed Oils": { en: "Cold Pressed Oils", ta: "மரச்செக்கு எண்ணெய்கள்" },
   "Organic Grains": { en: "Organic Grains", ta: "பாரம்பரிய தானியங்கள்" },
   "Traditional Rice": { en: "Traditional Rice", ta: "பாரம்பரிய அரிசி வகைகள்" },
@@ -516,3 +535,4 @@ export const CATEGORY_TRANSLATIONS = {
   "Herbal & Immunity": { en: "Herbal & Immunity", ta: "மூலிகை & நோய் எதிர்ப்பு" },
   "Dry Fruits & Nuts": { en: "Dry Fruits & Nuts", ta: "உலர் பழங்கள் & பருப்புகள்" },
 };
+
