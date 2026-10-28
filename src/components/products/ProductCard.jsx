@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Heart, ShoppingCart, Star, Check } from 'lucide-react';
-import { formatCurrency } from '../../utils/formatters';
+import { formatCurrency, getProductImageUrl } from '../../utils/formatters';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 
@@ -41,9 +41,14 @@ export default function ProductCard({ product }) {
       {/* Product Image Box */}
       <div className="relative aspect-square w-full overflow-hidden bg-cream-deep p-3 flex items-center justify-center">
         <img
-          src={product.image}
+          src={getProductImageUrl(product.image)}
           alt={product.name}
           loading="lazy"
+          onError={(e) => {
+            if (product.fallbackImage && e.currentTarget.src !== product.fallbackImage) {
+              e.currentTarget.src = product.fallbackImage;
+            }
+          }}
           className="w-full h-full object-cover rounded-md transition-transform duration-500 group-hover:scale-105"
         />
 

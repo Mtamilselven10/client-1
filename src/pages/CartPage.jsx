@@ -14,7 +14,8 @@ import { useCart } from '../context/CartContext';
 import { 
   formatCurrency, 
   buildSingleProductWhatsAppUrl, 
-  buildCartWhatsAppUrl 
+  buildCartWhatsAppUrl,
+  getProductImageUrl
 } from '../utils/formatters';
 import { SHOP_NAME } from '../config';
 
@@ -90,8 +91,13 @@ export default function CartPage() {
                   {/* Thumbnail and Info */}
                   <div className="flex items-center gap-4 w-full sm:w-auto">
                     <img
-                      src={item.image}
+                      src={getProductImageUrl(item.image)}
                       alt={item.name}
+                      onError={(e) => {
+                        if (item.fallbackImage && e.currentTarget.src !== item.fallbackImage) {
+                          e.currentTarget.src = item.fallbackImage;
+                        }
+                      }}
                       onClick={() => navigate(`/products/${item.id}`, { state: { product: item } })}
                       className="w-20 h-20 sm:w-24 sm:h-24 rounded-btn object-cover bg-cream-deep border border-olive/15 shrink-0 cursor-pointer"
                     />

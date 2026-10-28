@@ -4,7 +4,7 @@
  */
 export const SHOP_NAME = "Gandhi Shop";
 export const SHOP_TAGLINE = "Pure Traditions, Freshly Handpicked";
-export const WHATSAPP_NUMBER = "919876543210"; // Country code + 10 digits, no '+'
+export const WHATSAPP_NUMBER = "+91 6382965064"; // Country code + 10 digits, no '+'
 export const CUSTOMER_CARE_PHONES = ["+91 98765 43210", "+91 98765 43211"];
 export const CUSTOMER_CARE_EMAIL = "care@gandhishop.com";
 export const GOOGLE_MAP_URL = "https://maps.google.com/?q=Gandhi+Shop+Main+Bazaar";

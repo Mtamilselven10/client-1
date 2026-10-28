@@ -79,3 +79,16 @@ export function buildGeneralInquiryWhatsAppUrl(query = "") {
   const text = query || `Hello ${SHOP_NAME}, I would like to inquire about your products and delivery!`;
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
 }
+
+/**
+ * Resolves local and remote product image URLs with Vite BASE_URL support
+ */
+export function getProductImageUrl(img) {
+  if (!img) return '';
+  if (img.startsWith('http://') || img.startsWith('https://') || img.startsWith('data:')) {
+    return img;
+  }
+  const clean = img.startsWith('/') ? img.slice(1) : img;
+  const base = import.meta.env.BASE_URL || './';
+  return base.endsWith('/') ? `${base}${clean}` : `${base}/${clean}`;
+}

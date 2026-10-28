@@ -2,15 +2,20 @@ import * as XLSX from 'xlsx';
 import { SEED_PRODUCTS } from '../data/seedProducts';
 
 const CATEGORY_FALLBACK_IMAGES = {
-  'Grains, Rice & Millets': 'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=600&q=80',
-  'Organic Pulses & Lentils': 'https://images.unsplash.com/photo-1585994192701-f1a505c817ee?auto=format&fit=crop&w=600&q=80',
-  'Cold-Pressed Oils & Pure Ghee': 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=600&q=80',
-  'Spices, Masalas & Seasonings': 'https://images.unsplash.com/photo-1599940824399-b87987ceb72a?auto=format&fit=crop&w=600&q=80',
-  'Dry Fruits, Nuts & Seeds': 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?auto=format&fit=crop&w=600&q=80',
-  'Farm Honey & Country Sugars': 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=600&q=80',
-  'Artisanal Teas & Filter Coffee': 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=600&q=80',
-  'Heritage Crisps & Snacks': 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?auto=format&fit=crop&w=600&q=80',
-  default: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80',
+  'Aachi Masala & Podi': 'products/001_Aachi_Chilli_Powder.jpg',
+  'Sakthi & Other Cooking Masalas': 'products/064_Sakthi_Sambar_Powder.jpg',
+  'Tea & Coffee': 'products/012_3_Roses_Tea.jpg',
+  'Sugar & Sweeteners': 'products/020_Sugar.jpg',
+  'Cooking Oil': 'products/023_Gold_Winner_Sunflower_Oil.jpg',
+  'Rice': 'products/072_Basmati_Rice.jpg',
+  'Other Grocery Essentials': 'products/102_Toor_Dal.jpg',
+  'Dishwash': 'products/031_Vim_Dishwash_Bar.jpg',
+  'Laundry Detergent': 'products/040_Surf_Excel_Washing_Powder.jpg',
+  'Laundry Soap Bar': 'products/057_Rin_Washing_Soap.jpg',
+  'Bath Soap': 'products/050_Dettol_Soap.jpg',
+  'Cleaning Products': 'products/084_Harpic_Toilet_Cleaner.jpg',
+  'Personal Care & Shampoo': 'products/092_Clinic_Plus_Shampoo.jpg',
+  default: 'products/001_Aachi_Chilli_Powder.jpg',
 };
 
 // Aliases for flexible header matching
@@ -100,7 +105,7 @@ export function parseProductsFromSheet(data) {
       const reviewsCount = !isNaN(reviewsVal) ? reviewsVal : Math.floor(50 + (idx * 7) % 250);
 
       const rawImage = findValue(row, normalizedKeys, ALIASES.image);
-      let image = (rawImage && String(rawImage).startsWith('http')) ? String(rawImage).trim() : null;
+      let image = (rawImage && String(rawImage).trim().length > 0) ? String(rawImage).trim() : null;
       if (!image) {
         image = CATEGORY_FALLBACK_IMAGES[category] || CATEGORY_FALLBACK_IMAGES.default;
       }

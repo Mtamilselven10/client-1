@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { Heart, ShoppingCart, Trash2, ArrowRight, Star } from 'lucide-react';
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
-import { formatCurrency } from '../utils/formatters';
+import { formatCurrency, getProductImageUrl } from '../utils/formatters';
 
 export default function WishlistPage() {
   const { wishlist, removeFromWishlist, clearWishlist } = useWishlist();
@@ -71,9 +71,14 @@ export default function WishlistPage() {
                 className="relative aspect-square w-full bg-cream-deep p-3 cursor-pointer overflow-hidden"
               >
                 <img
-                  src={item.image}
+                  src={getProductImageUrl(item.image)}
                   alt={item.name}
                   loading="lazy"
+                  onError={(e) => {
+                    if (item.fallbackImage && e.currentTarget.src !== item.fallbackImage) {
+                      e.currentTarget.src = item.fallbackImage;
+                    }
+                  }}
                   className="w-full h-full object-cover rounded-md group-hover:scale-105 transition-transform duration-300"
                 />
                 <button

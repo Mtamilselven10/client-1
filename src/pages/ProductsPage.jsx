@@ -47,7 +47,7 @@ export default function ProductsPage() {
     loadProductsCatalog()
       .then(data => {
         setProducts(data);
-        const highestPrice = Math.max(...data.map(p => p.price), 1000);
+        const highestPrice = Math.max(...data.map(p => p.price), 400);
         setMaxPriceLimit(highestPrice);
         setPriceRange(highestPrice);
       })

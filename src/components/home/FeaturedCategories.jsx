@@ -1,49 +1,50 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Wheat, Droplets, Sparkles, Flame, Apple, Coffee } from 'lucide-react';
+import { getProductImageUrl } from '../../utils/formatters';
 
 const CATEGORIES = [
   {
-    name: 'Grains, Rice & Millets',
-    count: '24 Items',
-    desc: 'Ancient unpolished millets, aged basmati & heirloom grains',
-    icon: Wheat,
-    image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=600&q=80',
-  },
-  {
-    name: 'Cold-Pressed Oils & Pure Ghee',
-    count: '16 Items',
-    desc: 'Vedic Gir cow Bilona ghee & wood-pressed virgin seed oils',
-    icon: Droplets,
-    image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=600&q=80',
-  },
-  {
-    name: 'Spices, Masalas & Seasonings',
-    count: '32 Items',
-    desc: 'Alleppey green cardamom, high-curcumin Salem turmeric & whole spices',
+    name: 'Aachi Masala & Podi',
+    count: '10 Items',
+    desc: 'Traditional Aachi chilli, sambar, rasam, and signature kitchen masalas',
     icon: Flame,
-    image: 'https://images.unsplash.com/photo-1599940824399-b87987ceb72a?auto=format&fit=crop&w=600&q=80',
+    image: 'products/001_Aachi_Chilli_Powder.jpg',
   },
   {
-    name: 'Organic Pulses & Lentils',
-    count: '20 Items',
-    desc: 'Unpolished sun-dried toor, moong, and mineral-dense dals',
-    icon: Sparkles,
-    image: 'https://images.unsplash.com/photo-1585994192701-f1a505c817ee?auto=format&fit=crop&w=600&q=80',
+    name: 'Cooking Oil',
+    count: '8 Items',
+    desc: 'Cold-pressed gingelly, pure groundnut, coconut, and sunflower oils',
+    icon: Droplets,
+    image: 'products/023_Gold_Winner_Sunflower_Oil.jpg',
   },
   {
-    name: 'Dry Fruits, Nuts & Seeds',
-    count: '18 Items',
-    desc: 'Kashmiri walnuts, California almonds & hand-shelled Goan cashews',
-    icon: Apple,
-    image: 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?auto=format&fit=crop&w=600&q=80',
-  },
-  {
-    name: 'Artisanal Teas & Filter Coffee',
-    count: '14 Items',
-    desc: 'Nilgiri orthodox black leaf & Chikmagalur degree filter blends',
+    name: 'Tea & Coffee',
+    count: '8 Items',
+    desc: 'Brooke Bond 3 Roses, Red Label, Tata Tea, and degree filter coffee',
     icon: Coffee,
-    image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=600&q=80',
+    image: 'products/012_3_Roses_Tea.jpg',
+  },
+  {
+    name: 'Rice',
+    count: '8 Items',
+    desc: 'Thanjavur Ponni rice, Seeraga Samba, Basmati, and Idli Gundu Arisi',
+    icon: Wheat,
+    image: 'products/072_Basmati_Rice.jpg',
+  },
+  {
+    name: 'Sakthi & Other Cooking Masalas',
+    count: '11 Items',
+    desc: 'Famous Sakthi chicken, mutton, biryani, and kulambu spice blends',
+    icon: Sparkles,
+    image: 'products/064_Sakthi_Sambar_Powder.jpg',
+  },
+  {
+    name: 'Other Grocery Essentials',
+    count: '19 Items',
+    desc: 'Unpolished toor & urad dals, spices, whole wheat atta, and appalam',
+    icon: Apple,
+    image: 'products/102_Toor_Dal.jpg',
   },
 ];
 
@@ -70,7 +71,7 @@ export default function FeaturedCategories() {
           onClick={() => navigate('/products')}
           className="inline-flex items-center gap-2 text-olive hover:text-olive-dark font-semibold text-sm group"
         >
-          <span>View All 140+ Grocery Products</span>
+          <span>View All 120+ Grocery Products</span>
           <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
         </button>
       </div>
@@ -87,7 +88,7 @@ export default function FeaturedCategories() {
             >
               <div className="relative h-48 w-full overflow-hidden bg-cream-deep">
                 <img
-                  src={cat.image}
+                  src={getProductImageUrl(cat.image)}
                   alt={cat.name}
                   loading="lazy"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
