@@ -2,7 +2,7 @@ import React, { forwardRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Heart, ShoppingCart, Star, Check } from 'lucide-react';
-import { formatCurrency } from '../../utils/formatters';
+import { formatCurrency, getProductImageUrl } from '../../utils/formatters';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -51,9 +51,14 @@ const ProductCard = forwardRef(function ProductCard({ product }, ref) {
       {/* Product Image Box */}
       <div className="relative aspect-square w-full overflow-hidden bg-cream-deep p-3 flex items-center justify-center">
         <img
-          src={product.image}
+          src={getProductImageUrl(product.image)}
           alt={product.name}
           loading="lazy"
+          onError={(e) => {
+            if (product.fallbackImage && e.currentTarget.src !== product.fallbackImage) {
+              e.currentTarget.src = product.fallbackImage;
+            }
+          }}
           className="w-full h-full object-cover rounded-md transition-transform duration-500 group-hover:scale-105"
         />
 

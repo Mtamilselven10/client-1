@@ -67,17 +67,17 @@ export default function ProductFilters({
         </div>
         <input
           type="range"
-          min="40"
-          max={maxPriceLimit || 2000}
-          step="20"
+          min="15"
+          max={maxPriceLimit || 500}
+          step="5"
           value={priceRange}
           onChange={(e) => onChangePrice(Number(e.target.value))}
           className="w-full h-2 bg-cream-light rounded-lg appearance-none cursor-pointer accent-olive"
           aria-label="Filter maximum price"
         />
         <div className="flex items-center justify-between text-[11px] text-ink/60 font-medium">
-          <span>{formatCurrency(40)}</span>
-          <span>{formatCurrency(maxPriceLimit || 2000)}</span>
+          <span>{formatCurrency(15)}</span>
+          <span>{formatCurrency(maxPriceLimit || 500)}</span>
         </div>
       </div>
 

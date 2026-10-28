@@ -15,7 +15,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { loadProductsCatalog } from '../utils/excelParser';
-import { formatCurrency, buildSingleProductWhatsAppUrl } from '../utils/formatters';
+import { formatCurrency, buildSingleProductWhatsAppUrl, getProductImageUrl } from '../utils/formatters';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useToast } from '../context/ToastContext';
@@ -37,7 +37,7 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
 
   // Image Hover Zoom State
-  const [zoomStyle, setZoomStyle] = useState({ display: 'none' });
+  const [zoomStyle, setZoomStyle] = useState({ transform: 'scale(1)', transformOrigin: 'center center' });
   const imageContainerRef = useRef(null);
 
   useEffect(() => {
@@ -166,9 +166,14 @@ export default function ProductDetailPage() {
             className="relative aspect-square w-full rounded-card overflow-hidden bg-cream-deep border-2 border-olive/25 shadow-olive-md cursor-crosshair flex items-center justify-center p-4"
           >
             <img
-              src={product.image}
+              src={getProductImageUrl(product.image)}
               alt={product.name}
               style={zoomStyle}
+              onError={(e) => {
+                if (product.fallbackImage && e.currentTarget.src !== product.fallbackImage) {
+                  e.currentTarget.src = product.fallbackImage;
+                }
+              }}
               className="w-full h-full object-cover rounded-lg pointer-events-none transition-transform duration-100 ease-out"
             />
 
