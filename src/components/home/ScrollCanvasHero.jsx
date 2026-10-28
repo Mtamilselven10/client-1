@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import { ArrowRight, ChevronDown, Sparkles } from 'lucide-react';
 import { SHOP_NAME, SHOP_TAGLINE } from '../../config';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function ScrollCanvasHero() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
 
@@ -275,15 +277,15 @@ export default function ScrollCanvasHero() {
 
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-olive-soft text-olive text-sm font-semibold tracking-wider">
               <Sparkles className="w-4 h-4 animate-spin" />
-              <span>GANDHI SHOP HERITAGE</span>
+              <span>{t('hero.heritageTag')}</span>
             </div>
 
             <h2 className="font-serif text-3xl sm:text-4xl font-bold text-olive">
-              Preparing Your Experience
+              {t('hero.preparing')}
             </h2>
 
             <p className="text-ink text-sm sm:text-base font-medium">
-              Loading authentic farm-to-table sequence ({loadProgress}%)
+              {t('hero.loadingSequence')} ({loadProgress}%)
             </p>
 
             {/* Olive Progress Bar on Cream Deep Background */}
@@ -300,7 +302,7 @@ export default function ScrollCanvasHero() {
                 onClick={handleExploreStore}
                 className="text-xs uppercase tracking-widest text-olive hover:text-olive-dark underline underline-offset-4 font-semibold"
               >
-                Skip intro & go directly to shop →
+                {t('hero.skipIntro')}
               </button>
             </div>
           </div>
@@ -330,10 +332,10 @@ export default function ScrollCanvasHero() {
               <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-cream/95 backdrop-blur-xs text-olive font-semibold text-xs sm:text-sm tracking-widest uppercase shadow-olive-md border border-olive/20">
                 <img 
                   src={`${import.meta.env.BASE_URL}logo.png`} 
-                  alt="Gandhi Shop" 
+                  alt={t('brand.name')} 
                   className="w-5 h-5 object-contain" 
                 />
-                <span>Pure & Authentic Since 1974</span>
+                <span>{t('hero.badge')}</span>
               </div>
             </div>
 
@@ -343,10 +345,10 @@ export default function ScrollCanvasHero() {
               className="pointer-events-auto max-w-3xl space-y-5 px-4 my-auto"
             >
               <h1 className="font-serif text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-cream drop-shadow-md leading-[1.1]">
-                Nourish Life with Pure Earthly Harvest
+                {t('hero.title')}
               </h1>
               <p className="text-base sm:text-xl font-medium text-cream/90 max-w-2xl mx-auto drop-shadow-sm leading-relaxed">
-                Handpicked grains, stone-ground flours, wood-pressed oils, and royal hill spices sourced unadulterated from native farmers.
+                {t('hero.subtitle')}
               </p>
 
               {/* Centered "Explore Store" Button with fluid spring interaction */}
@@ -358,7 +360,7 @@ export default function ScrollCanvasHero() {
                   onClick={handleExploreStore}
                   className="px-8 py-4 rounded-btn bg-olive text-cream font-bold text-base sm:text-lg shadow-olive-lg hover:bg-olive-dark transition-colors duration-200 flex items-center gap-3 border border-cream/30 focus-visible:ring-2 focus-visible:ring-cream focus-visible:ring-offset-2"
                 >
-                  <span>Explore Store</span>
+                  <span>{t('hero.exploreBtn')}</span>
                   <ArrowRight className="w-5 h-5" />
                 </motion.button>
               </div>
@@ -369,9 +371,9 @@ export default function ScrollCanvasHero() {
               <button
                 onClick={handleScrollDown}
                 className="group flex flex-col items-center gap-1 text-xs sm:text-sm text-cream/80 hover:text-cream transition-colors font-medium tracking-wide"
-                aria-label="Scroll to view next section"
+                aria-label={t('hero.scrollHint')}
               >
-                <span>{isComplete ? 'Scroll down to discover more' : 'Scroll down to scrub harvest sequence'}</span>
+                <span>{t('hero.scrollHint')}</span>
                 <div className="w-8 h-8 rounded-full bg-cream/20 flex items-center justify-center group-hover:bg-cream/30 transition-colors animate-bounce">
                   <ChevronDown className="w-4 h-4 text-cream" />
                 </div>

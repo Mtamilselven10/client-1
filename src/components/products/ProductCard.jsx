@@ -5,11 +5,13 @@ import { Heart, ShoppingCart, Star, Check } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 const ProductCard = forwardRef(function ProductCard({ product }, ref) {
   const navigate = useNavigate();
   const { addToCart, isInCart, getProductQuantity } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
+  const { t, translateCategory } = useLanguage();
 
   const isWished = isInWishlist(product.id);
   const inCart = isInCart(product.id);
@@ -73,7 +75,7 @@ const ProductCard = forwardRef(function ProductCard({ product }, ref) {
         {/* Discount Badge */}
         {discountPercent > 0 && (
           <div className="absolute top-3 left-3 bg-olive text-cream text-[10px] font-bold px-2 py-0.5 rounded-full shadow-xs">
-            {discountPercent}% OFF
+            {t('products.offBadge', { pct: discountPercent })}
           </div>
         )}
 
@@ -89,7 +91,7 @@ const ProductCard = forwardRef(function ProductCard({ product }, ref) {
           {/* Category & Rating */}
           <div className="flex items-center justify-between text-xs text-ink/70 mb-1">
             <span className="font-medium truncate max-w-[140px] text-olive">
-              {product.category}
+              {translateCategory(product.category)}
             </span>
             <div className="flex items-center gap-1 font-semibold text-ink">
               <Star className="w-3.5 h-3.5 fill-olive text-olive" />
@@ -122,7 +124,7 @@ const ProductCard = forwardRef(function ProductCard({ product }, ref) {
                 </span>
               )}
             </div>
-            <div className="text-[10px] text-ink/60 font-medium">Inclusive of taxes</div>
+            <div className="text-[10px] text-ink/60 font-medium">{t('products.inclusiveTax')}</div>
           </div>
 
           {/* Add to Cart Olive Button */}
@@ -140,12 +142,12 @@ const ProductCard = forwardRef(function ProductCard({ product }, ref) {
             {inCart ? (
               <>
                 <Check className="w-3.5 h-3.5 text-cream" />
-                <span>In Cart ({cartQty})</span>
+                <span>{t('products.inCartBtn')} ({cartQty})</span>
               </>
             ) : (
               <>
                 <ShoppingCart className="w-3.5 h-3.5 text-cream" />
-                <span>Add</span>
+                <span>{t('products.addBtn')}</span>
               </>
             )}
           </motion.button>

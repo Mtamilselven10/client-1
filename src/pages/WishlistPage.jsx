@@ -4,11 +4,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, ShoppingCart, Trash2, ArrowRight, Star } from 'lucide-react';
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
+import { useLanguage } from '../context/LanguageContext';
 import { formatCurrency } from '../utils/formatters';
 
 export default function WishlistPage() {
   const { wishlist, removeFromWishlist, clearWishlist } = useWishlist();
   const { addToCart } = useCart();
+  const { t, translateCategory } = useLanguage();
   const navigate = useNavigate();
 
   return (
@@ -17,13 +19,13 @@ export default function WishlistPage() {
       <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 pb-4 border-b border-olive/15 gap-4">
         <div>
           <span className="text-xs uppercase tracking-widest font-extrabold text-olive">
-            Curated For You
+            {t('wishlist.tag')}
           </span>
           <h1 className="font-serif text-3xl sm:text-4xl font-extrabold text-ink mt-1">
-            Your Wishlist ({wishlist.length})
+            {t('wishlist.title')} ({wishlist.length})
           </h1>
           <p className="text-sm text-ink/75 mt-1">
-            Pure staples and provisions saved for your next harvest order.
+            {t('wishlist.subtitle')}
           </p>
         </div>
 
@@ -33,7 +35,7 @@ export default function WishlistPage() {
             className="text-xs font-bold text-olive hover:text-olive-dark underline underline-offset-4 flex items-center gap-1.5 self-start sm:self-auto"
           >
             <Trash2 className="w-3.5 h-3.5" />
-            <span>Clear Wishlist</span>
+            <span>{t('wishlist.clearBtn')}</span>
           </button>
         )}
       </div>
@@ -49,16 +51,16 @@ export default function WishlistPage() {
             <Heart className="w-8 h-8 text-olive" />
           </div>
           <div className="space-y-2">
-            <h2 className="font-serif text-2xl font-bold text-ink">Your Wishlist is Empty</h2>
+            <h2 className="font-serif text-2xl font-bold text-ink">{t('wishlist.emptyTitle')}</h2>
             <p className="text-sm text-ink/75 leading-relaxed">
-              Explore our fresh harvest catalog and click the heart icon on any product to save it here for later.
+              {t('wishlist.emptySubtitle')}
             </p>
           </div>
           <NavLink
             to="/products"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-btn bg-olive text-cream font-bold text-sm shadow-olive-md hover:bg-olive-dark transition-colors"
           >
-            <span>Explore Store</span>
+            <span>{t('wishlist.exploreBtn')}</span>
             <ArrowRight className="w-4 h-4" />
           </NavLink>
         </motion.div>
@@ -109,7 +111,7 @@ export default function WishlistPage() {
                 <div className="p-4 flex-1 flex flex-col justify-between space-y-4">
                   <div>
                     <div className="flex items-center justify-between text-xs text-olive font-semibold mb-1">
-                      <span className="truncate max-w-[130px]">{item.category}</span>
+                      <span className="truncate max-w-[130px]">{translateCategory(item.category)}</span>
                       <div className="flex items-center gap-1 text-ink">
                         <Star className="w-3 h-3 fill-olive text-olive" />
                         <span>{item.rating}</span>
@@ -148,7 +150,7 @@ export default function WishlistPage() {
                       className="w-full py-2.5 px-4 rounded-btn bg-olive text-cream font-bold text-xs shadow-olive-sm hover:bg-olive-dark transition-colors flex items-center justify-center gap-2"
                     >
                       <ShoppingCart className="w-4 h-4" />
-                      <span>Add to Cart</span>
+                      <span>{t('wishlist.addToCart')}</span>
                     </motion.button>
                   </div>
                 </div>

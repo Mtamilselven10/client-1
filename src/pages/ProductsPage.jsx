@@ -13,10 +13,12 @@ import { loadProductsCatalog } from '../utils/excelParser';
 import ProductCard from '../components/products/ProductCard';
 import ProductFilters from '../components/products/ProductFilters';
 import SearchBar from '../components/products/SearchBar';
+import { useLanguage } from '../context/LanguageContext';
 
 const ITEMS_PER_PAGE = 16;
 
 export default function ProductsPage() {
+  const { t, translateCategory } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialCategory = searchParams.get('category') || 'All';
 
@@ -159,13 +161,13 @@ export default function ProductsPage() {
       {/* Header Banner */}
       <div className="mb-8 space-y-2">
         <span className="text-xs uppercase tracking-widest font-extrabold text-olive">
-          Provisions Catalog
+          {t('products.catalogTag')}
         </span>
         <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-extrabold text-ink">
-          Handpicked Grocery Showcase
+          {t('products.catalogTitle')}
         </h1>
         <p className="text-sm text-ink/75 max-w-2xl">
-          Parsed directly from our live inventory spreadsheet with real-time stock, pricing, and origin details.
+          {t('products.catalogSubtitle')}
         </p>
       </div>
 
@@ -174,6 +176,7 @@ export default function ProductsPage() {
         <div className="flex-1">
           <SearchBar 
             value={searchQuery}
+            placeholder={t('products.searchPlaceholder')}
             onChange={(val) => { setSearchQuery(val); setCurrentPage(1); }}
           />
         </div>
@@ -182,10 +185,10 @@ export default function ProductsPage() {
         <button
           onClick={() => setMobileFilterOpen(true)}
           className="lg:hidden px-4 py-3.5 rounded-btn bg-cream-deep border border-olive/30 text-olive font-bold text-sm flex items-center gap-2 shadow-olive-sm shrink-0"
-          aria-label="Open filter settings"
+          aria-label={t('products.filtersBtn')}
         >
           <Filter className="w-4 h-4" />
-          <span>Filters</span>
+          <span>{t('products.filtersBtn')}</span>
           {hasActiveFilters && (
             <span className="w-2 h-2 rounded-full bg-olive" />
           )}
@@ -196,7 +199,7 @@ export default function ProductsPage() {
       {loading && (
         <div className="py-20 flex flex-col items-center justify-center space-y-4">
           <div className="w-12 h-12 border-4 border-olive/20 border-t-olive rounded-full animate-spin" />
-          <p className="font-serif text-lg font-bold text-olive">Reading inventory from products.xlsx...</p>
+          <p className="font-serif text-lg font-bold text-olive">{t('products.readingInventory')}</p>
         </div>
       )}
 
@@ -289,7 +292,7 @@ export default function ProductsPage() {
                       onClick={() => setMobileFilterOpen(false)}
                       className="w-full py-3 rounded-btn bg-olive text-cream font-bold text-sm shadow-olive-sm"
                     >
-                      Apply & View Results ({filteredProducts.length})
+                      {t('products.viewResults')} ({filteredProducts.length})
                     </button>
                   </div>
                 </motion.div>
@@ -309,22 +312,22 @@ export default function ProductsPage() {
                   layout
                   className="flex items-center gap-2 flex-wrap text-xs bg-cream-deep/70 p-3 rounded-btn border border-olive/15"
                 >
-                  <span className="font-bold text-ink/70">Active Filters:</span>
+                  <span className="font-bold text-ink/70">{t('products.activeFilters')}</span>
                   {selectedCategory !== 'All' && (
                     <motion.span layout className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-olive text-cream font-medium">
-                      Category: {selectedCategory}
+                      {t('products.categoryLabel')} {translateCategory(selectedCategory)}
                       <button onClick={() => handleSelectCategory('All')}>×</button>
                     </motion.span>
                   )}
                   {searchQuery && (
                     <motion.span layout className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-olive text-cream font-medium">
-                      Search: "{searchQuery}"
+                      {t('products.searchLabel')} "{searchQuery}"
                       <button onClick={() => setSearchQuery('')}>×</button>
                     </motion.span>
                   )}
                   {priceRange < maxPriceLimit && (
                     <motion.span layout className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-olive text-cream font-medium">
-                      Under ₹{priceRange}
+                      {t('products.underPrice')} ₹{priceRange}
                       <button onClick={() => setPriceRange(maxPriceLimit)}>×</button>
                     </motion.span>
                   )}
@@ -332,7 +335,7 @@ export default function ProductsPage() {
                     onClick={handleResetFilters}
                     className="text-xs font-bold text-olive hover:underline ml-auto"
                   >
-                    Clear all
+                    {t('products.clearAll')}
                   </button>
                 </motion.div>
               )}
@@ -345,15 +348,15 @@ export default function ProductsPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="py-16 text-center rounded-card bg-cream-light border border-olive/20 p-8 space-y-4"
               >
-                <h3 className="font-serif text-2xl font-bold text-ink">No Matching Grocery Items</h3>
+                <h3 className="font-serif text-2xl font-bold text-ink">{t('products.noMatchesTitle')}</h3>
                 <p className="text-sm text-ink/75 max-w-md mx-auto">
-                  We could not find any products matching your current search or filter criteria. Try expanding your price range or clearing filters.
+                  {t('products.noMatchesDesc')}
                 </p>
                 <button
                   onClick={handleResetFilters}
                   className="px-6 py-2.5 rounded-btn bg-olive text-cream font-bold text-sm shadow-olive-sm hover:bg-olive-dark transition-colors"
                 >
-                  Reset All Filters
+                  {t('products.resetFilters')}
                 </button>
               </motion.div>
             ) : (
@@ -376,12 +379,11 @@ export default function ProductsPage() {
                   className="px-4 py-2.5 rounded-btn border border-olive/30 text-xs font-bold text-olive hover:bg-olive-soft disabled:opacity-40 disabled:pointer-events-none flex items-center gap-1.5 transition-colors"
                 >
                   <ChevronLeft className="w-4 h-4" />
-                  <span>Previous</span>
+                  <span>{t('products.previous')}</span>
                 </button>
 
                 <div className="flex items-center gap-1">
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => {
-                    // Show current page, first, last, and immediate neighbors
                     if (
                       page === 1 || 
                       page === totalPages || 
@@ -415,7 +417,7 @@ export default function ProductsPage() {
                   disabled={currentPage === totalPages}
                   className="px-4 py-2.5 rounded-btn border border-olive/30 text-xs font-bold text-olive hover:bg-olive-soft disabled:opacity-40 disabled:pointer-events-none flex items-center gap-1.5 transition-colors"
                 >
-                  <span>Next</span>
+                  <span>{t('products.next')}</span>
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>

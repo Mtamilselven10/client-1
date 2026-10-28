@@ -4,9 +4,11 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ToastProvider } from './context/ToastContext';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
+import { LanguageProvider } from './context/LanguageContext';
 
 import Sidebar from './components/layout/Sidebar';
 import FloatingWhatsApp from './components/layout/FloatingWhatsApp';
+import LanguageSwitch from './components/common/LanguageSwitch';
 
 import HomePage from './pages/HomePage';
 import ProductsPage from './pages/ProductsPage';
@@ -34,6 +36,9 @@ function MainLayout() {
   return (
     <div className="min-h-screen bg-cream text-ink flex flex-col antialiased">
       <ScrollToTop />
+      {/* Top Right Corner Bilingual Switch (Tamil / English) */}
+      <LanguageSwitch />
+
       {/* Persistent 8-item Sidebar */}
       <Sidebar />
 
@@ -74,14 +79,16 @@ function MainLayout() {
 
 export default function App() {
   return (
-    <ToastProvider>
-      <CartProvider>
-        <WishlistProvider>
-          <HashRouter>
-            <MainLayout />
-          </HashRouter>
-        </WishlistProvider>
-      </CartProvider>
-    </ToastProvider>
+    <LanguageProvider>
+      <ToastProvider>
+        <CartProvider>
+          <WishlistProvider>
+            <HashRouter>
+              <MainLayout />
+            </HashRouter>
+          </WishlistProvider>
+        </CartProvider>
+      </ToastProvider>
+    </LanguageProvider>
   );
 }
