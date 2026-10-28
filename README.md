@@ -122,6 +122,22 @@ Launches a headless browser session, tests all navigation routes, verifies Excel
 
 ---
 
+## 🌐 Bilingual Language Switch (English & Tamil)
+- **Top-Right Switcher:** Located fixed at the top-right corner (`top-3.5 right-14 lg:right-6 sm:top-4 z-50`), cleanly accessible across both mobile viewports and desktop screens.
+- **Instant Reactive Toggle:** Powered by `LanguageContext` (`src/context/LanguageContext.jsx`) and `translations.js` (`src/i18n/translations.js`). Switching between **EN** and **தமிழ்** instantly re-renders the entire website with zero page reload.
+- **Dynamic Category & Text Translation:** Automatically maps and translates all Excel spreadsheet categories, descriptions, navigational items, order forms, and WhatsApp pre-filled messages.
+- **Persistence:** Stored in `localStorage` under `gandhi_shop_lang` and updates `document.documentElement.lang`.
+
+---
+
+## 🔒 Scroll-Driven Hero Animation Breakpoint & Gate
+- **Strict Breakpoint Gate:** The website content below the hero (`FeaturedCategories`, `StoreStoryPreview`, `CustomerReviews`) is **unmounted and locked** until the hero animation completely reaches its **100% final frame (Frame 282 / 282)**.
+- **Scrubbing Control:** All mouse wheel events, touch swipes, and keyboard down-arrows smoothly advance the animation frames via high-performance RequestAnimationFrame (RAF) interpolation.
+- **Live Breakpoint Card:** An on-brand status card shows current frame progress (`Frame X / 282 (X%)`) and lock state.
+- **Website Unlocking:** Once the animation completes 100%, the breakpoint triggers, unlocking the website below with a fluid Framer Motion slide-in animation, accompanied by an interactive downward scroll prompt.
+
+---
+
 ## 📸 Key Pages & Visual Verification
 
 1. **Home Page (`/`):** Full-screen scroll-scrubbed canvas hero with progressive preloader, "Explore Store" instant skip, pinned frame sequence, followed by unlocked featured categories, store legacy, and customer reviews.
