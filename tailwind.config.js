@@ -8,19 +8,19 @@ export default {
     extend: {
       colors: {
         cream: {
-          DEFAULT: '#FFF3D5', // Global page background
-          deep: '#F6E6BC',    // Panels, cards needing subtle separation
-          light: '#FFF9EA',   // Input fields, elevated surfaces, modals
+          DEFAULT: '#FFFACD', // Lemon Chiffon - Global page background
+          deep: '#F5ECB7',    // Deeper Lemon Chiffon - panels, cards needing subtle separation
+          light: '#FFFDEE',   // Elevated surfaces, input fields, modals
         },
         olive: {
-          DEFAULT: '#4D694E', // Signature brand color
-          dark: '#3A503B',    // Hover / pressed state
-          soft: 'rgba(77, 105, 78, 0.12)', // Tinted chips & active states
-          border: 'rgba(77, 105, 78, 0.25)', // Subtle borders
+          DEFAULT: '#CD5C5C', // Indian Red - Signature brand color
+          dark: '#A83E3E',    // Deep Indian Red - Hover / pressed state
+          soft: 'rgba(205, 92, 92, 0.12)', // Tinted chips & active states
+          border: 'rgba(205, 92, 92, 0.25)', // Subtle borders
         },
         ink: {
-          DEFAULT: '#2B3A2C', // Editorial body text (dark olive tone)
-          light: '#4B5E4C',   // Muted editorial secondary text
+          DEFAULT: '#381B1B', // Editorial body text (deep terracotta tone)
+          light: '#633939',   // Muted editorial secondary text
         }
       },
       fontFamily: {
@@ -28,9 +28,9 @@ export default {
         sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
-        'olive-sm': '0 2px 8px rgba(77, 105, 78, 0.08)',
-        'olive-md': '0 4px 16px rgba(77, 105, 78, 0.12)',
-        'olive-lg': '0 8px 30px rgba(77, 105, 78, 0.16)',
+        'olive-sm': '0 2px 8px rgba(205, 92, 92, 0.10)',
+        'olive-md': '0 4px 16px rgba(205, 92, 92, 0.15)',
+        'olive-lg': '0 8px 30px rgba(205, 92, 92, 0.20)',
       },
       borderRadius: {
         'card': '16px',

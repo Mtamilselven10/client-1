@@ -3,18 +3,18 @@
 @tailwind utilities;
 
 :root {
-  --cream: #FFF3D5;
-  --cream-deep: #F6E6BC;
-  --cream-light: #FFF9EA;
-  --olive: #4D694E;
-  --olive-dark: #3A503B;
-  --olive-soft: rgba(77, 105, 78, 0.12);
-  --olive-border: rgba(77, 105, 78, 0.22);
-  --ink: #2B3A2C;
-  --ink-muted: #4B5E4C;
+  --cream: #FFFACD;
+  --cream-deep: #F5ECB7;
+  --cream-light: #FFFDEE;
+  --olive: #CD5C5C;
+  --olive-dark: #A83E3E;
+  --olive-soft: rgba(205, 92, 92, 0.12);
+  --olive-border: rgba(205, 92, 92, 0.25);
+  --ink: #381B1B;
+  --ink-muted: #633939;
 }
 
-/* Force global Beige Cream background on html and body */
+/* Force global Lemon Chiffon background on html and body */
 html, body {
   background-color: var(--cream);
   color: var(--ink);
