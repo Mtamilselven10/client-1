@@ -1,16 +1,17 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, ChevronDown, Sparkles, CheckCircle2, Lock, Unlock } from 'lucide-react';
-import { SHOP_NAME, SHOP_TAGLINE } from '../../config';
+import { motion } from 'framer-motion';
+import { ArrowRight, Sparkles } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
+import frameManifest from '../../home/frameManifest.js';
+import homeHeroContent from '../../content/homeHero.js';
 
 export default function ScrollCanvasHero({ isUnlocked = false, onComplete, onRewind }) {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
   const canvasRef = useRef(null);
 
-  const TOTAL_FRAMES = 282;
+  const TOTAL_FRAMES = frameManifest.totalFrames;
   const [loadProgress, setLoadProgress] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
   const [currentFrameDisplay, setCurrentFrameDisplay] = useState(0);
@@ -71,17 +72,19 @@ export default function ScrollCanvasHero({ isUnlocked = false, onComplete, onRew
 
     if (!img || !img.complete || img.naturalWidth === 0) return;
 
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const width = canvas.clientWidth;
     const height = canvas.clientHeight;
 
-    if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
+    if (canvas.width !== Math.round(width * dpr) || canvas.height !== Math.round(height * dpr)) {
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
     }
 
     ctx.save();
     ctx.scale(dpr, dpr);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
 
     // Calculate cover fit dimensions
     const imgRatio = img.naturalWidth / img.naturalHeight;
@@ -104,13 +107,13 @@ export default function ScrollCanvasHero({ isUnlocked = false, onComplete, onRew
     ctx.drawImage(img, offsetX, offsetY, renderW, renderH);
 
     // Subtle brand tone overlay for editorial cohesion
-    ctx.fillStyle = 'rgba(43, 58, 44, 0.18)';
+    ctx.fillStyle = 'rgba(43, 58, 44, 0.12)';
     ctx.fillRect(0, 0, width, height);
 
     ctx.restore();
   }, []);
 
-  // Preload frames directly on mount
+  // Preload frames using auto-detected naming pattern
   useEffect(() => {
     let isCancelled = false;
     const images = new Array(TOTAL_FRAMES);
@@ -130,8 +133,7 @@ export default function ScrollCanvasHero({ isUnlocked = false, onComplete, onRew
     const baseUrl = import.meta.env.BASE_URL;
     for (let i = 1; i <= TOTAL_FRAMES; i++) {
       const img = new Image();
-      const padNum = String(i).padStart(3, '0');
-      img.src = `${baseUrl}frames/ezgif-frame-${padNum}.jpg`;
+      img.src = frameManifest.getFrameUrl(i, baseUrl);
 
       img.onload = () => {
         if (isCancelled) return;
@@ -162,44 +164,52 @@ export default function ScrollCanvasHero({ isUnlocked = false, onComplete, onRew
       isCancelled = true;
       clearTimeout(fallbackTimer);
     };
-  }, [drawFrame]);
+  }, [TOTAL_FRAMES, drawFrame]);
 
   // Smooth lerp frame scrubbing in RAF loop
   useEffect(() => {
     if (!isLoaded) return;
 
+    let isVisible = true;
+    const handleVisibility = () => {
+      isVisible = !document.hidden;
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
     const renderLoop = () => {
-      const current = currentFrameIndexRef.current;
-      const target = targetFrameIndexRef.current;
+      if (isVisible) {
+        const current = currentFrameIndexRef.current;
+        const target = targetFrameIndexRef.current;
 
-      const diff = target - current;
-      if (Math.abs(diff) > 0.05) {
-        currentFrameIndexRef.current += diff * 0.25;
-      } else {
-        currentFrameIndexRef.current = target;
-      }
-
-      const frameToDraw = Math.min(
-        TOTAL_FRAMES - 1,
-        Math.max(0, Math.round(currentFrameIndexRef.current))
-      );
-
-      setCurrentFrameDisplay(frameToDraw);
-      drawFrame(frameToDraw);
-
-      // Check if animation has reached the 100% breakpoint
-      if (currentFrameIndexRef.current >= TOTAL_FRAMES - 1.5) {
-        if (!isCompleteRef.current) {
-          isCompleteRef.current = true;
-          setIsAnimationComplete(true);
-          if (onComplete) onComplete();
+        const diff = target - current;
+        if (Math.abs(diff) > 0.05) {
+          currentFrameIndexRef.current += diff * 0.25;
+        } else {
+          currentFrameIndexRef.current = target;
         }
-      } else if (currentFrameIndexRef.current < TOTAL_FRAMES * 0.2) {
-        // Only if rewound near the beginning
-        if (isCompleteRef.current && window.scrollY <= 10) {
-          isCompleteRef.current = false;
-          setIsAnimationComplete(false);
-          if (onRewind) onRewind();
+
+        const frameToDraw = Math.min(
+          TOTAL_FRAMES - 1,
+          Math.max(0, Math.round(currentFrameIndexRef.current))
+        );
+
+        setCurrentFrameDisplay(frameToDraw);
+        drawFrame(frameToDraw);
+
+        // Check if animation has reached the 100% breakpoint
+        if (currentFrameIndexRef.current >= TOTAL_FRAMES - 1.5) {
+          if (!isCompleteRef.current) {
+            isCompleteRef.current = true;
+            setIsAnimationComplete(true);
+            if (onComplete) onComplete();
+          }
+        } else if (currentFrameIndexRef.current < TOTAL_FRAMES * 0.2) {
+          // Only if rewound near the beginning
+          if (isCompleteRef.current && window.scrollY <= 10) {
+            isCompleteRef.current = false;
+            setIsAnimationComplete(false);
+            if (onRewind) onRewind();
+          }
         }
       }
 
@@ -209,41 +219,12 @@ export default function ScrollCanvasHero({ isUnlocked = false, onComplete, onRew
     animFrameIdRef.current = requestAnimationFrame(renderLoop);
 
     return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
       if (animFrameIdRef.current) {
         cancelAnimationFrame(animFrameIdRef.current);
       }
     };
-  }, [isLoaded, drawFrame, onComplete, onRewind]);
-
-  // Skip / Instant Unlock Handler
-  const handleUnlockBreakpoint = () => {
-    targetFrameIndexRef.current = TOTAL_FRAMES - 1;
-    currentFrameIndexRef.current = TOTAL_FRAMES - 1;
-    drawFrame(TOTAL_FRAMES - 1);
-    setCurrentFrameDisplay(TOTAL_FRAMES - 1);
-    isCompleteRef.current = true;
-    setIsAnimationComplete(true);
-    if (onComplete) onComplete();
-
-    // Smoothly scroll down after unlock
-    setTimeout(() => {
-      const target = document.getElementById('explore-section');
-      if (target) {
-        target.scrollIntoView({ behavior: 'smooth' });
-      } else {
-        window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
-      }
-    }, 250);
-  };
-
-  const handleScrollDownToExplore = () => {
-    const target = document.getElementById('explore-section');
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
-    }
-  };
+  }, [isLoaded, TOTAL_FRAMES, drawFrame, onComplete, onRewind]);
 
   // Skip animation directly to products page
   const handleExploreStore = () => {
@@ -281,7 +262,6 @@ export default function ScrollCanvasHero({ isUnlocked = false, onComplete, onRew
         // Animation IS complete (breakpoint reached):
         // If at the top of the page and scrolling UP strongly, allow rewinding
         if (window.scrollY === 0 && e.deltaY < -25 && targetFrameIndexRef.current > 0) {
-          // Allow gentle reverse scrub
           targetFrameIndexRef.current = Math.max(0, targetFrameIndexRef.current - 4);
         }
         // Downward scrolling naturally scrolls the page down into the unlocked website!
@@ -335,12 +315,13 @@ export default function ScrollCanvasHero({ isUnlocked = false, onComplete, onRew
       window.removeEventListener('touchmove', onTouchMove);
       window.removeEventListener('keydown', onKeyDown);
     };
-  }, [isLoaded, prefersReducedMotion]);
+  }, [isLoaded, prefersReducedMotion, TOTAL_FRAMES]);
 
-  const progressPercent = Math.min(
-    100,
-    Math.round((currentFrameDisplay / (TOTAL_FRAMES - 1)) * 100)
-  );
+  // Compute text fade-out progress over the first 15% of frames
+  const scrollRatio = TOTAL_FRAMES > 1 ? currentFrameDisplay / (TOTAL_FRAMES - 1) : 0;
+  const fadeProgress = Math.min(1, scrollRatio / 0.15);
+  const textOpacity = Math.max(0, 1 - fadeProgress);
+  const textTranslateY = -fadeProgress * 20;
 
   return (
     <>
@@ -393,129 +374,68 @@ export default function ScrollCanvasHero({ isUnlocked = false, onComplete, onRew
       {/* Pinned Full-Screen Hero Viewport */}
       <section 
         className="relative w-full h-screen overflow-hidden bg-cream select-none"
-        aria-label="Interactive harvest animation"
+        aria-label="Interactive store animation"
       >
         <canvas
           ref={canvasRef}
+          aria-hidden="true"
           className="absolute inset-0 w-full h-full object-cover"
         />
 
-        {/* Editorial Overlay Scrim */}
-        <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/25 to-ink/45 pointer-events-none" />
+        {/* Soft Olive/Ink Editorial Overlay Scrim for WCAG AA Contrast */}
+        <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-olive/15 to-ink/40 pointer-events-none" />
 
-        {/* Hero Content Overlay */}
-        <div className="absolute inset-0 flex flex-col items-center justify-between p-4 sm:p-10 text-center text-cream z-10 pointer-events-none">
-          {/* Top Brand Pill with Logo */}
-          <div className="pointer-events-auto pt-3 sm:pt-4">
-            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-cream/95 backdrop-blur-xs text-olive font-semibold text-xs sm:text-sm tracking-widest uppercase shadow-olive-md border border-olive/20">
-              <img 
-                src={`${import.meta.env.BASE_URL}logo.png`} 
-                alt={t('brand.name')} 
-                className="w-5 h-5 object-contain" 
-              />
-              <span>{t('hero.badge')}</span>
-            </div>
-          </div>
-
-          {/* Centered Editorial Titles & Explore Button */}
-          <div className="pointer-events-auto max-w-3xl space-y-4 px-4 my-auto">
-            <h1 className="font-serif text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-cream drop-shadow-md leading-[1.1]">
-              {t('hero.title')}
+        {/* Hero Content Overlay: ONLY the two text lines and Explore Store button */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 sm:p-12 text-center text-cream z-10 pointer-events-none">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ 
+              opacity: textOpacity, 
+              y: textTranslateY 
+            }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            style={{ 
+              pointerEvents: textOpacity < 0.1 ? 'none' : 'auto',
+              display: textOpacity <= 0 ? 'none' : 'flex'
+            }}
+            className="flex-col items-center max-w-4xl space-y-4 px-4"
+          >
+            {/* Line 1: Bold prominent headline using font-liber token */}
+            <h1 
+              data-testid="hero-headline"
+              className="font-liber font-bold tracking-wider text-cream drop-shadow-xl leading-[1.08] uppercase"
+              style={{
+                fontSize: 'clamp(2.25rem, 6vw, 4.75rem)',
+              }}
+            >
+              {language === 'ta' ? homeHeroContent.headlineTa : homeHeroContent.headline}
             </h1>
-            <p className="text-sm sm:text-lg font-medium text-cream/90 max-w-2xl mx-auto drop-shadow-sm leading-relaxed">
-              {t('hero.subtitle')}
+
+            {/* Line 2: Bold sentence beneath headline, noticeably smaller */}
+            <p 
+              data-testid="hero-subheading"
+              className="font-sans font-bold text-cream/95 drop-shadow-md leading-relaxed tracking-normal max-w-2xl mx-auto"
+              style={{
+                fontSize: 'clamp(1.125rem, 2.5vw, 1.75rem)',
+              }}
+            >
+              {language === 'ta' ? homeHeroContent.subheadingTa : homeHeroContent.subheading}
             </p>
 
-            {/* Primary Actions Grid */}
-            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+            {/* Explore Store Button */}
+            <div className="pt-4 flex items-center justify-center">
               <motion.button
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.96 }}
                 transition={{ type: "spring", stiffness: 400, damping: 20 }}
                 onClick={handleExploreStore}
-                className="px-7 py-3.5 rounded-btn bg-olive text-cream font-bold text-sm sm:text-base shadow-olive-lg hover:bg-olive-dark transition-colors duration-200 flex items-center gap-2.5 border border-cream/30 focus-visible:ring-2 focus-visible:ring-cream focus-visible:ring-offset-2"
+                className="px-8 py-3.5 rounded-btn bg-olive text-cream font-bold text-sm sm:text-base shadow-olive-lg hover:bg-olive-dark transition-colors duration-200 flex items-center gap-2.5 border border-cream/30 focus-visible:ring-2 focus-visible:ring-cream focus-visible:ring-offset-2 cursor-pointer"
               >
-                <span>{t('hero.exploreBtn')}</span>
+                <span>{language === 'ta' ? homeHeroContent.exploreButtonTextTa : homeHeroContent.exploreButtonText}</span>
                 <ArrowRight className="w-4 h-4" />
               </motion.button>
             </div>
-          </div>
-
-          {/* Bottom Breakpoint Gate Status & Control Card */}
-          <div className="pointer-events-auto pb-3 sm:pb-6 w-full max-w-xl mx-auto px-4">
-            <motion.div
-              layout
-              className={`p-3.5 sm:p-4 rounded-card backdrop-blur-md border shadow-olive-lg transition-all duration-300 ${
-                isAnimationComplete
-                  ? 'bg-cream/95 border-olive text-ink shadow-olive-xl'
-                  : 'bg-ink/75 border-cream/25 text-cream'
-              }`}
-            >
-              {/* Status Header */}
-              <div className="flex items-center justify-between gap-3 text-xs font-semibold mb-2">
-                <div className="flex items-center gap-2">
-                  {isAnimationComplete ? (
-                    <div className="flex items-center gap-1.5 text-olive font-extrabold uppercase tracking-wider text-[11px]">
-                      <CheckCircle2 className="w-4 h-4 text-olive" />
-                      <span>{t('hero.breakpointBadge')}</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1.5 text-cream/90 font-extrabold uppercase tracking-wider text-[11px]">
-                      <Lock className="w-3.5 h-3.5 text-cream animate-pulse" />
-                      <span>{t('hero.breakpointBadge')}</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="font-mono text-xs font-bold px-2 py-0.5 rounded-full bg-cream-deep/30 border border-current/20">
-                  {currentFrameDisplay + 1} / {TOTAL_FRAMES} ({progressPercent}%)
-                </div>
-              </div>
-
-              {/* Breakpoint Visual Progress Track */}
-              <div className="w-full h-2 rounded-full bg-black/25 overflow-hidden mb-3 border border-cream/20 shadow-inner">
-                <motion.div
-                  className={`h-full rounded-full transition-all duration-100 ${
-                    isAnimationComplete ? 'bg-olive' : 'bg-cream'
-                  }`}
-                  style={{ width: `${progressPercent}%` }}
-                />
-              </div>
-
-              {/* Breakpoint State Information & Dynamic Actions */}
-              {!isAnimationComplete ? (
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5 pt-0.5">
-                  <p className="text-[11px] sm:text-xs text-cream/80 text-center sm:text-left font-medium">
-                    {t('hero.breakpointNotice')}
-                  </p>
-                  <button
-                    data-testid="skip-to-unlock-btn"
-                    onClick={handleUnlockBreakpoint}
-                    className="shrink-0 px-3 py-1 rounded-full bg-cream/20 hover:bg-cream/30 text-cream text-[11px] font-bold border border-cream/30 transition-colors"
-                  >
-                    {t('hero.unlockButton')} →
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-2 pt-0.5">
-                  <div className="flex items-center justify-center gap-2 text-olive font-bold text-xs sm:text-sm">
-                    <Unlock className="w-4 h-4 text-olive" />
-                    <span>{t('hero.breakpointComplete')}</span>
-                  </div>
-                  <motion.button
-                    data-testid="scroll-down-prompt-btn"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handleScrollDownToExplore}
-                    className="w-full py-2.5 px-4 rounded-btn bg-olive text-cream font-bold text-xs sm:text-sm shadow-olive-md hover:bg-olive-dark transition-all flex items-center justify-center gap-2 animate-bounce cursor-pointer"
-                  >
-                    <span>{t('hero.scrollDownPrompt')}</span>
-                    <ChevronDown className="w-4 h-4" />
-                  </motion.button>
-                </div>
-              )}
-            </motion.div>
-          </div>
+          </motion.div>
         </div>
       </section>
     </>

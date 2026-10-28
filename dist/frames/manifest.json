@@ -1,9 +1,13 @@
 {
-  "frameCount": 282,
-  "namingPattern": "ezgif-frame-%03d.jpg",
+  "totalFrames": 292,
   "prefix": "ezgif-frame-",
   "digits": 3,
   "extension": "jpg",
-  "startIndex": 1,
-  "fps": 30
+  "width": 1280,
+  "height": 736,
+  "aspectRatio": 1.7391,
+  "sampleFirst": "ezgif-frame-001.jpg",
+  "sampleLast": "ezgif-frame-292.jpg",
+  "framePattern": "ezgif-frame-%03d.jpg",
+  "getFrameUrl": "(index, baseUrl = '') => `${baseUrl}frames/ezgif-frame-${String(index).padStart(3, '0')}.jpg`"
 }
