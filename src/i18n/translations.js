@@ -31,11 +31,17 @@ export const TRANSLATIONS = {
       title: "Nourish Life with Pure Earthly Harvest",
       subtitle: "Handpicked grains, stone-ground flours, wood-pressed oils, and royal hill spices sourced unadulterated from native farmers.",
       exploreBtn: "Explore Store",
-      scrollHint: "Scroll to explore our heritage",
+      scrollHint: "Scroll to scrub harvest sequence",
       preparing: "Preparing Your Experience",
       loadingSequence: "Loading authentic farm-to-table sequence",
       skipIntro: "Skip intro & go directly to shop →",
-      heritageTag: "GANDHI SHOP HERITAGE"
+      heritageTag: "GANDHI SHOP HERITAGE",
+      breakpointScrubbing: "Scrubbing Animation ({progress}%) • Complete to Unlock Website",
+      breakpointNotice: "Scroll to scrub harvest sequence • Website below is locked until 100% complete",
+      breakpointComplete: "✓ Animation 100% Complete • Website Below Unlocked!",
+      breakpointBadge: "Animation Gate & Breakpoint",
+      unlockButton: "Skip to Unlock Website",
+      scrollDownPrompt: "Scroll Down to Move Website Below ↓"
     },
     home: {
       categoriesBadge: "Pantry Essentials",
@@ -277,7 +283,13 @@ export const TRANSLATIONS = {
       preparing: "உங்களுக்கான காட்சிகளை தயார் செய்கிறோம்",
       loadingSequence: "பண்ணை முதல் இல்லம் வரையிலான காட்சிகள் தயாராகின்றன",
       skipIntro: "நேரடியாக கடைக்குச் செல்ல →",
-      heritageTag: "காந்தி ஷாப் பாரம்பரியம்"
+      heritageTag: "காந்தி ஷாப் பாரம்பரியம்",
+      breakpointScrubbing: "காட்சி ஓட்டம் ({progress}%) • முடிக்கப்பட்டதும் அங்காடி திறக்கும்",
+      breakpointNotice: "காட்சியை உருட்டவும் • அங்காடி திறக்க காட்சி 100% முழுமையடைய வேண்டும்",
+      breakpointComplete: "✓ காட்சி 100% நிறைவடைந்தது • கீழே உள்ள இணையதளம் திறக்கப்பட்டது!",
+      breakpointBadge: "காட்சி நிறைவு வாயில்",
+      unlockButton: "உடனடியாகத் திறக்கவும்",
+      scrollDownPrompt: "இணையதளத்தை கீழே உருட்டவும் ↓"
     },
     home: {
       categoriesBadge: "அஞ்சறைப்பெட்டி பொருட்கள்",

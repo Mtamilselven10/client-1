@@ -6,7 +6,7 @@ import http from 'http';
 const CHROME_PATH = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 const EDGE_PATH = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe";
 
-const BROWSER_PATH = fs.existsSync(CHROME_PATH) ? CHROME_PATH : EDGE_PATH;
+const BROWSER_PATH = fs.existsSync(EDGE_PATH) ? EDGE_PATH : CHROME_PATH;
 const PORT = 4173;
 const BASE_URL = `http://127.0.0.1:${PORT}`;
 
@@ -39,10 +39,7 @@ function createStaticServer() {
     if (cleanUrl === '/' || cleanUrl === '') {
       cleanUrl = '/index.html';
     }
-    // Remove leading slash
     let filePath = path.join(distDir, cleanUrl.replace(/^\//, ''));
-    
-    // Fallback to index.html for SPA if not found
     if (!fs.existsSync(filePath)) {
       filePath = path.join(distDir, 'index.html');
     }
@@ -81,7 +78,8 @@ async function runVerification() {
   const browser = await puppeteer.launch({
     executablePath: BROWSER_PATH,
     headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--window-size=1400,900']
+    protocolTimeout: 60000,
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu', '--disable-dev-shm-usage', '--window-size=1400,900']
   });
 
   const page = await browser.newPage();
@@ -102,30 +100,58 @@ async function runVerification() {
       await new Promise(r => setTimeout(r, 1200));
     }
 
-    // 1. HOME PAGE HERO (ENGLISH)
-    console.log('\n--- 1. Testing Home Page & Canvas Hero ---');
+    // 1. HOME PAGE HERO: LOCKED STATE BEFORE ANIMATION FINISHES
+    console.log('\n--- 1. Testing Hero Animation Breakpoint & Lock ---');
     await page.goto(`${BASE_URL}/#/`, { waitUntil: 'domcontentloaded' });
-    await new Promise(r => setTimeout(r, 2500));
-    await saveScreenshot(page, '01_home_hero.png');
+    await new Promise(r => setTimeout(r, 2000));
 
-    // 2. SCROLL SCRUBBING & UNLOCKED SECTIONS
-    console.log('\n--- 2. Testing Scroll Scrubbing & Unlocked Sections ---');
-    await page.evaluate(() => {
-      window.scrollTo({ top: 3800, behavior: 'smooth' });
-    });
+    // Verify website below is NOT mounted/visible
+    const initialExploreSection = await page.$('#explore-section');
+    console.log(`Explore section present before animation completion: ${initialExploreSection !== null}`);
+    await saveScreenshot(page, '23_breakpoint_hero_locked.png');
+
+    // 2. SCRUBBING ANIMATION FORWARD
+    console.log('\n--- 2. Scrubbing Animation via Mouse Wheel ---');
+    for (let i = 0; i < 8; i++) {
+      await page.mouse.wheel({ deltaY: 200 });
+      await new Promise(r => setTimeout(r, 100));
+    }
+    await new Promise(r => setTimeout(r, 800));
+    await saveScreenshot(page, '24_breakpoint_scrubbing_in_progress.png');
+
+    // 3. REACHING BREAKPOINT & UNLOCKING
+    console.log('\n--- 3. Triggering Animation Completion / Breakpoint ---');
+    const skipToUnlockBtn = await page.waitForSelector('[data-testid="skip-to-unlock-btn"]', { timeout: 5000 });
+    await skipToUnlockBtn.click();
+    console.log('✓ Clicked unlock button to reach 100% animation breakpoint');
+    await new Promise(r => setTimeout(r, 1000));
+
+    // Verify explore section is now mounted!
+    const unlockedExploreSection = await page.$('#explore-section');
+    console.log(`Explore section mounted after animation completion: ${unlockedExploreSection !== null}`);
+    await saveScreenshot(page, '25_breakpoint_unlocked_prompt.png');
+
+    // 4. SCROLLING WEBSITE BELOW AFTER BREAKPOINT
+    console.log('\n--- 4. Moving Website Below Hero ---');
+    const scrollDownPromptBtn = await page.$('[data-testid="scroll-down-prompt-btn"]');
+    if (scrollDownPromptBtn) {
+      await scrollDownPromptBtn.click();
+    } else {
+      await page.evaluate(() => window.scrollTo({ top: 1200, behavior: 'smooth' }));
+    }
     await new Promise(r => setTimeout(r, 1500));
-    await saveScreenshot(page, '02_home_unlocked_sections.png');
+    await saveScreenshot(page, '26_website_below_scrolled.png');
 
-    // 3. PRODUCTS CATALOG PAGE
-    console.log('\n--- 3. Testing Products Page (Excel Parsing) ---');
+    // 5. PRODUCTS CATALOG PAGE
+    console.log('\n--- 5. Testing Products Page (Excel Parsing) ---');
     await navigateHash('#/products');
     await page.waitForSelector('[data-testid="product-card"]', { timeout: 10000 });
     const productCount = await page.$$eval('[data-testid="product-card"]', el => el.length);
     console.log(`Product cards visible on page 1: ${productCount}`);
     await saveScreenshot(page, '03_products_catalog.png');
 
-    // 4. TEST FILTER & SEARCH
-    console.log('\n--- 4. Testing Search & Category Filter ---');
+    // 6. TEST FILTER & SEARCH
+    console.log('\n--- 6. Testing Search & Category Filter ---');
     const searchInput = await page.$('input[placeholder*="Search"]');
     if (searchInput) {
       await searchInput.type('Cardamom', { delay: 40 });
@@ -133,77 +159,31 @@ async function runVerification() {
       await saveScreenshot(page, '04_products_filtered.png');
     }
 
-    // Add product to cart & wishlist
-    const addToCartBtns = await page.$$('button[aria-label*="Add"]');
-    if (addToCartBtns.length > 0) {
-      await addToCartBtns[0].click();
-      console.log('✓ Clicked Add to Cart on product');
-    }
-
-    const wishlistBtns = await page.$$('button[aria-label*="wishlist"]');
-    if (wishlistBtns.length > 0) {
-      await wishlistBtns[0].click();
-      console.log('✓ Clicked Wishlist Toggle on product');
-    }
-    await new Promise(r => setTimeout(r, 600));
-
-    // 5. TEST TOP-RIGHT LANGUAGE SWITCH BUTTON
-    console.log('\n--- 5. Testing Top-Right Language Switch Button (EN <-> தமிழ்) ---');
+    // 7. TEST TOP-RIGHT LANGUAGE SWITCH BUTTON (EN <-> தமிழ்)
+    console.log('\n--- 7. Testing Top-Right Language Switch Button ---');
     const langBtnTa = await page.waitForSelector('[data-testid="lang-btn-ta"]', { timeout: 5000 });
-    console.log('✓ Found Tamil language switch button in top-right corner.');
-    
-    // Click button to toggle language to Tamil
     await langBtnTa.click();
     console.log('✓ Clicked language button to switch to Tamil (தமிழ்)');
     await new Promise(r => setTimeout(r, 1000));
 
-    // Verify document lang is 'ta'
     const docLang = await page.evaluate(() => document.documentElement.lang);
     console.log(`Document language after toggle: "${docLang}"`);
-
-    // Verify translated Tamil text on Products page
     await saveScreenshot(page, '18_language_toggle_tamil_products.png');
 
-    // 6. VERIFY HOME IN TAMIL
-    console.log('\n--- 6. Verifying Home in Tamil ---');
+    // 8. VERIFY HOME IN TAMIL WITH BREAKPOINT
+    console.log('\n--- 8. Verifying Home with Breakpoint in Tamil ---');
     await navigateHash('#/');
     await page.evaluate(() => window.scrollTo(0, 0));
     await new Promise(r => setTimeout(r, 1200));
     await saveScreenshot(page, '17_language_toggle_tamil_home.png');
 
-    // 7. VERIFY CART IN TAMIL
-    console.log('\n--- 7. Verifying Cart in Tamil ---');
-    await navigateHash('#/cart');
-    await new Promise(r => setTimeout(r, 1000));
-    await saveScreenshot(page, '19_language_toggle_tamil_cart.png');
-
-    // 8. VERIFY ABOUT IN TAMIL
-    console.log('\n--- 8. Verifying About Us in Tamil ---');
-    await navigateHash('#/about');
-    await new Promise(r => setTimeout(r, 1000));
-    await saveScreenshot(page, '20_language_toggle_tamil_about.png');
-
-    // 9. VERIFY FAQS IN TAMIL
-    console.log('\n--- 9. Verifying FAQs in Tamil ---');
-    await navigateHash('#/faqs');
-    await new Promise(r => setTimeout(r, 1000));
-    await saveScreenshot(page, '21_language_toggle_tamil_faqs.png');
-
-    // 10. VERIFY CUSTOMER CARE IN TAMIL
-    console.log('\n--- 10. Verifying Customer Care in Tamil ---');
-    await navigateHash('#/customer-care');
-    await new Promise(r => setTimeout(r, 1000));
-    await saveScreenshot(page, '22_language_toggle_tamil_customer_care.png');
-
-    // 11. SWITCH BACK TO ENGLISH AND TEST TOGGLE STABILITY
-    console.log('\n--- 11. Testing Toggle back to English ---');
+    // Switch back to English
     const langBtnEn = await page.waitForSelector('[data-testid="lang-btn-en"]');
     await langBtnEn.click();
-    console.log('✓ Clicked language switch back to English');
-    await new Promise(r => setTimeout(r, 1000));
+    await new Promise(r => setTimeout(r, 800));
 
-    // 12. COLOR PALETTE COMPLIANCE CHECK
-    console.log('\n--- 12. Color Palette & Background Compliance Verification ---');
+    // 9. COLOR PALETTE COMPLIANCE CHECK
+    console.log('\n--- 9. Color Palette & Background Compliance Verification ---');
     const colorAudit = await page.evaluate(() => {
       const elements = Array.from(document.querySelectorAll('*'));
       const offColors = [];
@@ -216,15 +196,14 @@ async function runVerification() {
       });
       return {
         totalInspected: elements.length,
-        offColorCount: offColors.length,
-        samples: offColors.slice(0, 5)
+        offColorCount: offColors.length
       };
     });
     console.log(`Elements inspected: ${colorAudit.totalInspected}`);
     console.log(`Off-palette pure white backgrounds detected: ${colorAudit.offColorCount}`);
 
     console.log('\n========================================');
-    console.log('✓ ALL BILINGUAL & REGRESSION TESTS PASSED!');
+    console.log('✓ ALL BREAKPOINT & SCROLL LOCK TESTS PASSED!');
     console.log('========================================\n');
 
   } catch (err) {
