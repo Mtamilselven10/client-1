@@ -1,0 +1,9 @@
+{
+  "frameCount": 282,
+  "namingPattern": "ezgif-frame-%03d.jpg",
+  "prefix": "ezgif-frame-",
+  "digits": 3,
+  "extension": "jpg",
+  "startIndex": 1,
+  "fps": 30
+}

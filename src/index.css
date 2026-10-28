@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --cream: #FFF3D5;
+  --cream-deep: #F6E6BC;
+  --cream-light: #FFF9EA;
+  --olive: #4D694E;
+  --olive-dark: #3A503B;
+  --olive-soft: rgba(77, 105, 78, 0.12);
+  --olive-border: rgba(77, 105, 78, 0.22);
+  --ink: #2B3A2C;
+  --ink-muted: #4B5E4C;
+}
+
+/* Force global Beige Cream background on html and body */
+html, body {
+  background-color: var(--cream);
+  color: var(--ink);
+  font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  margin: 0;
+  padding: 0;
+}
+
+/* Accessible focus ring for all interactive elements */
+*:focus-visible {
+  outline: 2px solid var(--olive) !important;
+  outline-offset: 2px !important;
+}
+
+/* Custom Scrollbar styled strictly in olive and cream */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--cream-deep);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--olive);
+  border-radius: 9999px;
+  border: 2px solid var(--cream-deep);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--olive-dark);
+}
+
+/* Typography Headings */
+h1, h2, h3, .font-editorial {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+/* Input reset to prevent browser white defaults */
+input, textarea, select {
+  background-color: var(--cream-light);
+  color: var(--ink);
+  border-color: var(--olive-border);
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--olive);
+}
+
+/* Range input slider styling */
+input[type="range"] {
+  accent-color: var(--olive);
+}
