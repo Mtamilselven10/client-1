@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import { ToastProvider } from './context/ToastContext';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
@@ -28,6 +29,8 @@ function ScrollToTop() {
 }
 
 function MainLayout() {
+  const location = useLocation();
+
   return (
     <div className="min-h-screen bg-cream text-ink flex flex-col antialiased">
       <ScrollToTop />
@@ -36,19 +39,30 @@ function MainLayout() {
 
       {/* Main Content Area (Offset by sidebar width on desktop) */}
       <div className="flex-1 lg:pl-72 flex flex-col min-h-screen">
-        <main className="flex-1">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/products" element={<ProductsPage />} />
-            <Route path="/products/:id" element={<ProductDetailPage />} />
-            <Route path="/wishlist" element={<WishlistPage />} />
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/about" element={<AboutUsPage />} />
-            <Route path="/faqs" element={<FAQsPage />} />
-            <Route path="/customer-care" element={<CustomerCarePage />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
+        <main className="flex-1 flex flex-col">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -14 }}
+              transition={{ duration: 0.28, ease: [0.25, 1, 0.5, 1] }}
+              className="flex-1 flex flex-col"
+            >
+              <Routes location={location} key={location.pathname}>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/products" element={<ProductsPage />} />
+                <Route path="/products/:id" element={<ProductDetailPage />} />
+                <Route path="/wishlist" element={<WishlistPage />} />
+                <Route path="/cart" element={<CartPage />} />
+                <Route path="/about" element={<AboutUsPage />} />
+                <Route path="/faqs" element={<FAQsPage />} />
+                <Route path="/customer-care" element={<CustomerCarePage />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                <Route path="*" element={<NotFoundPage />} />
+              </Routes>
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
 

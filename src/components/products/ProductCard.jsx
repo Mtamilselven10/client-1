@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Heart, ShoppingCart, Star, Check } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 
-export default function ProductCard({ product }) {
+const ProductCard = forwardRef(function ProductCard({ product }, ref) {
   const navigate = useNavigate();
   const { addToCart, isInCart, getProductQuantity } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
@@ -33,10 +34,17 @@ export default function ProductCard({ product }) {
     : 0;
 
   return (
-    <div
+    <motion.div
+      ref={ref}
+      layout
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      whileHover={{ y: -6 }}
+      transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
       data-testid="product-card"
       onClick={handleCardClick}
-      className="group cursor-pointer rounded-card overflow-hidden bg-cream-light border border-olive/20 shadow-olive-sm hover:shadow-olive-md hover:border-olive transition-all duration-300 flex flex-col justify-between"
+      className="group cursor-pointer rounded-card overflow-hidden bg-cream-light border border-olive/20 shadow-olive-sm hover:shadow-olive-md hover:border-olive transition-shadow duration-300 flex flex-col justify-between"
     >
       {/* Product Image Box */}
       <div className="relative aspect-square w-full overflow-hidden bg-cream-deep p-3 flex items-center justify-center">
@@ -48,9 +56,11 @@ export default function ProductCard({ product }) {
         />
 
         {/* Wishlist Heart Toggle Button */}
-        <button
+        <motion.button
+          whileHover={{ scale: 1.15 }}
+          whileTap={{ scale: 0.8 }}
           onClick={handleWishlistToggle}
-          className="absolute top-3 right-3 w-9 h-9 rounded-full bg-cream/90 backdrop-blur-xs flex items-center justify-center text-olive border border-olive/20 shadow-olive-sm hover:scale-110 active:scale-95 transition-all z-10 focus-visible:ring-2 focus-visible:ring-olive"
+          className="absolute top-3 right-3 w-9 h-9 rounded-full bg-cream/90 backdrop-blur-xs flex items-center justify-center text-olive border border-olive/20 shadow-olive-sm transition-colors z-10 focus-visible:ring-2 focus-visible:ring-olive"
           aria-label={isWished ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
         >
           <Heart
@@ -58,7 +68,7 @@ export default function ProductCard({ product }) {
               isWished ? 'fill-olive text-olive' : 'text-olive'
             }`}
           />
-        </button>
+        </motion.button>
 
         {/* Discount Badge */}
         {discountPercent > 0 && (
@@ -116,12 +126,14 @@ export default function ProductCard({ product }) {
           </div>
 
           {/* Add to Cart Olive Button */}
-          <button
+          <motion.button
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.92 }}
             onClick={handleAddToCart}
-            className={`px-3.5 py-2 rounded-btn font-semibold text-xs tracking-wide shadow-olive-sm transition-all duration-200 flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-olive ${
+            className={`px-3.5 py-2 rounded-btn font-semibold text-xs tracking-wide shadow-olive-sm transition-colors duration-200 flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-olive ${
               inCart
                 ? 'bg-olive text-cream hover:bg-olive-dark'
-                : 'bg-olive text-cream hover:bg-olive-dark active:scale-95'
+                : 'bg-olive text-cream hover:bg-olive-dark'
             }`}
             aria-label={`Add ${product.name} to cart`}
           >
@@ -136,9 +148,11 @@ export default function ProductCard({ product }) {
                 <span>Add</span>
               </>
             )}
-          </button>
+          </motion.button>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
-}
+});
+
+export default ProductCard;

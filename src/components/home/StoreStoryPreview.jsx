@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { ShieldCheck, HeartHandshake, Award, MapPin } from 'lucide-react';
 import { SHOP_NAME, GOOGLE_MAP_URL, STORE_ADDRESS } from '../../config';
 
@@ -7,8 +8,14 @@ export default function StoreStoryPreview() {
   return (
     <section className="py-20 px-4 sm:px-8 bg-cream-deep border-y border-olive/15">
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-        {/* Left Column: Image with editorial framing */}
-        <div className="lg:col-span-5 relative">
+        {/* Left Column: Image with editorial framing & parallel float */}
+        <motion.div 
+          initial={{ opacity: 0, x: -35 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.6, ease: [0.25, 1, 0.5, 1] }}
+          className="lg:col-span-5 relative"
+        >
           <div className="rounded-card overflow-hidden border-2 border-olive/30 shadow-olive-lg bg-cream">
             <img
               src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80"
@@ -17,17 +24,27 @@ export default function StoreStoryPreview() {
               loading="lazy"
             />
           </div>
-          {/* Floating badge */}
-          <div className="absolute -bottom-6 -right-4 sm:right-6 bg-olive text-cream p-5 rounded-card shadow-olive-lg border-2 border-cream max-w-[220px]">
+          {/* Floating badge with continuous subtle parallel float */}
+          <motion.div 
+            animate={{ y: [0, -7, 0] }}
+            transition={{ repeat: Infinity, duration: 4.5, ease: "easeInOut" }}
+            className="absolute -bottom-6 -right-4 sm:right-6 bg-olive text-cream p-5 rounded-card shadow-olive-lg border-2 border-cream max-w-[220px]"
+          >
             <div className="font-serif text-3xl font-extrabold leading-none">50+</div>
             <div className="text-xs font-semibold mt-1 uppercase tracking-wider text-cream/90">
               Years of Uncompromising Purity
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
-        {/* Right Column: Narrative */}
-        <div className="lg:col-span-7 space-y-6">
+        {/* Right Column: Narrative with parallel entrance */}
+        <motion.div 
+          initial={{ opacity: 0, x: 35 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.6, delay: 0.15, ease: [0.25, 1, 0.5, 1] }}
+          className="lg:col-span-7 space-y-6"
+        >
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-olive-soft text-olive text-xs font-bold tracking-widest uppercase">
             <span>Our Sourcing Promise</span>
           </div>
@@ -92,7 +109,7 @@ export default function StoreStoryPreview() {
               <span>Locate Our Store on Map</span>
             </a>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

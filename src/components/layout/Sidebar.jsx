@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Home, 
   ShoppingBag, 
@@ -128,30 +129,43 @@ export default function Sidebar() {
                 key={item.path}
                 to={item.path}
                 onClick={closeMobile}
-                className={`relative flex items-center justify-between px-4 py-3 rounded-btn text-sm font-semibold transition-all duration-200 group ${
+                className={`relative flex items-center justify-between px-4 py-3 rounded-btn text-sm font-semibold transition-colors duration-200 group ${
                   isActive
-                    ? 'bg-olive text-cream shadow-olive-sm'
+                    ? 'text-cream'
                     : 'text-olive hover:bg-olive/10 hover:text-olive-dark'
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  <Icon className={`w-5 h-5 transition-transform duration-200 group-hover:scale-105 ${
+                {/* Smooth sliding pill active indicator */}
+                {isActive && (
+                  <motion.div
+                    layoutId="activeNavIndicator"
+                    className="absolute inset-0 bg-olive rounded-btn shadow-olive-sm"
+                    transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                  />
+                )}
+
+                <div className="relative z-10 flex items-center gap-3">
+                  <Icon className={`w-5 h-5 transition-transform duration-200 group-hover:scale-110 ${
                     isActive ? 'text-cream' : 'text-olive'
                   }`} />
                   <span className="tracking-wide">{item.label}</span>
                 </div>
 
-                {/* Live Count Badge (olive badge, cream number) */}
+                {/* Live Count Badge (olive badge, cream number) with pop spring */}
                 {item.badge !== undefined && item.badge > 0 && (
-                  <span
-                    className={`inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold rounded-full transition-colors ${
+                  <motion.span
+                    key={item.badge}
+                    initial={{ scale: 0.7 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 25 }}
+                    className={`relative z-10 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold rounded-full transition-colors ${
                       isActive
                         ? 'bg-cream text-olive'
                         : 'bg-olive text-cream'
                     }`}
                   >
                     {item.badge > 99 ? '99+' : item.badge}
-                  </span>
+                  </motion.span>
                 )}
               </NavLink>
             );

@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ShoppingCart, 
   Trash2, 
@@ -78,97 +79,108 @@ export default function CartPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Cart Items List (8 cols) */}
           <div className="lg:col-span-8 space-y-4">
-            {cart.map((item) => {
-              const itemTotal = item.price * item.quantity;
-              const singleItemOrderUrl = buildSingleProductWhatsAppUrl(item, item.quantity);
+            <AnimatePresence mode="popLayout">
+              {cart.map((item) => {
+                const itemTotal = item.price * item.quantity;
+                const singleItemOrderUrl = buildSingleProductWhatsAppUrl(item, item.quantity);
 
-              return (
-                <div
-                  key={item.id}
-                  className="p-4 sm:p-5 rounded-card bg-cream-light border border-olive/20 shadow-olive-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 transition-all hover:border-olive"
-                >
-                  {/* Thumbnail and Info */}
-                  <div className="flex items-center gap-4 w-full sm:w-auto">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      onClick={() => navigate(`/products/${item.id}`, { state: { product: item } })}
-                      className="w-20 h-20 sm:w-24 sm:h-24 rounded-btn object-cover bg-cream-deep border border-olive/15 shrink-0 cursor-pointer"
-                    />
-
-                    <div className="space-y-1">
-                      <span className="text-[11px] font-bold text-olive uppercase tracking-wider">
-                        {item.category} • {item.id}
-                      </span>
-                      <h3 
+                return (
+                  <motion.div
+                    key={item.id}
+                    layout
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, x: -30, scale: 0.95 }}
+                    transition={{ duration: 0.25 }}
+                    className="p-4 sm:p-5 rounded-card bg-cream-light border border-olive/20 shadow-olive-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 transition-colors hover:border-olive"
+                  >
+                    {/* Thumbnail and Info */}
+                    <div className="flex items-center gap-4 w-full sm:w-auto">
+                      <img
+                        src={item.image}
+                        alt={item.name}
                         onClick={() => navigate(`/products/${item.id}`, { state: { product: item } })}
-                        className="font-serif font-bold text-ink text-base line-clamp-1 cursor-pointer hover:text-olive transition-colors"
-                      >
-                        {item.name}
-                      </h3>
-                      <div className="text-xs text-ink/70">
-                        Pack Unit: <span className="font-semibold text-ink">{item.unit || '1 unit'}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs">
-                        <span className="font-serif font-extrabold text-olive text-sm">
-                          {formatCurrency(item.price)}
+                        className="w-20 h-20 sm:w-24 sm:h-24 rounded-btn object-cover bg-cream-deep border border-olive/15 shrink-0 cursor-pointer"
+                      />
+
+                      <div className="space-y-1">
+                        <span className="text-[11px] font-bold text-olive uppercase tracking-wider">
+                          {item.category} • {item.id}
                         </span>
-                        <span className="text-ink/50 text-[11px]">per unit</span>
+                        <h3 
+                          onClick={() => navigate(`/products/${item.id}`, { state: { product: item } })}
+                          className="font-serif font-bold text-ink text-base line-clamp-1 cursor-pointer hover:text-olive transition-colors"
+                        >
+                          {item.name}
+                        </h3>
+                        <div className="text-xs text-ink/70">
+                          Pack Unit: <span className="font-semibold text-ink">{item.unit || '1 unit'}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs">
+                          <span className="font-serif font-extrabold text-olive text-sm">
+                            {formatCurrency(item.price)}
+                          </span>
+                          <span className="text-ink/50 text-[11px]">per unit</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Quantity Stepper & Individual WhatsApp Order */}
-                  <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto pt-3 sm:pt-0 border-t sm:border-t-0 border-olive/10">
-                    {/* Stepper */}
-                    <div className="flex items-center rounded-btn bg-cream border border-olive/25 overflow-hidden">
-                      <button
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="p-1.5 px-2.5 text-olive hover:bg-olive-soft transition-colors"
-                        aria-label="Decrease quantity"
-                      >
-                        <Minus className="w-3.5 h-3.5" />
-                      </button>
-                      <span className="px-3 py-1 text-xs font-bold text-ink min-w-[32px] text-center">
-                        {item.quantity}
-                      </span>
-                      <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="p-1.5 px-2.5 text-olive hover:bg-olive-soft transition-colors"
-                        aria-label="Increase quantity"
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-
-                    {/* Subtotal */}
-                    <div className="text-right min-w-[80px]">
-                      <div className="font-serif font-extrabold text-olive text-base">
-                        {formatCurrency(itemTotal)}
+                    {/* Quantity Stepper & Individual WhatsApp Order */}
+                    <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto pt-3 sm:pt-0 border-t sm:border-t-0 border-olive/10">
+                      {/* Stepper */}
+                      <div className="flex items-center rounded-btn bg-cream border border-olive/25 overflow-hidden">
+                        <motion.button
+                          whileTap={{ scale: 0.85 }}
+                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          className="p-1.5 px-2.5 text-olive hover:bg-olive-soft transition-colors"
+                          aria-label="Decrease quantity"
+                        >
+                          <Minus className="w-3.5 h-3.5" />
+                        </motion.button>
+                        <span className="px-3 py-1 text-xs font-bold text-ink min-w-[32px] text-center">
+                          {item.quantity}
+                        </span>
+                        <motion.button
+                          whileTap={{ scale: 0.85 }}
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          className="p-1.5 px-2.5 text-olive hover:bg-olive-soft transition-colors"
+                          aria-label="Increase quantity"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                        </motion.button>
                       </div>
-                      <button
-                        onClick={() => removeFromCart(item.id)}
-                        className="text-[11px] text-ink/50 hover:text-olive underline transition-colors"
-                      >
-                        Remove
-                      </button>
-                    </div>
 
-                    {/* Individual WhatsApp Order Button */}
-                    <a
-                      href={singleItemOrderUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-4 py-2.5 rounded-btn bg-olive text-cream font-bold text-xs shadow-olive-sm hover:bg-olive-dark transition-all flex items-center gap-1.5 shrink-0 focus-visible:ring-2 focus-visible:ring-olive"
-                      title="Order this specific item on WhatsApp"
-                    >
-                      <MessageCircle className="w-3.5 h-3.5 text-cream" />
-                      <span>Order</span>
-                    </a>
-                  </div>
-                </div>
-              );
-            })}
+                      {/* Subtotal */}
+                      <div className="text-right min-w-[80px]">
+                        <div className="font-serif font-extrabold text-olive text-base">
+                          {formatCurrency(itemTotal)}
+                        </div>
+                        <button
+                          onClick={() => removeFromCart(item.id)}
+                          className="text-[11px] text-ink/50 hover:text-olive underline transition-colors"
+                        >
+                          Remove
+                        </button>
+                      </div>
+
+                      {/* Individual WhatsApp Order Button */}
+                      <motion.a
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        href={singleItemOrderUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2.5 rounded-btn bg-olive text-cream font-bold text-xs shadow-olive-sm hover:bg-olive-dark transition-colors flex items-center gap-1.5 shrink-0 focus-visible:ring-2 focus-visible:ring-olive"
+                        title="Order this specific item on WhatsApp"
+                      >
+                        <MessageCircle className="w-3.5 h-3.5 text-cream" />
+                        <span>Order</span>
+                      </motion.a>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
           </div>
 
           {/* Cart Summary Sidebar (4 cols) */}

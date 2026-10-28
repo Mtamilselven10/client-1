@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Star, Quote } from 'lucide-react';
 
 const REVIEWS = [
@@ -40,11 +41,36 @@ export default function CustomerReviews() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <motion.div 
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-60px" }}
+        variants={{
+          hidden: {},
+          visible: {
+            transition: {
+              staggerChildren: 0.15
+            }
+          }
+        }}
+        className="grid grid-cols-1 md:grid-cols-3 gap-8"
+      >
         {REVIEWS.map((rev) => (
-          <div
+          <motion.div
             key={rev.name}
-            className="p-8 rounded-card bg-cream-light border border-olive/20 shadow-olive-sm flex flex-col justify-between relative group hover:border-olive transition-all duration-300"
+            variants={{
+              hidden: { opacity: 0, y: 30 },
+              visible: { 
+                opacity: 1, 
+                y: 0,
+                transition: { duration: 0.5, ease: [0.25, 1, 0.5, 1] }
+              }
+            }}
+            whileHover={{ 
+              y: -8, 
+              transition: { type: "spring", stiffness: 350, damping: 22 } 
+            }}
+            className="p-8 rounded-card bg-cream-light border border-olive/20 shadow-olive-sm flex flex-col justify-between relative group hover:border-olive hover:shadow-olive-lg transition-colors duration-300"
           >
             <Quote className="w-10 h-10 text-olive/20 absolute top-6 right-6 group-hover:text-olive/30 transition-colors" />
 
@@ -73,9 +99,9 @@ export default function CustomerReviews() {
                 {rev.location}
               </span>
             </div>
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </section>
   );
 }
