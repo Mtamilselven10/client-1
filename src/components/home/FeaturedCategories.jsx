@@ -3,47 +3,60 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, Wheat, Droplets, Sparkles, Flame, Apple, Coffee } from 'lucide-react';
 import { getProductImageUrl } from '../../utils/formatters';
+import { useLanguage } from '../../context/LanguageContext';
 
 const CATEGORIES = [
   {
     name: 'Aachi Masala & Podi',
-    count: '10 Items',
+    nameTa: 'ஆச்சி மசாலா & பொடி வகைகள்',
+    count: '10',
     desc: 'Traditional Aachi chilli, sambar, rasam, and signature kitchen masalas',
+    descTa: 'பாரம்பரிய ஆச்சி மிளகாய், சாம்பார், ரசம் மற்றும் மசாலா பொடிகள்',
     icon: Flame,
     image: 'products/001_Aachi_Chilli_Powder.jpg',
   },
   {
     name: 'Cooking Oil',
-    count: '8 Items',
+    nameTa: 'சமையல் எண்ணெய்கள்',
+    count: '8',
     desc: 'Cold-pressed gingelly, pure groundnut, coconut, and sunflower oils',
+    descTa: 'நல்லெண்ணெய், கடலை எண்ணெய், தேங்காய் எண்ணெய் மற்றும் சூரியகாந்தி எண்ணெய்',
     icon: Droplets,
     image: 'products/023_Gold_Winner_Sunflower_Oil.jpg',
   },
   {
     name: 'Tea & Coffee',
-    count: '8 Items',
+    nameTa: 'தேயிலை & காபி',
+    count: '8',
     desc: 'Brooke Bond 3 Roses, Red Label, Tata Tea, and degree filter coffee',
+    descTa: '3 ரோசஸ், ரெட் லேபிள், டாடா டீ மற்றும் கும்பகோணம் டிகிரி காபி',
     icon: Coffee,
     image: 'products/012_3_Roses_Tea.jpg',
   },
   {
     name: 'Rice',
-    count: '8 Items',
+    nameTa: 'பாரம்பரிய அரிசி வகைகள்',
+    count: '8',
     desc: 'Thanjavur Ponni rice, Seeraga Samba, Basmati, and Idli Gundu Arisi',
+    descTa: 'தஞ்சாவூர் பொன்னி, சீரக சம்பா, பாஸ்மதி மற்றும் இட்லி அரிசி',
     icon: Wheat,
     image: 'products/072_Basmati_Rice.jpg',
   },
   {
     name: 'Sakthi & Other Cooking Masalas',
-    count: '11 Items',
+    nameTa: 'சக்தி & குழம்பு மசாலாக்கள்',
+    count: '11',
     desc: 'Famous Sakthi chicken, mutton, biryani, and kulambu spice blends',
+    descTa: 'சக்தி சிக்கன், மட்டன், பிரியாணி மற்றும் குழம்பு மிளகாய்த்தூள்',
     icon: Sparkles,
     image: 'products/064_Sakthi_Sambar_Powder.jpg',
   },
   {
     name: 'Other Grocery Essentials',
-    count: '19 Items',
+    nameTa: 'மளிகைப் பொருட்கள் & பருப்பு வகைகள்',
+    count: '19',
     desc: 'Unpolished toor & urad dals, spices, whole wheat atta, and appalam',
+    descTa: 'நாட்டு துவரம்பருப்பு, உளுந்து, கோதுமை மாவு மற்றும் அப்பளம்',
     icon: Apple,
     image: 'products/102_Toor_Dal.jpg',
   },
@@ -51,6 +64,7 @@ const CATEGORIES = [
 
 export default function FeaturedCategories() {
   const navigate = useNavigate();
+  const { language, t } = useLanguage();
 
   const handleCategoryClick = (categoryName) => {
     navigate(`/products?category=${encodeURIComponent(categoryName)}`);
@@ -62,17 +76,20 @@ export default function FeaturedCategories() {
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
         <div>
           <span className="text-xs uppercase tracking-widest font-bold text-olive">
-            Pure Sourcing Categories
+            {t('home.categoriesBadge')}
           </span>
           <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-ink mt-2">
-            Explore Handpicked Essentials
+            {t('home.categoriesTitle')}
           </h2>
+          <p className="text-sm text-ink/75 mt-1 max-w-xl">
+            {t('home.categoriesSubtitle')}
+          </p>
         </div>
         <button
           onClick={() => navigate('/products')}
           className="inline-flex items-center gap-2 text-olive hover:text-olive-dark font-semibold text-sm group"
         >
-          <span>View All 120+ Grocery Products</span>
+          <span>{language === 'ta' ? 'அனைத்து 120+ பொருட்களையும் காண்க' : 'View All 120+ Grocery Products'}</span>
           <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
         </button>
       </div>
@@ -122,7 +139,7 @@ export default function FeaturedCategories() {
                 <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-transparent opacity-80" />
                 <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between text-cream">
                   <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-olive/90 backdrop-blur-xs">
-                    {cat.count}
+                    {cat.count} {t('home.itemsSuffix')}
                   </span>
                   <div className="w-8 h-8 rounded-full bg-cream text-olive flex items-center justify-center shadow-sm group-hover:bg-olive group-hover:text-cream transition-colors">
                     <Icon className="w-4 h-4" />
@@ -133,15 +150,15 @@ export default function FeaturedCategories() {
               <div className="p-5 flex-1 flex flex-col justify-between">
                 <div>
                   <h3 className="font-serif text-xl font-bold text-ink group-hover:text-olive transition-colors">
-                    {cat.name}
+                    {language === 'ta' ? cat.nameTa : cat.name}
                   </h3>
                   <p className="mt-2 text-xs sm:text-sm text-ink/75 leading-relaxed">
-                    {cat.desc}
+                    {language === 'ta' ? cat.descTa : cat.desc}
                   </p>
                 </div>
 
                 <div className="mt-4 pt-3 border-t border-olive/10 flex items-center text-xs font-bold text-olive group-hover:text-olive-dark">
-                  <span>Browse Category</span>
+                  <span>{t('home.exploreCategory')}</span>
                   <ArrowRight className="w-3.5 h-3.5 ml-1 transition-transform group-hover:translate-x-1.5" />
                 </div>
               </div>

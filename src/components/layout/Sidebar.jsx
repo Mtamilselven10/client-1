@@ -16,25 +16,27 @@ import {
 import { SHOP_NAME, SHOP_TAGLINE } from '../../config';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const { getItemCount } = useCart();
   const { itemCount: wishlistCount } = useWishlist();
+  const { t } = useLanguage();
 
   const cartCount = getItemCount();
   const logoUrl = `${import.meta.env.BASE_URL}logo.png`;
 
   const navItems = [
-    { label: 'Home', path: '/', icon: Home },
-    { label: 'Products', path: '/products', icon: ShoppingBag },
-    { label: 'Wishlist', path: '/wishlist', icon: Heart, badge: wishlistCount },
-    { label: 'Cart', path: '/cart', icon: ShoppingCart, badge: cartCount },
-    { label: 'About Us', path: '/about', icon: Info },
-    { label: 'FAQs', path: '/faqs', icon: HelpCircle },
-    { label: 'Customer Care', path: '/customer-care', icon: Headphones },
-    { label: 'Privacy & Policy', path: '/privacy-policy', icon: ShieldCheck },
+    { label: t('nav.home'), path: '/', icon: Home },
+    { label: t('nav.products'), path: '/products', icon: ShoppingBag },
+    { label: t('nav.wishlist'), path: '/wishlist', icon: Heart, badge: wishlistCount },
+    { label: t('nav.cart'), path: '/cart', icon: ShoppingCart, badge: cartCount },
+    { label: t('nav.about'), path: '/about', icon: Info },
+    { label: t('nav.faqs'), path: '/faqs', icon: HelpCircle },
+    { label: t('nav.customerCare'), path: '/customer-care', icon: Headphones },
+    { label: t('nav.privacyPolicy'), path: '/privacy-policy', icon: ShieldCheck },
   ];
 
   const closeMobile = () => setMobileOpen(false);
@@ -46,17 +48,17 @@ export default function Sidebar() {
         <NavLink to="/" className="flex items-center gap-2.5 text-olive font-serif text-xl font-bold tracking-tight">
           <img
             src={logoUrl}
-            alt={SHOP_NAME}
+            alt={t('brand.name')}
             className="w-8 h-8 object-contain shrink-0"
           />
-          <span>{SHOP_NAME}</span>
+          <span>{t('brand.name')}</span>
         </NavLink>
         <div className="flex items-center gap-2">
           {/* Quick Cart on Mobile Header */}
           <NavLink
             to="/cart"
             className="relative p-2 text-olive hover:bg-olive/10 rounded-full transition-colors"
-            aria-label="View Cart"
+            aria-label={t('nav.cart')}
           >
             <ShoppingCart className="w-5 h-5" />
             {cartCount > 0 && (
@@ -102,16 +104,16 @@ export default function Sidebar() {
               <div className="w-11 h-11 rounded-card bg-cream-light border border-olive/20 p-1 flex items-center justify-center shadow-olive-sm shrink-0 group-hover:scale-105 transition-transform">
                 <img
                   src={logoUrl}
-                  alt={SHOP_NAME}
+                  alt={t('brand.name')}
                   className="w-full h-full object-contain"
                 />
               </div>
               <h1 className="font-serif text-2xl font-extrabold text-olive tracking-tight group-hover:text-olive-dark transition-colors">
-                {SHOP_NAME}
+                {t('brand.name')}
               </h1>
             </div>
             <p className="mt-1.5 text-xs text-ink/75 font-medium tracking-wide">
-              {SHOP_TAGLINE}
+              {t('brand.tagline')}
             </p>
           </NavLink>
 
@@ -184,13 +186,13 @@ export default function Sidebar() {
         <div className="p-4 m-3 rounded-card bg-cream-light border border-olive/15 text-xs text-ink/80 space-y-2">
           <div className="flex items-center gap-2 text-olive font-semibold">
             <span className="w-2 h-2 rounded-full bg-olive animate-pulse" />
-            <span>Store Open Today</span>
+            <span>{t('brand.storeOpen')}</span>
           </div>
           <p className="leading-relaxed">
-            Fresh harvest batches updated daily. 100% natural and unadulterated.
+            {t('brand.storeSubtitle')}
           </p>
           <div className="text-[11px] text-ink/60 pt-1 border-t border-olive/10">
-            © 2026 {SHOP_NAME}.
+            {t('brand.rights')}
           </div>
         </div>
       </aside>

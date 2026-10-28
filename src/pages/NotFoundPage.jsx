@@ -1,9 +1,12 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Compass, Home, ShoppingBag } from 'lucide-react';
+import { Home, ShoppingBag } from 'lucide-react';
 import { SHOP_NAME } from '../config';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function NotFoundPage() {
+  const { t } = useLanguage();
+
   return (
     <div className="min-h-[75vh] flex items-center justify-center p-6 bg-cream">
       <div className="max-w-md w-full p-8 rounded-card bg-cream-light border-2 border-olive/25 text-center shadow-olive-md space-y-6">
@@ -17,13 +20,13 @@ export default function NotFoundPage() {
 
         <div className="space-y-2">
           <span className="text-xs font-bold uppercase tracking-widest text-olive">
-            Page Not Found • 404
+            {t('notFound.tag')}
           </span>
           <h1 className="font-serif text-3xl font-bold text-ink">
-            A Stray Seed in the Wind
+            {t('notFound.title')}
           </h1>
           <p className="text-sm text-ink/75 leading-relaxed">
-            The page you are looking for does not exist or may have been relocated in our pantry shelves.
+            {t('notFound.subtitle')}
           </p>
         </div>
 
@@ -33,7 +36,7 @@ export default function NotFoundPage() {
             className="w-full sm:w-auto px-5 py-3 rounded-btn bg-olive text-cream font-bold text-xs shadow-olive-sm hover:bg-olive-dark transition-colors inline-flex items-center justify-center gap-2"
           >
             <Home className="w-4 h-4 text-cream" />
-            <span>Return Home</span>
+            <span>{t('notFound.homeBtn')}</span>
           </NavLink>
 
           <NavLink
@@ -41,7 +44,7 @@ export default function NotFoundPage() {
             className="w-full sm:w-auto px-5 py-3 rounded-btn border border-olive text-olive font-bold text-xs hover:bg-olive-soft transition-colors inline-flex items-center justify-center gap-2"
           >
             <ShoppingBag className="w-4 h-4 text-olive" />
-            <span>Browse Products</span>
+            <span>{t('notFound.productsBtn')}</span>
           </NavLink>
         </div>
       </div>

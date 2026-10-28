@@ -19,12 +19,14 @@ import { formatCurrency, buildSingleProductWhatsAppUrl, getProductImageUrl } fro
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useToast } from '../context/ToastContext';
+import { useLanguage } from '../context/LanguageContext';
 import { SHOP_NAME } from '../config';
 
 export default function ProductDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t, translateCategory } = useLanguage();
   const { addToCart, isInCart, getProductQuantity } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { addToast } = useToast();
@@ -91,7 +93,7 @@ export default function ProductDetailPage() {
       }).catch(() => {});
     } else {
       navigator.clipboard.writeText(window.location.href);
-      addToast('Product link copied to clipboard', 'info');
+      addToast(t('productDetail.shareCopied') || 'Product link copied to clipboard', 'info');
     }
   };
 
@@ -108,13 +110,13 @@ export default function ProductDetailPage() {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-center bg-cream">
         <div className="max-w-md p-8 rounded-card bg-cream-light border border-olive/20 shadow-olive-md space-y-4">
-          <h2 className="font-serif text-2xl font-bold text-ink">Item Not Found</h2>
+          <h2 className="font-serif text-2xl font-bold text-ink">{t('productDetail.itemNotFound')}</h2>
           <p className="text-sm text-ink/75">{error || "The requested item is not currently listed in our catalog."}</p>
           <button
             onClick={() => navigate('/products')}
             className="px-6 py-2.5 rounded-btn bg-olive text-cream font-bold text-sm shadow-olive-sm hover:bg-olive-dark transition-colors"
           >
-            Return to Products Catalog
+            {t('productDetail.returnCatalog')}
           </button>
         </div>
       </div>
@@ -130,11 +132,11 @@ export default function ProductDetailPage() {
     <div className="py-8 px-4 sm:px-8 max-w-7xl mx-auto bg-cream">
       {/* Breadcrumb Navigation */}
       <nav className="flex items-center gap-2 text-xs font-semibold text-ink/60 mb-6 flex-wrap">
-        <NavLink to="/" className="hover:text-olive transition-colors">Home</NavLink>
+        <NavLink to="/" className="hover:text-olive transition-colors">{t('productDetail.home')}</NavLink>
         <ChevronRight className="w-3.5 h-3.5 text-olive" />
-        <NavLink to="/products" className="hover:text-olive transition-colors">Products</NavLink>
+        <NavLink to="/products" className="hover:text-olive transition-colors">{t('productDetail.products')}</NavLink>
         <ChevronRight className="w-3.5 h-3.5 text-olive" />
-        <span className="text-olive truncate max-w-[200px]">{product.category}</span>
+        <span className="text-olive truncate max-w-[200px]">{translateCategory(product.category)}</span>
         <ChevronRight className="w-3.5 h-3.5 text-olive" />
         <span className="text-ink truncate max-w-[200px]">{product.name}</span>
       </nav>
@@ -145,7 +147,7 @@ export default function ProductDetailPage() {
         className="inline-flex items-center gap-2 text-xs font-bold text-olive hover:text-olive-dark mb-6 group"
       >
         <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-        <span>Back to catalog</span>
+        <span>{t('productDetail.backCatalog')}</span>
       </button>
 
       {/* Main Product Layout with Parallel Entrance */}
@@ -177,13 +179,13 @@ export default function ProductDetailPage() {
 
             {/* Hover hint badge */}
             <div className="absolute bottom-4 left-4 bg-ink/70 backdrop-blur-xs text-cream text-[11px] px-3 py-1 rounded-full pointer-events-none">
-              Hover to zoom details
+              {t('productDetail.hoverZoom')}
             </div>
 
             {/* In stock badge */}
             <div className="absolute top-4 left-4 bg-olive text-cream text-xs font-bold px-3 py-1 rounded-full shadow-sm flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-cream animate-pulse" />
-              <span>{product.inStock ? 'Fresh Batch in Stock' : 'Limited Stock'}</span>
+              <span>{product.inStock ? t('productDetail.freshInStock') : t('productDetail.limitedStock')}</span>
             </div>
           </div>
 
@@ -191,18 +193,18 @@ export default function ProductDetailPage() {
           <div className="grid grid-cols-3 gap-3 pt-2">
             <div className="p-3 rounded-btn bg-cream-light border border-olive/15 text-center">
               <ShieldCheck className="w-5 h-5 text-olive mx-auto mb-1" />
-              <div className="text-[11px] font-bold text-ink">100% Pure</div>
-              <div className="text-[10px] text-ink/60">Lab tested</div>
+              <div className="text-[11px] font-bold text-ink">{t('productDetail.pure100')}</div>
+              <div className="text-[10px] text-ink/60">{t('productDetail.labTested')}</div>
             </div>
             <div className="p-3 rounded-btn bg-cream-light border border-olive/15 text-center">
               <Truck className="w-5 h-5 text-olive mx-auto mb-1" />
-              <div className="text-[11px] font-bold text-ink">Swift Dispatch</div>
-              <div className="text-[10px] text-ink/60">Within 24 Hours</div>
+              <div className="text-[11px] font-bold text-ink">{t('productDetail.swiftDispatch')}</div>
+              <div className="text-[10px] text-ink/60">{t('productDetail.within24h')}</div>
             </div>
             <div className="p-3 rounded-btn bg-cream-light border border-olive/15 text-center">
               <Sparkles className="w-5 h-5 text-olive mx-auto mb-1" />
-              <div className="text-[11px] font-bold text-ink">Artisanal Cut</div>
-              <div className="text-[10px] text-ink/60">Wood-pressed</div>
+              <div className="text-[11px] font-bold text-ink">{t('productDetail.artisanalCut')}</div>
+              <div className="text-[10px] text-ink/60">{t('productDetail.woodPressed')}</div>
             </div>
           </div>
         </motion.div>
@@ -217,7 +219,7 @@ export default function ProductDetailPage() {
           <div>
             <div className="flex items-center justify-between gap-4">
               <span className="text-xs uppercase tracking-widest font-extrabold text-olive">
-                {product.category} • Code: {product.id}
+                {translateCategory(product.category)} • {t('productDetail.code')}: {product.id}
               </span>
               <button
                 onClick={handleShare}
@@ -239,10 +241,10 @@ export default function ProductDetailPage() {
                 <span>{product.rating}</span>
               </div>
               <span className="text-xs text-ink/70 font-semibold">
-                ({product.reviewsCount} verified customer ratings)
+                ({product.reviewsCount} {t('productDetail.verifiedRatings')})
               </span>
               <span className="text-xs text-olive font-bold px-2 py-0.5 rounded-full bg-olive-soft">
-                Pack: {product.unit}
+                {t('productDetail.pack')}: {product.unit}
               </span>
             </div>
           </div>
@@ -265,13 +267,13 @@ export default function ProductDetailPage() {
               )}
             </div>
             <p className="text-xs text-ink/60">
-              Price includes all applicable GST and statutory charges. Free delivery above ₹499.
+              {t('productDetail.taxNote')}
             </p>
           </div>
 
           {/* Sensory Description */}
           <div className="space-y-2">
-            <h3 className="font-serif text-base font-bold text-ink">Heritage Tasting & Sourcing Notes</h3>
+            <h3 className="font-serif text-base font-bold text-ink">{t('productDetail.tastingNotes')}</h3>
             <p className="text-sm text-ink/85 leading-relaxed bg-cream-deep/60 p-4 rounded-btn border border-olive/10">
               {product.description}
             </p>
@@ -279,7 +281,7 @@ export default function ProductDetailPage() {
 
           {/* Specifications Box */}
           <div className="space-y-2">
-            <h3 className="font-serif text-base font-bold text-ink">Detailed Specifications</h3>
+            <h3 className="font-serif text-base font-bold text-ink">{t('productDetail.specifications')}</h3>
             <div className="p-4 rounded-btn bg-cream-light border border-olive/15 text-xs text-ink/80 space-y-2">
               <p className="leading-relaxed">{product.details}</p>
             </div>
@@ -289,7 +291,7 @@ export default function ProductDetailPage() {
           <div className="pt-4 border-t border-olive/15 space-y-4">
             <div className="flex items-center gap-4">
               <span className="text-xs font-bold uppercase tracking-wider text-ink/80">
-                Quantity
+                {t('productDetail.quantity')}
               </span>
               <div className="flex items-center rounded-btn bg-cream-light border border-olive/25 overflow-hidden shadow-xs">
                 <button
@@ -324,12 +326,12 @@ export default function ProductDetailPage() {
                 {inCart ? (
                   <>
                     <Check className="w-5 h-5 text-cream" />
-                    <span>In Cart ({cartQty}) • Add More</span>
+                    <span>{t('productDetail.inCartAddMore', { qty: cartQty })}</span>
                   </>
                 ) : (
                   <>
                     <ShoppingCart className="w-5 h-5 text-cream" />
-                    <span>Add to Cart ({quantity})</span>
+                    <span>{t('productDetail.addToCart')} ({quantity})</span>
                   </>
                 )}
               </motion.button>
@@ -344,7 +346,7 @@ export default function ProductDetailPage() {
                 className="w-full py-3.5 px-6 rounded-btn border-1.5 border-olive text-olive font-bold text-sm hover:bg-olive-soft transition-colors flex items-center justify-center gap-2 focus-visible:ring-2 focus-visible:ring-olive"
               >
                 <MessageCircle className="w-5 h-5 text-olive" />
-                <span>Order via WhatsApp</span>
+                <span>{t('productDetail.orderWhatsApp')}</span>
               </motion.a>
             </div>
 
@@ -359,7 +361,7 @@ export default function ProductDetailPage() {
               }`}
             >
               <Heart className={`w-4 h-4 ${isWished ? 'fill-cream text-cream' : 'text-olive'}`} />
-              <span>{isWished ? 'Saved to Your Wishlist (Click to remove)' : 'Add to Wishlist'}</span>
+              <span>{isWished ? t('productDetail.savedWishlist') : t('productDetail.saveWishlist')}</span>
             </motion.button>
           </div>
         </motion.div>

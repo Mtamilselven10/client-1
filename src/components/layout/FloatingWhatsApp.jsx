@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
 import { WHATSAPP_NUMBER, SHOP_NAME } from '../../config';
 import { buildGeneralInquiryWhatsAppUrl } from '../../utils/formatters';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function FloatingWhatsApp() {
   const [isHovered, setIsHovered] = useState(false);
+  const { language, t } = useLanguage();
 
-  const whatsappUrl = buildGeneralInquiryWhatsAppUrl(
-    `Hello ${SHOP_NAME}, I would like to inquire about your pure grocery products and home delivery!`
-  );
+  const inquiryMessage = language === 'ta'
+    ? `வணக்கம் ${SHOP_NAME}, உங்கள் இயற்கை மளிகைப் பொருட்கள் மற்றும் விநியோகம் குறித்து அறிய விரும்புகிறேன்!`
+    : `Hello ${SHOP_NAME}, I would like to inquire about your pure grocery products and home delivery!`;
+
+  const whatsappUrl = buildGeneralInquiryWhatsAppUrl(inquiryMessage);
 
   return (
     <div className="fixed bottom-6 right-6 z-40 flex items-center gap-3">
@@ -17,7 +21,7 @@ export default function FloatingWhatsApp() {
           className="hidden sm:block px-3 py-1.5 rounded-btn bg-olive text-cream text-xs font-semibold shadow-olive-md tracking-wide animate-fade-in border border-olive-dark"
           role="tooltip"
         >
-          Chat on WhatsApp
+          {t('whatsapp.floatingTooltip')}
         </div>
       )}
 

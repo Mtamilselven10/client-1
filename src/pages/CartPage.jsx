@@ -12,6 +12,7 @@ import {
   Minus
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useLanguage } from '../context/LanguageContext';
 import { 
   formatCurrency, 
   buildSingleProductWhatsAppUrl, 
@@ -22,6 +23,7 @@ import { SHOP_NAME } from '../config';
 
 export default function CartPage() {
   const { cart, updateQuantity, removeFromCart, clearCart, getCartTotal, getItemCount } = useCart();
+  const { t, translateCategory } = useLanguage();
   const navigate = useNavigate();
 
   const totalAmount = getCartTotal();
@@ -34,13 +36,13 @@ export default function CartPage() {
       <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 pb-4 border-b border-olive/15 gap-4">
         <div>
           <span className="text-xs uppercase tracking-widest font-extrabold text-olive">
-            Your Provisions Basket
+            {t('cart.tag')}
           </span>
           <h1 className="font-serif text-3xl sm:text-4xl font-extrabold text-ink mt-1">
-            Shopping Cart ({totalItems} items)
+            {t('cart.title')} ({totalItems} {t('cart.itemsSuffix')})
           </h1>
           <p className="text-sm text-ink/75 mt-1">
-            Review your pure grocery selections and order seamlessly via WhatsApp.
+            {t('cart.subtitle')}
           </p>
         </div>
 
@@ -50,7 +52,7 @@ export default function CartPage() {
             className="text-xs font-bold text-olive hover:text-olive-dark underline underline-offset-4 flex items-center gap-1.5 self-start sm:self-auto"
           >
             <Trash2 className="w-3.5 h-3.5" />
-            <span>Empty Cart</span>
+            <span>{t('cart.emptyBtn')}</span>
           </button>
         )}
       </div>
@@ -62,16 +64,16 @@ export default function CartPage() {
             <ShoppingCart className="w-8 h-8 text-olive" />
           </div>
           <div className="space-y-2">
-            <h2 className="font-serif text-2xl font-bold text-ink">Your Cart is Empty</h2>
+            <h2 className="font-serif text-2xl font-bold text-ink">{t('cart.emptyTitle')}</h2>
             <p className="text-sm text-ink/75 leading-relaxed">
-              You have not added any staples to your cart yet. Explore our pantry for fresh cold-pressed oils, aged rice, and fragrant spices!
+              {t('cart.emptySubtitle')}
             </p>
           </div>
           <NavLink
             to="/products"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-btn bg-olive text-cream font-bold text-sm shadow-olive-md hover:bg-olive-dark transition-colors"
           >
-            <span>Explore Store</span>
+            <span>{t('cart.exploreBtn')}</span>
             <ArrowRight className="w-4 h-4" />
           </NavLink>
         </div>
@@ -111,7 +113,7 @@ export default function CartPage() {
 
                       <div className="space-y-1">
                         <span className="text-[11px] font-bold text-olive uppercase tracking-wider">
-                          {item.category} • {item.id}
+                          {translateCategory(item.category)} • {item.id}
                         </span>
                         <h3 
                           onClick={() => navigate(`/products/${item.id}`, { state: { product: item } })}
@@ -120,13 +122,13 @@ export default function CartPage() {
                           {item.name}
                         </h3>
                         <div className="text-xs text-ink/70">
-                          Pack Unit: <span className="font-semibold text-ink">{item.unit || '1 unit'}</span>
+                          {t('cart.packUnit')} <span className="font-semibold text-ink">{item.unit || '1 unit'}</span>
                         </div>
                         <div className="flex items-center gap-2 text-xs">
                           <span className="font-serif font-extrabold text-olive text-sm">
                             {formatCurrency(item.price)}
                           </span>
-                          <span className="text-ink/50 text-[11px]">per unit</span>
+                          <span className="text-ink/50 text-[11px]">{t('cart.perUnit')}</span>
                         </div>
                       </div>
                     </div>
@@ -165,7 +167,7 @@ export default function CartPage() {
                           onClick={() => removeFromCart(item.id)}
                           className="text-[11px] text-ink/50 hover:text-olive underline transition-colors"
                         >
-                          Remove
+                          {t('cart.remove')}
                         </button>
                       </div>
 
@@ -180,7 +182,7 @@ export default function CartPage() {
                         title="Order this specific item on WhatsApp"
                       >
                         <MessageCircle className="w-3.5 h-3.5 text-cream" />
-                        <span>Order</span>
+                        <span>{t('cart.orderItem')}</span>
                       </motion.a>
                     </div>
                   </motion.div>
@@ -193,29 +195,29 @@ export default function CartPage() {
           <div className="lg:col-span-4 sticky top-6 space-y-6">
             <div className="p-6 rounded-card bg-cream-deep border border-olive/20 shadow-olive-sm space-y-5">
               <h2 className="font-serif text-xl font-bold text-ink border-b border-olive/15 pb-3">
-                Order Summary
+                {t('cart.orderSummary')}
               </h2>
 
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between text-ink/80">
-                  <span>Subtotal ({totalItems} items)</span>
+                  <span>{t('cart.subtotal')} ({totalItems} {t('cart.itemsSuffix')})</span>
                   <span className="font-bold text-ink">{formatCurrency(totalAmount)}</span>
                 </div>
 
                 <div className="flex justify-between text-ink/80">
-                  <span>Estimated Delivery</span>
+                  <span>{t('cart.estDelivery')}</span>
                   <span className="font-bold text-olive">
-                    {totalAmount >= 499 ? 'FREE (Special Offer)' : '₹40'}
+                    {totalAmount >= 499 ? t('cart.freeOffer') : '₹40'}
                   </span>
                 </div>
 
                 <div className="flex justify-between text-ink/80">
-                  <span>Purity Certification</span>
-                  <span className="font-bold text-olive">Included Free</span>
+                  <span>{t('cart.purityCert')}</span>
+                  <span className="font-bold text-olive">{t('cart.includedFree')}</span>
                 </div>
 
                 <div className="pt-3 border-t border-olive/20 flex justify-between items-baseline">
-                  <span className="font-serif text-lg font-bold text-ink">Total Payable</span>
+                  <span className="font-serif text-lg font-bold text-ink">{t('cart.totalPayable')}</span>
                   <span className="font-serif text-2xl font-extrabold text-olive">
                     {formatCurrency(totalAmount + (totalAmount >= 499 ? 0 : 40))}
                   </span>
@@ -230,11 +232,11 @@ export default function CartPage() {
                 className="w-full py-4 px-6 rounded-btn bg-olive text-cream font-bold text-sm shadow-olive-md hover:bg-olive-dark active:scale-98 transition-all flex items-center justify-center gap-2 border border-olive-dark text-center focus-visible:ring-2 focus-visible:ring-olive"
               >
                 <MessageCircle className="w-5 h-5 text-cream" />
-                <span>Checkout Entire Cart via WhatsApp</span>
+                <span>{t('cart.checkoutWhatsApp')}</span>
               </a>
 
               <p className="text-[11px] text-ink/65 text-center leading-relaxed">
-                Your pre-formatted order message includes item codes, quantities, and totals for instant confirmation with our store manager.
+                {t('cart.orderHint')}
               </p>
             </div>
 
@@ -242,11 +244,11 @@ export default function CartPage() {
             <div className="p-4 rounded-card bg-cream-light border border-olive/15 space-y-3 text-xs text-ink/80">
               <div className="flex items-center gap-2.5">
                 <Truck className="w-4 h-4 text-olive shrink-0" />
-                <span>Fresh handpicked batches packed securely in eco-boxes.</span>
+                <span>{t('cart.freshBox')}</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <ShieldCheck className="w-4 h-4 text-olive shrink-0" />
-                <span>100% money-back freshness guarantee on all groceries.</span>
+                <span>{t('cart.guarantee')}</span>
               </div>
             </div>
           </div>
