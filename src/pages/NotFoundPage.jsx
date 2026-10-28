@@ -7,8 +7,12 @@ export default function NotFoundPage() {
   return (
     <div className="min-h-[75vh] flex items-center justify-center p-6 bg-cream">
       <div className="max-w-md w-full p-8 rounded-card bg-cream-light border-2 border-olive/25 text-center shadow-olive-md space-y-6">
-        <div className="w-16 h-16 rounded-full bg-olive-soft flex items-center justify-center mx-auto text-olive">
-          <Compass className="w-8 h-8 text-olive" />
+        <div className="w-16 h-16 rounded-card bg-cream-deep p-2 border border-olive/20 shadow-olive-sm flex items-center justify-center mx-auto">
+          <img 
+            src={`${import.meta.env.BASE_URL}logo.png`} 
+            alt={SHOP_NAME} 
+            className="w-full h-full object-contain" 
+          />
         </div>
 
         <div className="space-y-2">

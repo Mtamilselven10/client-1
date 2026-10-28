@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Home, 
   ShoppingBag, 
@@ -10,8 +11,7 @@ import {
   Headphones, 
   ShieldCheck, 
   Menu, 
-  X,
-  Sprout
+  X
 } from 'lucide-react';
 import { SHOP_NAME, SHOP_TAGLINE } from '../../config';
 import { useCart } from '../../context/CartContext';
@@ -24,6 +24,7 @@ export default function Sidebar() {
   const { itemCount: wishlistCount } = useWishlist();
 
   const cartCount = getItemCount();
+  const logoUrl = `${import.meta.env.BASE_URL}logo.png`;
 
   const navItems = [
     { label: 'Home', path: '/', icon: Home },
@@ -41,9 +42,13 @@ export default function Sidebar() {
   return (
     <>
       {/* Mobile Top Header */}
-      <header className="lg:hidden sticky top-0 z-40 flex items-center justify-between px-4 py-3.5 bg-cream-deep border-b border-olive/20 shadow-olive-sm">
-        <NavLink to="/" className="flex items-center gap-2 text-olive font-serif text-xl font-bold tracking-tight">
-          <Sprout className="w-6 h-6 text-olive" />
+      <header className="lg:hidden sticky top-0 z-40 flex items-center justify-between px-4 py-3 bg-cream-deep border-b border-olive/20 shadow-olive-sm">
+        <NavLink to="/" className="flex items-center gap-2.5 text-olive font-serif text-xl font-bold tracking-tight">
+          <img
+            src={logoUrl}
+            alt={SHOP_NAME}
+            className="w-8 h-8 object-contain shrink-0"
+          />
           <span>{SHOP_NAME}</span>
         </NavLink>
         <div className="flex items-center gap-2">
@@ -86,22 +91,26 @@ export default function Sidebar() {
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        {/* Brand Header */}
+        {/* Brand Header with Dedicated Logo */}
         <div className="p-6 border-b border-olive/15 flex items-center justify-between">
           <NavLink 
             to="/" 
             onClick={closeMobile}
             className="flex flex-col group"
           >
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-btn bg-olive flex items-center justify-center text-cream shadow-olive-sm">
-                <Sprout className="w-5 h-5" />
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-card bg-cream-light border border-olive/20 p-1 flex items-center justify-center shadow-olive-sm shrink-0 group-hover:scale-105 transition-transform">
+                <img
+                  src={logoUrl}
+                  alt={SHOP_NAME}
+                  className="w-full h-full object-contain"
+                />
               </div>
               <h1 className="font-serif text-2xl font-extrabold text-olive tracking-tight group-hover:text-olive-dark transition-colors">
                 {SHOP_NAME}
               </h1>
             </div>
-            <p className="mt-1 text-xs text-ink/75 font-medium tracking-wide">
+            <p className="mt-1.5 text-xs text-ink/75 font-medium tracking-wide">
               {SHOP_TAGLINE}
             </p>
           </NavLink>
@@ -128,30 +137,43 @@ export default function Sidebar() {
                 key={item.path}
                 to={item.path}
                 onClick={closeMobile}
-                className={`relative flex items-center justify-between px-4 py-3 rounded-btn text-sm font-semibold transition-all duration-200 group ${
+                className={`relative flex items-center justify-between px-4 py-3 rounded-btn text-sm font-semibold transition-colors duration-200 group ${
                   isActive
-                    ? 'bg-olive text-cream shadow-olive-sm'
+                    ? 'text-cream'
                     : 'text-olive hover:bg-olive/10 hover:text-olive-dark'
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  <Icon className={`w-5 h-5 transition-transform duration-200 group-hover:scale-105 ${
+                {/* Smooth sliding pill active indicator */}
+                {isActive && (
+                  <motion.div
+                    layoutId="activeNavIndicator"
+                    className="absolute inset-0 bg-olive rounded-btn shadow-olive-sm"
+                    transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                  />
+                )}
+
+                <div className="relative z-10 flex items-center gap-3">
+                  <Icon className={`w-5 h-5 transition-transform duration-200 group-hover:scale-110 ${
                     isActive ? 'text-cream' : 'text-olive'
                   }`} />
                   <span className="tracking-wide">{item.label}</span>
                 </div>
 
-                {/* Live Count Badge (olive badge, cream number) */}
+                {/* Live Count Badge (olive badge, cream number) with pop spring */}
                 {item.badge !== undefined && item.badge > 0 && (
-                  <span
-                    className={`inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold rounded-full transition-colors ${
+                  <motion.span
+                    key={item.badge}
+                    initial={{ scale: 0.7 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 25 }}
+                    className={`relative z-10 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold rounded-full transition-colors ${
                       isActive
                         ? 'bg-cream text-olive'
                         : 'bg-olive text-cream'
                     }`}
                   >
                     {item.badge > 99 ? '99+' : item.badge}
-                  </span>
+                  </motion.span>
                 )}
               </NavLink>
             );

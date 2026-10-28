@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   AlertCircle, 
   RefreshCw, 
@@ -241,84 +242,109 @@ export default function ProductsPage() {
           </aside>
 
           {/* Mobile Filter Drawer */}
-          {mobileFilterOpen && (
-            <div className="lg:hidden fixed inset-0 z-50 flex bg-ink/40 backdrop-blur-xs">
-              <div className="w-full max-w-sm h-full bg-cream-deep p-6 overflow-y-auto ml-auto flex flex-col justify-between border-l border-olive/30 shadow-olive-lg">
-                <div className="flex items-center justify-between pb-4 border-b border-olive/20 mb-4">
-                  <h3 className="font-serif text-lg font-bold text-olive">Filters & Sorting</h3>
-                  <button
-                    onClick={() => setMobileFilterOpen(false)}
-                    className="p-1 text-olive hover:bg-olive-soft rounded-btn"
-                    aria-label="Close filters"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
+          <AnimatePresence>
+            {mobileFilterOpen && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="lg:hidden fixed inset-0 z-50 flex bg-ink/40 backdrop-blur-xs"
+              >
+                <motion.div
+                  initial={{ x: '100%' }}
+                  animate={{ x: 0 }}
+                  exit={{ x: '100%' }}
+                  transition={{ type: 'spring', damping: 26, stiffness: 260 }}
+                  className="w-full max-w-sm h-full bg-cream-deep p-6 overflow-y-auto ml-auto flex flex-col justify-between border-l border-olive/30 shadow-olive-lg"
+                >
+                  <div className="flex items-center justify-between pb-4 border-b border-olive/20 mb-4">
+                    <h3 className="font-serif text-lg font-bold text-olive">Filters & Sorting</h3>
+                    <button
+                      onClick={() => setMobileFilterOpen(false)}
+                      className="p-1 text-olive hover:bg-olive-soft rounded-btn"
+                      aria-label="Close filters"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
 
-                <div className="flex-1 overflow-y-auto pr-1">
-                  <ProductFilters
-                    categories={categories}
-                    selectedCategory={selectedCategory}
-                    onSelectCategory={handleSelectCategory}
-                    priceRange={priceRange}
-                    maxPriceLimit={maxPriceLimit}
-                    onChangePrice={(p) => { setPriceRange(p); setCurrentPage(1); }}
-                    sortBy={sortBy}
-                    onChangeSort={(s) => { setSortBy(s); setCurrentPage(1); }}
-                    onResetFilters={handleResetFilters}
-                    hasActiveFilters={hasActiveFilters}
-                    totalResults={filteredProducts.length}
-                  />
-                </div>
+                  <div className="flex-1 overflow-y-auto pr-1">
+                    <ProductFilters
+                      categories={categories}
+                      selectedCategory={selectedCategory}
+                      onSelectCategory={handleSelectCategory}
+                      priceRange={priceRange}
+                      maxPriceLimit={maxPriceLimit}
+                      onChangePrice={(p) => { setPriceRange(p); setCurrentPage(1); }}
+                      sortBy={sortBy}
+                      onChangeSort={(s) => { setSortBy(s); setCurrentPage(1); }}
+                      onResetFilters={handleResetFilters}
+                      hasActiveFilters={hasActiveFilters}
+                      totalResults={filteredProducts.length}
+                    />
+                  </div>
 
-                <div className="pt-4 border-t border-olive/20 mt-4">
-                  <button
-                    onClick={() => setMobileFilterOpen(false)}
-                    className="w-full py-3 rounded-btn bg-olive text-cream font-bold text-sm shadow-olive-sm"
-                  >
-                    Apply & View Results ({filteredProducts.length})
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+                  <div className="pt-4 border-t border-olive/20 mt-4">
+                    <button
+                      onClick={() => setMobileFilterOpen(false)}
+                      className="w-full py-3 rounded-btn bg-olive text-cream font-bold text-sm shadow-olive-sm"
+                    >
+                      Apply & View Results ({filteredProducts.length})
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Product Grid Area (9 cols) */}
           <main className="lg:col-span-9 space-y-8">
             {/* Active Filter Chips Bar */}
-            {hasActiveFilters && (
-              <div className="flex items-center gap-2 flex-wrap text-xs bg-cream-deep/70 p-3 rounded-btn border border-olive/15">
-                <span className="font-bold text-ink/70">Active Filters:</span>
-                {selectedCategory !== 'All' && (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-olive text-cream font-medium">
-                    Category: {selectedCategory}
-                    <button onClick={() => handleSelectCategory('All')}>×</button>
-                  </span>
-                )}
-                {searchQuery && (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-olive text-cream font-medium">
-                    Search: "{searchQuery}"
-                    <button onClick={() => setSearchQuery('')}>×</button>
-                  </span>
-                )}
-                {priceRange < maxPriceLimit && (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-olive text-cream font-medium">
-                    Under ₹{priceRange}
-                    <button onClick={() => setPriceRange(maxPriceLimit)}>×</button>
-                  </span>
-                )}
-                <button
-                  onClick={handleResetFilters}
-                  className="text-xs font-bold text-olive hover:underline ml-auto"
+            <AnimatePresence>
+              {hasActiveFilters && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  layout
+                  className="flex items-center gap-2 flex-wrap text-xs bg-cream-deep/70 p-3 rounded-btn border border-olive/15"
                 >
-                  Clear all
-                </button>
-              </div>
-            )}
+                  <span className="font-bold text-ink/70">Active Filters:</span>
+                  {selectedCategory !== 'All' && (
+                    <motion.span layout className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-olive text-cream font-medium">
+                      Category: {selectedCategory}
+                      <button onClick={() => handleSelectCategory('All')}>×</button>
+                    </motion.span>
+                  )}
+                  {searchQuery && (
+                    <motion.span layout className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-olive text-cream font-medium">
+                      Search: "{searchQuery}"
+                      <button onClick={() => setSearchQuery('')}>×</button>
+                    </motion.span>
+                  )}
+                  {priceRange < maxPriceLimit && (
+                    <motion.span layout className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-olive text-cream font-medium">
+                      Under ₹{priceRange}
+                      <button onClick={() => setPriceRange(maxPriceLimit)}>×</button>
+                    </motion.span>
+                  )}
+                  <button
+                    onClick={handleResetFilters}
+                    className="text-xs font-bold text-olive hover:underline ml-auto"
+                  >
+                    Clear all
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Empty State when no matches */}
             {paginatedProducts.length === 0 ? (
-              <div className="py-16 text-center rounded-card bg-cream-light border border-olive/20 p-8 space-y-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="py-16 text-center rounded-card bg-cream-light border border-olive/20 p-8 space-y-4"
+              >
                 <h3 className="font-serif text-2xl font-bold text-ink">No Matching Grocery Items</h3>
                 <p className="text-sm text-ink/75 max-w-md mx-auto">
                   We could not find any products matching your current search or filter criteria. Try expanding your price range or clearing filters.
@@ -329,14 +355,16 @@ export default function ProductsPage() {
                 >
                   Reset All Filters
                 </button>
-              </div>
+              </motion.div>
             ) : (
-              /* Amazon/Flipkart Responsive Grid */
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5">
-                {paginatedProducts.map(product => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
+              /* Amazon/Flipkart Responsive Grid with Fluid Layout Animation */
+              <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5">
+                <AnimatePresence mode="popLayout">
+                  {paginatedProducts.map(product => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </AnimatePresence>
+              </motion.div>
             )}
 
             {/* Pagination Controls */}

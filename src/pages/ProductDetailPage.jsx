@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation, NavLink } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { 
   ArrowLeft, 
   Heart, 
@@ -147,10 +148,15 @@ export default function ProductDetailPage() {
         <span>Back to catalog</span>
       </button>
 
-      {/* Main Product Layout */}
+      {/* Main Product Layout with Parallel Entrance */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
         {/* Left Column: Interactive Zoomable Image */}
-        <div className="lg:col-span-6 space-y-4">
+        <motion.div
+          initial={{ opacity: 0, x: -24 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.45, ease: 'easeOut' }}
+          className="lg:col-span-6 space-y-4"
+        >
           <div 
             ref={imageContainerRef}
             onMouseMove={handleMouseMove}
@@ -199,10 +205,15 @@ export default function ProductDetailPage() {
               <div className="text-[10px] text-ink/60">Wood-pressed</div>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Right Column: Product Info & Actions */}
-        <div className="lg:col-span-6 space-y-6">
+        <motion.div
+          initial={{ opacity: 0, x: 24 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.45, ease: 'easeOut' }}
+          className="lg:col-span-6 space-y-6"
+        >
           <div>
             <div className="flex items-center justify-between gap-4">
               <span className="text-xs uppercase tracking-widest font-extrabold text-olive">
@@ -304,9 +315,11 @@ export default function ProductDetailPage() {
             {/* Action Buttons Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
               {/* Add to Cart Button */}
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.96 }}
                 onClick={() => addToCart(product, quantity)}
-                className="w-full py-3.5 px-6 rounded-btn bg-olive text-cream font-bold text-sm shadow-olive-md hover:bg-olive-dark active:scale-98 transition-all flex items-center justify-center gap-2 border border-olive-dark focus-visible:ring-2 focus-visible:ring-olive"
+                className="w-full py-3.5 px-6 rounded-btn bg-olive text-cream font-bold text-sm shadow-olive-md hover:bg-olive-dark transition-colors flex items-center justify-center gap-2 border border-olive-dark focus-visible:ring-2 focus-visible:ring-olive"
               >
                 {inCart ? (
                   <>
@@ -319,10 +332,12 @@ export default function ProductDetailPage() {
                     <span>Add to Cart ({quantity})</span>
                   </>
                 )}
-              </button>
+              </motion.button>
 
               {/* Instant WhatsApp Order Button */}
-              <a
+              <motion.a
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.96 }}
                 href={whatsAppOrderUrl}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -330,11 +345,12 @@ export default function ProductDetailPage() {
               >
                 <MessageCircle className="w-5 h-5 text-olive" />
                 <span>Order via WhatsApp</span>
-              </a>
+              </motion.a>
             </div>
 
             {/* Wishlist Toggle Button */}
-            <button
+            <motion.button
+              whileTap={{ scale: 0.98 }}
               onClick={() => toggleWishlist(product)}
               className={`w-full py-3 px-4 rounded-btn text-xs font-bold transition-all border flex items-center justify-center gap-2 ${
                 isWished
@@ -344,9 +360,9 @@ export default function ProductDetailPage() {
             >
               <Heart className={`w-4 h-4 ${isWished ? 'fill-cream text-cream' : 'text-olive'}`} />
               <span>{isWished ? 'Saved to Your Wishlist (Click to remove)' : 'Add to Wishlist'}</span>
-            </button>
+            </motion.button>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

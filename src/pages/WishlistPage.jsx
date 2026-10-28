@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, ShoppingCart, Trash2, ArrowRight, Star } from 'lucide-react';
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
@@ -39,7 +40,11 @@ export default function WishlistPage() {
 
       {/* Empty State */}
       {wishlist.length === 0 ? (
-        <div className="py-20 text-center max-w-md mx-auto rounded-card bg-cream-light border border-olive/20 p-8 space-y-5 shadow-olive-sm">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="py-20 text-center max-w-md mx-auto rounded-card bg-cream-light border border-olive/20 p-8 space-y-5 shadow-olive-sm"
+        >
           <div className="w-16 h-16 rounded-full bg-olive-soft flex items-center justify-center mx-auto text-olive">
             <Heart className="w-8 h-8 text-olive" />
           </div>
@@ -56,94 +61,106 @@ export default function WishlistPage() {
             <span>Explore Store</span>
             <ArrowRight className="w-4 h-4" />
           </NavLink>
-        </div>
+        </motion.div>
       ) : (
-        /* Wishlist Cards Grid */
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {wishlist.map((item) => (
-            <div
-              key={item.id}
-              className="rounded-card overflow-hidden bg-cream-light border border-olive/20 shadow-olive-sm flex flex-col justify-between group hover:border-olive transition-all"
-            >
-              {/* Image & Remove Action */}
-              <div 
-                onClick={() => navigate(`/products/${item.id}`, { state: { product: item } })}
-                className="relative aspect-square w-full bg-cream-deep p-3 cursor-pointer overflow-hidden"
+        /* Wishlist Cards Grid with Fluid Motion */
+        <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <AnimatePresence mode="popLayout">
+            {wishlist.map((item) => (
+              <motion.div
+                key={item.id}
+                layout
+                initial={{ opacity: 0, scale: 0.92 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.85, transition: { duration: 0.2 } }}
+                whileHover={{ y: -6 }}
+                transition={{ duration: 0.25 }}
+                className="rounded-card overflow-hidden bg-cream-light border border-olive/20 shadow-olive-sm flex flex-col justify-between group hover:border-olive transition-shadow"
               >
-                <img
-                  src={getProductImageUrl(item.image)}
-                  alt={item.name}
-                  loading="lazy"
-                  onError={(e) => {
-                    if (item.fallbackImage && e.currentTarget.src !== item.fallbackImage) {
-                      e.currentTarget.src = item.fallbackImage;
-                    }
-                  }}
-                  className="w-full h-full object-cover rounded-md group-hover:scale-105 transition-transform duration-300"
-                />
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeFromWishlist(item.id);
-                  }}
-                  className="absolute top-3 right-3 w-8 h-8 rounded-full bg-cream/90 backdrop-blur-xs flex items-center justify-center text-olive hover:text-olive-dark border border-olive/20 shadow-xs hover:scale-110 transition-all"
-                  aria-label={`Remove ${item.name} from wishlist`}
+                {/* Image & Remove Action */}
+                <div 
+                  onClick={() => navigate(`/products/${item.id}`, { state: { product: item } })}
+                  className="relative aspect-square w-full bg-cream-deep p-3 cursor-pointer overflow-hidden"
                 >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-                <div className="absolute bottom-3 left-3 bg-ink/75 backdrop-blur-xs text-cream text-[10px] font-semibold px-2 py-0.5 rounded-md">
-                  {item.unit}
+                  <img
+                    src={getProductImageUrl(item.image)}
+                    alt={item.name}
+                    loading="lazy"
+                    onError={(e) => {
+                      if (item.fallbackImage && e.currentTarget.src !== item.fallbackImage) {
+                        e.currentTarget.src = item.fallbackImage;
+                      }
+                    }}
+                    className="w-full h-full object-cover rounded-md group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <motion.button
+                    whileHover={{ scale: 1.15 }}
+                    whileTap={{ scale: 0.85 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeFromWishlist(item.id);
+                    }}
+                    className="absolute top-3 right-3 w-8 h-8 rounded-full bg-cream/90 backdrop-blur-xs flex items-center justify-center text-olive hover:text-olive-dark border border-olive/20 shadow-xs transition-colors"
+                    aria-label={`Remove ${item.name} from wishlist`}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </motion.button>
+                  <div className="absolute bottom-3 left-3 bg-ink/75 backdrop-blur-xs text-cream text-[10px] font-semibold px-2 py-0.5 rounded-md">
+                    {item.unit}
+                  </div>
                 </div>
-              </div>
 
-              {/* Details & Action */}
-              <div className="p-4 flex-1 flex flex-col justify-between space-y-4">
-                <div>
-                  <div className="flex items-center justify-between text-xs text-olive font-semibold mb-1">
-                    <span className="truncate max-w-[130px]">{item.category}</span>
-                    <div className="flex items-center gap-1 text-ink">
-                      <Star className="w-3 h-3 fill-olive text-olive" />
-                      <span>{item.rating}</span>
+                {/* Details & Action */}
+                <div className="p-4 flex-1 flex flex-col justify-between space-y-4">
+                  <div>
+                    <div className="flex items-center justify-between text-xs text-olive font-semibold mb-1">
+                      <span className="truncate max-w-[130px]">{item.category}</span>
+                      <div className="flex items-center gap-1 text-ink">
+                        <Star className="w-3 h-3 fill-olive text-olive" />
+                        <span>{item.rating}</span>
+                      </div>
                     </div>
+
+                    <h3 
+                      onClick={() => navigate(`/products/${item.id}`, { state: { product: item } })}
+                      className="font-serif font-bold text-ink text-base line-clamp-2 leading-snug cursor-pointer group-hover:text-olive transition-colors"
+                    >
+                      {item.name}
+                    </h3>
+
+                    <p className="mt-1 text-xs text-ink/70 line-clamp-2 leading-relaxed">
+                      {item.description}
+                    </p>
                   </div>
 
-                  <h3 
-                    onClick={() => navigate(`/products/${item.id}`, { state: { product: item } })}
-                    className="font-serif font-bold text-ink text-base line-clamp-2 leading-snug cursor-pointer group-hover:text-olive transition-colors"
-                  >
-                    {item.name}
-                  </h3>
-
-                  <p className="mt-1 text-xs text-ink/70 line-clamp-2 leading-relaxed">
-                    {item.description}
-                  </p>
-                </div>
-
-                <div className="pt-2 border-t border-olive/10 space-y-3">
-                  <div className="flex items-baseline gap-2">
-                    <span className="font-serif text-lg font-extrabold text-olive">
-                      {formatCurrency(item.price)}
-                    </span>
-                    {item.mrp > item.price && (
-                      <span className="text-xs text-ink/50 line-through">
-                        {formatCurrency(item.mrp)}
+                  <div className="pt-2 border-t border-olive/10 space-y-3">
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-serif text-lg font-extrabold text-olive">
+                        {formatCurrency(item.price)}
                       </span>
-                    )}
-                  </div>
+                      {item.mrp > item.price && (
+                        <span className="text-xs text-ink/50 line-through">
+                          {formatCurrency(item.mrp)}
+                        </span>
+                      )}
+                    </div>
 
-                  {/* Add to Cart button */}
-                  <button
-                    onClick={() => addToCart(item, 1)}
-                    className="w-full py-2.5 px-4 rounded-btn bg-olive text-cream font-bold text-xs shadow-olive-sm hover:bg-olive-dark transition-colors flex items-center justify-center gap-2"
-                  >
-                    <ShoppingCart className="w-4 h-4" />
-                    <span>Add to Cart</span>
-                  </button>
+                    {/* Add to Cart button */}
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => addToCart(item, 1)}
+                      className="w-full py-2.5 px-4 rounded-btn bg-olive text-cream font-bold text-xs shadow-olive-sm hover:bg-olive-dark transition-colors flex items-center justify-center gap-2"
+                    >
+                      <ShoppingCart className="w-4 h-4" />
+                      <span>Add to Cart</span>
+                    </motion.button>
+                  </div>
                 </div>
-              </div>
-            </div>
-          ))}
-        </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </motion.div>
       )}
     </div>
   );

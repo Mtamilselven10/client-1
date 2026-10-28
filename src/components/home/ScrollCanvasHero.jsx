@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import { ArrowRight, ChevronDown, Sparkles } from 'lucide-react';
 import { SHOP_NAME, SHOP_TAGLINE } from '../../config';
 
@@ -247,12 +248,31 @@ export default function ScrollCanvasHero() {
     window.scrollTo({ top: targetY, behavior: 'smooth' });
   };
 
+  // Parallel scroll depth transitions
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ['start start', 'end end']
+  });
+
+  const smoothProgress = useSpring(scrollYProgress, { stiffness: 200, damping: 28 });
+  const textY = useTransform(smoothProgress, [0, 0.9], [0, -60]);
+  const textOpacity = useTransform(smoothProgress, [0, 0.75, 0.98], [1, 0.9, 0]);
+  const heroScale = useTransform(smoothProgress, [0, 0.9], [1, 0.96]);
+
   return (
     <>
       {/* Preloader Screen */}
       {!isLoaded && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-cream px-6">
           <div className="w-full max-w-md text-center space-y-6">
+            <div className="w-20 h-20 mx-auto rounded-card bg-cream-light p-2 border border-olive/20 shadow-olive-md flex items-center justify-center">
+              <img 
+                src={`${import.meta.env.BASE_URL}logo.png`} 
+                alt="Gandhi Shop Logo" 
+                className="w-full h-full object-contain animate-pulse" 
+              />
+            </div>
+
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-olive-soft text-olive text-sm font-semibold tracking-wider">
               <Sparkles className="w-4 h-4 animate-spin" />
               <span>GANDHI SHOP HERITAGE</span>
@@ -305,16 +325,23 @@ export default function ScrollCanvasHero() {
 
           {/* Hero Content Overlay */}
           <div className="absolute inset-0 flex flex-col items-center justify-between p-6 sm:p-12 text-center text-cream z-10 pointer-events-none">
-            {/* Top Brand Pill */}
+            {/* Top Brand Pill with Logo */}
             <div className="pointer-events-auto pt-4 sm:pt-6">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cream/90 backdrop-blur-xs text-olive font-semibold text-xs sm:text-sm tracking-widest uppercase shadow-olive-md border border-olive/20">
-                <span className="w-2 h-2 rounded-full bg-olive" />
-                Pure & Authentic Since 1974
+              <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-cream/95 backdrop-blur-xs text-olive font-semibold text-xs sm:text-sm tracking-widest uppercase shadow-olive-md border border-olive/20">
+                <img 
+                  src={`${import.meta.env.BASE_URL}logo.png`} 
+                  alt="Gandhi Shop" 
+                  className="w-5 h-5 object-contain" 
+                />
+                <span>Pure & Authentic Since 1974</span>
               </div>
             </div>
 
-            {/* Centered Editorial Titles & Explore Button */}
-            <div className="pointer-events-auto max-w-3xl space-y-5 px-4 my-auto">
+            {/* Centered Editorial Titles & Explore Button with Parallel Parallax */}
+            <motion.div 
+              style={{ y: textY, opacity: textOpacity, scale: heroScale }}
+              className="pointer-events-auto max-w-3xl space-y-5 px-4 my-auto"
+            >
               <h1 className="font-serif text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-cream drop-shadow-md leading-[1.1]">
                 Nourish Life with Pure Earthly Harvest
               </h1>
@@ -322,17 +349,20 @@ export default function ScrollCanvasHero() {
                 Handpicked grains, stone-ground flours, wood-pressed oils, and royal hill spices sourced unadulterated from native farmers.
               </p>
 
-              {/* Centered "Explore Store" Button */}
+              {/* Centered "Explore Store" Button with fluid spring interaction */}
               <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.96 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 20 }}
                   onClick={handleExploreStore}
-                  className="px-8 py-4 rounded-btn bg-olive text-cream font-bold text-base sm:text-lg shadow-olive-lg hover:bg-olive-dark hover:scale-105 active:scale-95 transition-all duration-200 flex items-center gap-3 border border-cream/30 focus-visible:ring-2 focus-visible:ring-cream focus-visible:ring-offset-2"
+                  className="px-8 py-4 rounded-btn bg-olive text-cream font-bold text-base sm:text-lg shadow-olive-lg hover:bg-olive-dark transition-colors duration-200 flex items-center gap-3 border border-cream/30 focus-visible:ring-2 focus-visible:ring-cream focus-visible:ring-offset-2"
                 >
                   <span>Explore Store</span>
                   <ArrowRight className="w-5 h-5" />
-                </button>
+                </motion.button>
               </div>
-            </div>
+            </motion.div>
 
             {/* Bottom Scroll Indicator */}
             <div className="pointer-events-auto pb-4 sm:pb-8 flex flex-col items-center gap-2">

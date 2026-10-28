@@ -45,9 +45,17 @@ async function runVerification() {
   });
 
   try {
+    async function navigateHash(hash) {
+      await page.evaluate((h) => {
+        window.location.hash = h;
+        window.scrollTo(0, 0);
+      }, hash);
+      await new Promise(r => setTimeout(r, 1500));
+    }
+
     // 1. HOME PAGE HERO
     console.log('\n--- 1. Testing Home Page & Canvas Hero ---');
-    await page.goto(`${BASE_URL}/`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`${BASE_URL}/#/`, { waitUntil: 'domcontentloaded' });
     await new Promise(r => setTimeout(r, 3500));
     await saveScreenshot(page, '01_home_hero.png');
 
@@ -61,7 +69,7 @@ async function runVerification() {
 
     // 3. PRODUCTS CATALOG PAGE
     console.log('\n--- 3. Testing Products Page (Excel Parsing) ---');
-    await page.goto(`${BASE_URL}/products`, { waitUntil: 'domcontentloaded' });
+    await navigateHash('#/products');
     await page.waitForSelector('[data-testid="product-card"]', { timeout: 10000 });
     const productCount = await page.$$eval('[data-testid="product-card"]', el => el.length);
     console.log(`Product cards visible on page 1: ${productCount}`);
@@ -90,19 +98,19 @@ async function runVerification() {
 
     // 5. PRODUCT DETAIL PAGE
     console.log('\n--- 5. Testing Product Detail Page ---');
-    await page.goto(`${BASE_URL}/products/GS-1001`, { waitUntil: 'domcontentloaded' });
+    await navigateHash('#/products/GS-1001');
     await new Promise(r => setTimeout(r, 1500));
     await saveScreenshot(page, '05_product_detail.png');
 
     // 6. WISHLIST PAGE
     console.log('\n--- 6. Testing Wishlist Page ---');
-    await page.goto(`${BASE_URL}/wishlist`, { waitUntil: 'domcontentloaded' });
+    await navigateHash('#/wishlist');
     await new Promise(r => setTimeout(r, 1200));
     await saveScreenshot(page, '06_wishlist.png');
 
     // 7. CART PAGE & WHATSAPP URL VERIFICATION
     console.log('\n--- 7. Testing Cart Page & WhatsApp URL ---');
-    await page.goto(`${BASE_URL}/cart`, { waitUntil: 'domcontentloaded' });
+    await navigateHash('#/cart');
     await new Promise(r => setTimeout(r, 1200));
     await saveScreenshot(page, '07_cart.png');
 
@@ -114,31 +122,31 @@ async function runVerification() {
 
     // 8. ABOUT US PAGE
     console.log('\n--- 8. Testing About Us Page ---');
-    await page.goto(`${BASE_URL}/about`, { waitUntil: 'domcontentloaded' });
+    await navigateHash('#/about');
     await new Promise(r => setTimeout(r, 1000));
     await saveScreenshot(page, '08_about_us.png');
 
     // 9. FAQS PAGE
     console.log('\n--- 9. Testing FAQs Page ---');
-    await page.goto(`${BASE_URL}/faqs`, { waitUntil: 'domcontentloaded' });
+    await navigateHash('#/faqs');
     await new Promise(r => setTimeout(r, 1000));
     await saveScreenshot(page, '09_faqs.png');
 
     // 10. CUSTOMER CARE PAGE
     console.log('\n--- 10. Testing Customer Care Page ---');
-    await page.goto(`${BASE_URL}/customer-care`, { waitUntil: 'domcontentloaded' });
+    await navigateHash('#/customer-care');
     await new Promise(r => setTimeout(r, 1000));
     await saveScreenshot(page, '10_customer_care.png');
 
     // 11. PRIVACY & POLICY PAGE
     console.log('\n--- 11. Testing Privacy & Policy Page ---');
-    await page.goto(`${BASE_URL}/privacy-policy`, { waitUntil: 'domcontentloaded' });
+    await navigateHash('#/privacy-policy');
     await new Promise(r => setTimeout(r, 1000));
     await saveScreenshot(page, '11_privacy_policy.png');
 
     // 12. 404 NOT FOUND PAGE
     console.log('\n--- 12. Testing 404 Page ---');
-    await page.goto(`${BASE_URL}/non-existent-page`, { waitUntil: 'domcontentloaded' });
+    await navigateHash('#/non-existent-page');
     await new Promise(r => setTimeout(r, 1000));
     await saveScreenshot(page, '12_404_page.png');
 

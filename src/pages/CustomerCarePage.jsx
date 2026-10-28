@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Phone, Mail, Clock, MapPin, Send, MessageCircle, CheckCircle2 } from 'lucide-react';
 import { 
   SHOP_NAME, 
@@ -33,24 +34,42 @@ export default function CustomerCarePage() {
   return (
     <div className="py-8 px-4 sm:px-8 max-w-7xl mx-auto bg-cream space-y-12">
       {/* Header */}
-      <div className="max-w-2xl space-y-3">
-        <span className="text-xs uppercase tracking-widest font-extrabold text-olive">
-          At Your Service
-        </span>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="max-w-2xl space-y-3"
+      >
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-btn bg-cream-deep border border-olive/20 p-1 flex items-center justify-center shadow-xs">
+            <img 
+              src={`${import.meta.env.BASE_URL}logo.png`} 
+              alt={SHOP_NAME} 
+              className="w-full h-full object-contain" 
+            />
+          </div>
+          <span className="text-xs uppercase tracking-widest font-extrabold text-olive">
+            At Your Service
+          </span>
+        </div>
         <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-extrabold text-ink">
           Customer Care & Sourcing Desk
         </h1>
         <p className="text-sm text-ink/75 leading-relaxed">
           Need advice on whole wheat grinding, authentic cold-pressed oil storage, or corporate bulk grocery gifting? Reach our family desk directly.
         </p>
-      </div>
+      </motion.div>
 
-      {/* 3 Olive-Accented Contact Cards */}
+      {/* 3 Olive-Accented Contact Cards with Parallel Flow Motion */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Phone 1 Card */}
-        <a
+        <motion.a
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.08, duration: 0.4 }}
+          whileHover={{ y: -6 }}
           href={`tel:${CUSTOMER_CARE_PHONES[0].replace(/\s+/g, '')}`}
-          className="p-6 rounded-card bg-cream-light border-2 border-olive/30 shadow-olive-sm hover:border-olive hover:shadow-olive-md transition-all group flex flex-col justify-between"
+          className="p-6 rounded-card bg-cream-light border-2 border-olive/30 shadow-olive-sm hover:border-olive hover:shadow-olive-md transition-shadow group flex flex-col justify-between"
         >
           <div>
             <div className="w-12 h-12 rounded-btn bg-olive text-cream flex items-center justify-center shadow-xs mb-4 group-hover:scale-105 transition-transform">
@@ -70,12 +89,16 @@ export default function CustomerCarePage() {
             <span>Tap to place a call</span>
             <span>→</span>
           </div>
-        </a>
+        </motion.a>
 
         {/* Phone 2 Card */}
-        <a
+        <motion.a
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.16, duration: 0.4 }}
+          whileHover={{ y: -6 }}
           href={`tel:${CUSTOMER_CARE_PHONES[1].replace(/\s+/g, '')}`}
-          className="p-6 rounded-card bg-cream-light border-2 border-olive/30 shadow-olive-sm hover:border-olive hover:shadow-olive-md transition-all group flex flex-col justify-between"
+          className="p-6 rounded-card bg-cream-light border-2 border-olive/30 shadow-olive-sm hover:border-olive hover:shadow-olive-md transition-shadow group flex flex-col justify-between"
         >
           <div>
             <div className="w-12 h-12 rounded-btn bg-olive text-cream flex items-center justify-center shadow-xs mb-4 group-hover:scale-105 transition-transform">
@@ -95,12 +118,16 @@ export default function CustomerCarePage() {
             <span>Tap to place a call</span>
             <span>→</span>
           </div>
-        </a>
+        </motion.a>
 
         {/* Email Card */}
-        <a
+        <motion.a
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.24, duration: 0.4 }}
+          whileHover={{ y: -6 }}
           href={`mailto:${CUSTOMER_CARE_EMAIL}`}
-          className="p-6 rounded-card bg-cream-light border-2 border-olive/30 shadow-olive-sm hover:border-olive hover:shadow-olive-md transition-all group flex flex-col justify-between"
+          className="p-6 rounded-card bg-cream-light border-2 border-olive/30 shadow-olive-sm hover:border-olive hover:shadow-olive-md transition-shadow group flex flex-col justify-between"
         >
           <div>
             <div className="w-12 h-12 rounded-btn bg-olive text-cream flex items-center justify-center shadow-xs mb-4 group-hover:scale-105 transition-transform">
@@ -120,7 +147,7 @@ export default function CustomerCarePage() {
             <span>Tap to send email</span>
             <span>→</span>
           </div>
-        </a>
+        </motion.a>
       </div>
 
       {/* Inquiry Form & Store Information Split */}

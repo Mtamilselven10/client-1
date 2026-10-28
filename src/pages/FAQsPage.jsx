@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, HelpCircle, MessageCircle } from 'lucide-react';
 import { FAQS_DATA } from '../data/faqsData';
 import { WHATSAPP_NUMBER, SHOP_NAME } from '../config';
@@ -13,7 +14,12 @@ export default function FAQsPage() {
   return (
     <div className="py-8 px-4 sm:px-8 max-w-4xl mx-auto bg-cream space-y-10">
       {/* Editorial Header */}
-      <div className="text-center space-y-3">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="text-center space-y-3"
+      >
         <span className="text-xs uppercase tracking-widest font-extrabold text-olive">
           Assistance & Clarity
         </span>
@@ -23,16 +29,19 @@ export default function FAQsPage() {
         <p className="text-sm text-ink/75 max-w-xl mx-auto">
           Everything you need to know about our sourcing authenticity, WhatsApp order process, delivery standards, and purity guarantees.
         </p>
-      </div>
+      </motion.div>
 
       {/* Accordion Container */}
       <div className="space-y-4">
         {FAQS_DATA.map((faq, index) => {
           const isOpen = openIndex === index;
           return (
-            <div
+            <motion.div
               key={faq.id}
-              className="rounded-card bg-cream-light border border-olive/20 shadow-olive-sm overflow-hidden transition-all duration-200"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05, duration: 0.35 }}
+              className="rounded-card bg-cream-light border border-olive/20 shadow-olive-sm overflow-hidden transition-colors hover:border-olive/60"
             >
               <button
                 onClick={() => toggleAccordion(index)}
@@ -50,25 +59,44 @@ export default function FAQsPage() {
                   </h3>
                 </div>
 
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-olive shrink-0 transition-transform duration-200 ${
-                  isOpen ? 'rotate-180 bg-olive-soft' : ''
-                }`}>
+                <motion.div
+                  animate={{ rotate: isOpen ? 180 : 0 }}
+                  transition={{ duration: 0.25, ease: 'easeInOut' }}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-olive shrink-0 ${
+                    isOpen ? 'bg-olive-soft' : ''
+                  }`}
+                >
                   <ChevronDown className="w-5 h-5" />
-                </div>
+                </motion.div>
               </button>
 
-              {isOpen && (
-                <div className="px-5 pb-6 sm:px-6 sm:pb-6 pt-1 text-sm text-ink/80 leading-relaxed border-t border-olive/10">
-                  <p className="pl-10">{faq.answer}</p>
-                </div>
-              )}
-            </div>
+              <AnimatePresence initial={false}>
+                {isOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                    className="overflow-hidden"
+                  >
+                    <div className="px-5 pb-6 sm:px-6 sm:pb-6 pt-1 text-sm text-ink/80 leading-relaxed border-t border-olive/10">
+                      <p className="pl-10">{faq.answer}</p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
           );
         })}
       </div>
 
       {/* Help Banner */}
-      <div className="p-6 rounded-card bg-cream-deep border border-olive/20 text-center space-y-4">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.4 }}
+        className="p-6 rounded-card bg-cream-deep border border-olive/20 text-center space-y-4"
+      >
         <h3 className="font-serif text-xl font-bold text-ink">Have a specific question not covered here?</h3>
         <p className="text-xs sm:text-sm text-ink/75 max-w-md mx-auto">
           Our senior grocery consultants are ready to assist with grain choices, recipes, and bulk orders directly on WhatsApp.
@@ -82,7 +110,7 @@ export default function FAQsPage() {
           <MessageCircle className="w-4 h-4 text-cream" />
           <span>Ask Us on WhatsApp</span>
         </a>
-      </div>
+      </motion.div>
     </div>
   );
 }

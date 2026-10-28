@@ -1,6 +1,6 @@
 # Gandhi Shop — Premium Grocery & Organic Provisions E-Commerce Showcase
 
-A production-quality, editorial grocery e-commerce showcase web application built for **Gandhi Shop**. Designed with a strict two-color brand system (Beige Cream `#FFF3D5` and Olive Green `#4D694E`), scroll-driven canvas frame scrubbing hero, dynamic Excel catalog parser (SheetJS), Amazon/Flipkart-style grocery grid, persistent live Cart & Wishlist with localStorage synchronization, and direct per-item WhatsApp order generation.
+A production-quality, editorial grocery e-commerce showcase web application built for **Gandhi Shop**. Designed with a strict two-color brand system (Lemon Chiffon `#FFFACD` and Indian Red `#CD5C5C`), scroll-driven canvas frame scrubbing hero, dynamic Excel catalog parser (SheetJS), Amazon/Flipkart-style grocery grid, persistent live Cart & Wishlist with localStorage synchronization, and direct per-item WhatsApp order generation.
 
 ---
 
@@ -16,17 +16,17 @@ A production-quality, editorial grocery e-commerce showcase web application buil
 ---
 
 ## 🎨 Design System & Color Palette
-The entire website is strictly built with **Beige Cream** as the global page background and **Olive Green** as the single signature identity color. There are **zero white or gray backgrounds** anywhere on the site.
+The entire website is strictly built with **Lemon Chiffon** as the global page background and **Indian Red** as the single signature identity color. There are **zero white or gray backgrounds** anywhere on the site.
 
 | Token | Hex / CSS Value | Description & Purpose |
 | :--- | :--- | :--- |
-| `cream` | `#FFF3D5` | Default global background on every page, drawer, and canvas base |
-| `cream-deep` | `#F6E6BC` | Sidebar base, order summary panels, filter sidebar, cards needing separation |
-| `cream-light` | `#FFF9EA` | Product card boxes, input fields, elevated surfaces, modal panels |
-| `olive` | `#4D694E` | Signature brand color: primary buttons, prices, active route, badges, slider, focus rings |
-| `olive-dark` | `#3A503B` | Hover and pressed states of olive buttons and elements |
-| `olive-soft` | `rgba(77, 105, 78, 0.12)` | Subtle tinted surfaces, active-state chips, hover backgrounds |
-| `ink` | `#2B3A2C` | High-contrast editorial body text and headings (WCAG AA compliant) |
+| `cream` | `#FFFACD` | Lemon Chiffon - Default global background on every page, drawer, and canvas base |
+| `cream-deep` | `#F5ECB7` | Deeper Lemon Chiffon - Sidebar base, order summary panels, filter sidebar, separation cards |
+| `cream-light` | `#FFFDEE` | Elevated surfaces, product card boxes, input fields, modal panels |
+| `olive` | `#CD5C5C` | Indian Red - Signature brand color: primary buttons, prices, active route, badges, slider, focus rings |
+| `olive-dark` | `#A83E3E` | Deep Indian Red - Hover and pressed states of primary buttons and elements |
+| `olive-soft` | `rgba(205, 92, 92, 0.12)` | Subtle tinted surfaces, active-state chips, hover backgrounds |
+| `ink` | `#381B1B` | High-contrast editorial body text and headings (deep terracotta, WCAG AAA compliant) |
 
 ### How to Change the Palette in One Place
 All colors are centralized in `src/theme.js` and exposed as CSS variables in `src/index.css` and `tailwind.config.js`. To change the brand theme, simply update the hex values in `src/theme.js` and `src/index.css`.
