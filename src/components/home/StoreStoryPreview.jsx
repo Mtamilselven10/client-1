@@ -45,7 +45,12 @@ export default function StoreStoryPreview() {
           transition={{ duration: 0.6, delay: 0.15, ease: [0.25, 1, 0.5, 1] }}
           className="lg:col-span-7 space-y-6"
         >
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-olive-soft text-olive text-xs font-bold tracking-widest uppercase">
+          <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-olive-soft text-olive text-xs font-bold tracking-widest uppercase">
+            <img 
+              src={`${import.meta.env.BASE_URL}logo.png`} 
+              alt={SHOP_NAME} 
+              className="w-4 h-4 object-contain" 
+            />
             <span>Our Sourcing Promise</span>
           </div>
 

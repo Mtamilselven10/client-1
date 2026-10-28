@@ -20,9 +20,18 @@ export default function AboutUsPage() {
         transition={{ duration: 0.4 }}
         className="max-w-3xl space-y-4"
       >
-        <span className="text-xs uppercase tracking-widest font-extrabold text-olive">
-          Our Heritage & Roots
-        </span>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-btn bg-cream-deep border border-olive/20 p-1 flex items-center justify-center shadow-xs">
+            <img 
+              src={`${import.meta.env.BASE_URL}logo.png`} 
+              alt={SHOP_NAME} 
+              className="w-full h-full object-contain" 
+            />
+          </div>
+          <span className="text-xs uppercase tracking-widest font-extrabold text-olive">
+            Our Heritage & Roots
+          </span>
+        </div>
         <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-extrabold text-ink leading-tight">
           Fifty Years of Pure Trust, Farmed from the Earth.
         </h1>

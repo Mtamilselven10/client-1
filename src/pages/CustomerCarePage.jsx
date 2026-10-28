@@ -40,9 +40,18 @@ export default function CustomerCarePage() {
         transition={{ duration: 0.4 }}
         className="max-w-2xl space-y-3"
       >
-        <span className="text-xs uppercase tracking-widest font-extrabold text-olive">
-          At Your Service
-        </span>
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-btn bg-cream-deep border border-olive/20 p-1 flex items-center justify-center shadow-xs">
+            <img 
+              src={`${import.meta.env.BASE_URL}logo.png`} 
+              alt={SHOP_NAME} 
+              className="w-full h-full object-contain" 
+            />
+          </div>
+          <span className="text-xs uppercase tracking-widest font-extrabold text-olive">
+            At Your Service
+          </span>
+        </div>
         <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-extrabold text-ink">
           Customer Care & Sourcing Desk
         </h1>

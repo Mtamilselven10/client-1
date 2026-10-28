@@ -265,6 +265,14 @@ export default function ScrollCanvasHero() {
       {!isLoaded && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-cream px-6">
           <div className="w-full max-w-md text-center space-y-6">
+            <div className="w-20 h-20 mx-auto rounded-card bg-cream-light p-2 border border-olive/20 shadow-olive-md flex items-center justify-center">
+              <img 
+                src={`${import.meta.env.BASE_URL}logo.png`} 
+                alt="Gandhi Shop Logo" 
+                className="w-full h-full object-contain animate-pulse" 
+              />
+            </div>
+
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-olive-soft text-olive text-sm font-semibold tracking-wider">
               <Sparkles className="w-4 h-4 animate-spin" />
               <span>GANDHI SHOP HERITAGE</span>
@@ -317,11 +325,15 @@ export default function ScrollCanvasHero() {
 
           {/* Hero Content Overlay */}
           <div className="absolute inset-0 flex flex-col items-center justify-between p-6 sm:p-12 text-center text-cream z-10 pointer-events-none">
-            {/* Top Brand Pill */}
+            {/* Top Brand Pill with Logo */}
             <div className="pointer-events-auto pt-4 sm:pt-6">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cream/90 backdrop-blur-xs text-olive font-semibold text-xs sm:text-sm tracking-widest uppercase shadow-olive-md border border-olive/20">
-                <span className="w-2 h-2 rounded-full bg-olive" />
-                Pure & Authentic Since 1974
+              <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-cream/95 backdrop-blur-xs text-olive font-semibold text-xs sm:text-sm tracking-widest uppercase shadow-olive-md border border-olive/20">
+                <img 
+                  src={`${import.meta.env.BASE_URL}logo.png`} 
+                  alt="Gandhi Shop" 
+                  className="w-5 h-5 object-contain" 
+                />
+                <span>Pure & Authentic Since 1974</span>
               </div>
             </div>
 

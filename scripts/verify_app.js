@@ -48,8 +48,9 @@ async function runVerification() {
     async function navigateHash(hash) {
       await page.evaluate((h) => {
         window.location.hash = h;
+        window.scrollTo(0, 0);
       }, hash);
-      await new Promise(r => setTimeout(r, 1200));
+      await new Promise(r => setTimeout(r, 1500));
     }
 
     // 1. HOME PAGE HERO
