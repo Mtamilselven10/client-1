@@ -54,21 +54,23 @@ To update your WhatsApp ordering number or customer care numbers, edit `src/conf
 ## 📁 How to Replace Assets
 
 ### 1. Replacing Animation Frames
-1. Extract your sequential JPG or PNG frames (e.g. `frame-001.jpg` to `frame-282.jpg`) into `/public/frames/`.
-2. Update `/public/frames/manifest.json` with your frame count and naming pattern:
-   ```json
-   {
-     "frameCount": 282,
-     "namingPattern": "ezgif-frame-%03d.jpg",
-     "prefix": "ezgif-frame-",
-     "digits": 3,
-     "extension": "jpg",
-     "fps": 30
-   }
+1. Extract your sequential JPG or PNG frames (e.g. `ezgif-frame-001.jpg` to `ezgif-frame-292.jpg`) into `/public/frames/` (or unzip directly).
+2. Run the automated frame scanner script:
+   ```bash
+   npm run frames:scan
    ```
-3. The canvas hero automatically auto-detects the count and scrubs smoothly across the frames on scroll.
+   This automatically detects the total frame count, filename prefix, zero-padding digits, file extension, and native resolution, generating `src/home/frameManifest.js` and `public/frames/manifest.json`.
+3. The canvas hero automatically reads this manifest and plays smoothly across all frames without needing any manual code edits.
 
-### 2. Replacing the Product Spreadsheet
+### 2. Editing the Home Hero Text
+The two hero text lines and the Explore button label are centralized in `src/content/homeHero.js`:
+- **Line 1 (Top Headline):** `headline` (English) and `headlineTa` (Tamil) — rendered in bold `font-liber`.
+- **Line 2 (Subheading Sentence):** `subheading` (English) and `subheadingTa` (Tamil) — rendered in bold `font-sans`.
+- **Button:** `exploreButtonText` and `exploreButtonTextTa`.
+
+To update the wording, simply edit `src/content/homeHero.js`. The hero text will update immediately.
+
+### 3. Replacing the Product Spreadsheet
 1. Save your Excel spreadsheet at `/public/data/products.xlsx`.
 2. The runtime parser (`src/utils/excelParser.js`) flexibly recognizes common column headers:
    - **Name:** `Name`, `Product Name`, `Item`, `Title`

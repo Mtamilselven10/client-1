@@ -26,6 +26,7 @@ export default {
       fontFamily: {
         serif: ['"Playfair Display"', 'Georgia', 'serif'],
         sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
+        liber: ['"Liberation Serif"', '"Playfair Display"', 'Georgia', 'serif'],
       },
       boxShadow: {
         'olive-sm': '0 2px 8px rgba(205, 92, 92, 0.10)',
