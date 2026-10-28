@@ -7,6 +7,7 @@ import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useFlyToCart } from '../../animations/useFlyToCart';
+import { useReviews } from '../../context/ReviewsContext';
 
 const ProductCard = forwardRef(function ProductCard({ product, index = 0 }, ref) {
   const navigate = useNavigate();
@@ -14,6 +15,8 @@ const ProductCard = forwardRef(function ProductCard({ product, index = 0 }, ref)
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { t, translateCategory } = useLanguage();
   const { triggerFlyToCart, triggerFlyToWishlist } = useFlyToCart();
+  const { getProductReviewStats } = useReviews();
+  const reviewStats = getProductReviewStats(product.id, product.name, product.rating, product.reviewsCount);
 
   const [isPicked, setIsPicked] = useState(false);
   const cardContainerRef = useRef(null);
@@ -134,8 +137,8 @@ const ProductCard = forwardRef(function ProductCard({ product, index = 0 }, ref)
             </span>
             <div className="flex items-center gap-1 font-semibold text-ink">
               <Star className="w-3.5 h-3.5 fill-olive text-olive" />
-              <span>{product.rating}</span>
-              <span className="text-ink/50 text-[11px]">({product.reviewsCount})</span>
+              <span>{reviewStats.rating.toFixed(1)}</span>
+              <span className="text-ink/50 text-[11px]">({reviewStats.reviewsCount})</span>
             </div>
           </div>
 

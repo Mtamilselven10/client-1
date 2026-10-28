@@ -21,6 +21,7 @@ import { useWishlist } from '../context/WishlistContext';
 import { useToast } from '../context/ToastContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useFlyToCart } from '../animations/useFlyToCart';
+import { useReviews } from '../context/ReviewsContext';
 import { SHOP_NAME } from '../config';
 
 export default function ProductDetailPage() {
@@ -32,9 +33,12 @@ export default function ProductDetailPage() {
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { addToast } = useToast();
   const { triggerFlyToCart, triggerFlyToWishlist } = useFlyToCart();
+  const { getProductReviewStats } = useReviews();
+  
 
   const wishlistBtnRef = useRef(null);
   const [product, setProduct] = useState(location.state?.product || null);
+  const reviewStats = product ? getProductReviewStats(product.id, product.name, product.rating, product.reviewsCount) : { rating: 4.8, reviewsCount: 0, reviews: [] };
   const [loading, setLoading] = useState(!location.state?.product);
   const [error, setError] = useState(null);
   const [quantity, setQuantity] = useState(1);
@@ -241,11 +245,14 @@ export default function ProductDetailPage() {
             <div className="flex items-center gap-3 mt-3">
               <div className="flex items-center gap-1 px-2.5 py-1 rounded-btn bg-olive text-cream text-xs font-bold">
                 <Star className="w-3.5 h-3.5 fill-cream text-cream" />
-                <span>{product.rating}</span>
+                <span>{reviewStats.rating.toFixed(1)}</span>
               </div>
-              <span className="text-xs text-ink/70 font-semibold">
-                ({product.reviewsCount} {t('productDetail.verifiedRatings')})
-              </span>
+              <NavLink 
+                to={`/reviews?product=${encodeURIComponent(product.name)}`}
+                className="text-xs text-olive font-semibold hover:underline"
+              >
+                ({reviewStats.reviewsCount} {t('productDetail.verifiedRatings')})
+              </NavLink>
               <span className="text-xs text-olive font-bold px-2 py-0.5 rounded-full bg-olive-soft">
                 {t('productDetail.pack')}: {product.unit}
               </span>
@@ -378,6 +385,65 @@ export default function ProductDetailPage() {
             </motion.button>
           </div>
         </motion.div>
+      </div>
+
+      {/* Customer Reviews for this Product */}
+      <div className="mt-14 pt-8 border-t border-olive/20 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="font-serif text-2xl font-bold text-ink flex items-center gap-2">
+              <span>Customer Reviews & Ratings</span>
+              <span className="text-xs font-sans font-bold px-2 py-0.5 rounded-full bg-olive-soft text-olive">
+                {reviewStats.reviewsCount} verified
+              </span>
+            </h2>
+            <p className="text-xs text-ink/70 mt-1">
+              Real customer feedback on delivery, product quality, service, and website usability.
+            </p>
+          </div>
+
+          <NavLink
+            to={`/reviews?product=${encodeURIComponent(product.name)}`}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-btn bg-olive text-cream text-xs font-bold shadow-olive-xs hover:bg-olive-dark transition-colors self-start sm:self-auto"
+          >
+            <span>Write a Review for this Product</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </NavLink>
+        </div>
+
+        {reviewStats.reviews && reviewStats.reviews.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {reviewStats.reviews.slice(0, 4).map((r) => (
+              <div key={r.id} className="p-4 rounded-card bg-cream-light border border-olive/20 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-xs text-ink">{r.customerName}</span>
+                  <div className="px-2 py-0.5 rounded bg-olive text-cream text-[11px] font-bold">
+                    ★ {r.overallRating ? r.overallRating.toFixed(1) : "5.0"}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-[10px] text-ink/70 bg-cream p-2 rounded border border-olive/10">
+                  <div>Delivery: <strong className="text-olive">{r.deliveryRating}/5</strong></div>
+                  <div>Quality: <strong className="text-olive">{r.qualityRating}/5</strong></div>
+                  <div>Service: <strong className="text-olive">{r.serviceRating}/5</strong></div>
+                  <div>Website: <strong className="text-olive">{r.websiteRating}/3</strong></div>
+                </div>
+                {r.comments && (
+                  <p className="text-xs italic text-ink/80">"{r.comments}"</p>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="p-6 rounded-card bg-cream-light border border-olive/15 text-center space-y-2">
+            <p className="text-xs text-ink/70">No specific reviews written for this product yet.</p>
+            <NavLink
+              to={`/reviews?product=${encodeURIComponent(product.name)}`}
+              className="text-xs font-bold text-olive hover:underline inline-block"
+            >
+              Be the first to rate this product on the Reviews page →
+            </NavLink>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import { ToastProvider } from './context/ToastContext';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { LanguageProvider } from './context/LanguageContext';
+import { ReviewsProvider } from './context/ReviewsContext';
 
 import Sidebar from './components/layout/Sidebar';
 import FloatingWhatsApp from './components/layout/FloatingWhatsApp';
@@ -20,6 +21,7 @@ import AboutUsPage from './pages/AboutUsPage';
 import FAQsPage from './pages/FAQsPage';
 import CustomerCarePage from './pages/CustomerCarePage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import ReviewsPage from './pages/ReviewsPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 // Scroll restoration helper
@@ -62,6 +64,7 @@ function MainLayout() {
                 <Route path="/faqs" element={<FAQsPage />} />
                 <Route path="/customer-care" element={<CustomerCarePage />} />
                 <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                <Route path="/reviews" element={<ReviewsPage />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </motion.div>
@@ -84,9 +87,11 @@ export default function App() {
       <ToastProvider>
         <CartProvider>
           <WishlistProvider>
-            <HashRouter>
-              <MainLayout />
-            </HashRouter>
+            <ReviewsProvider>
+              <HashRouter>
+                <MainLayout />
+              </HashRouter>
+            </ReviewsProvider>
           </WishlistProvider>
         </CartProvider>
       </ToastProvider>

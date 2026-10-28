@@ -9,7 +9,8 @@ import {
   Info, 
   HelpCircle, 
   Headphones, 
-  ShieldCheck, 
+  ShieldCheck,
+  Star, 
   X
 } from 'lucide-react';
 import { SHOP_NAME, SHOP_TAGLINE } from '../../config';
@@ -105,6 +106,7 @@ export default function Sidebar() {
     { label: t('nav.faqs'), path: '/faqs', icon: HelpCircle },
     { label: t('nav.customerCare'), path: '/customer-care', icon: Headphones },
     { label: t('nav.privacyPolicy'), path: '/privacy-policy', icon: ShieldCheck },
+    { label: t('nav.reviews') || 'Customer Ratings', path: '/reviews', icon: Star },
   ];
 
   return (
