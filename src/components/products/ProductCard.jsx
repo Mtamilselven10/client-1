@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Heart, ShoppingCart, Star, Check } from 'lucide-react';
@@ -6,12 +6,24 @@ import { formatCurrency, getProductImageUrl } from '../../utils/formatters';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { useLanguage } from '../../context/LanguageContext';
+import { useFlyToCart } from '../../animations/useFlyToCart';
 
-const ProductCard = forwardRef(function ProductCard({ product }, ref) {
+const ProductCard = forwardRef(function ProductCard({ product, index = 0 }, ref) {
   const navigate = useNavigate();
   const { addToCart, isInCart, getProductQuantity } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { t, translateCategory } = useLanguage();
+  const { triggerFlyToCart, triggerFlyToWishlist } = useFlyToCart();
+
+  const [isPicked, setIsPicked] = useState(false);
+  const cardContainerRef = useRef(null);
+  const heartBtnRef = useRef(null);
+
+  const setMergedRef = (el) => {
+    cardContainerRef.current = el;
+    if (typeof ref === 'function') ref(el);
+    else if (ref) ref.current = el;
+  };
 
   const isWished = isInWishlist(product.id);
   const inCart = isInCart(product.id);
@@ -23,11 +35,17 @@ const ProductCard = forwardRef(function ProductCard({ product }, ref) {
 
   const handleWishlistToggle = (e) => {
     e.stopPropagation();
+    if (!isWished) {
+      triggerFlyToWishlist(heartBtnRef.current || e.currentTarget, product);
+    }
     toggleWishlist(product);
   };
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
+    setIsPicked(true);
+    setTimeout(() => setIsPicked(false), 350);
+    triggerFlyToCart(cardContainerRef.current, product, 'card');
     addToCart(product, 1);
   };
 
@@ -37,17 +55,27 @@ const ProductCard = forwardRef(function ProductCard({ product }, ref) {
 
   return (
     <motion.div
-      ref={ref}
+      ref={setMergedRef}
       layout
-      initial={{ opacity: 0, y: 18 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 16 }}
+      animate={isPicked ? { scale: [1, 0.98, 1], y: 0 } : { opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      whileHover={{ y: -6 }}
-      transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+      whileHover={{ y: -4 }}
+      transition={{ delay: Math.min(index * 0.04, 0.32), duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
       data-testid="product-card"
       onClick={handleCardClick}
-      className="group cursor-pointer rounded-card overflow-hidden bg-cream-light border border-olive/20 shadow-olive-sm hover:shadow-olive-md hover:border-olive transition-shadow duration-300 flex flex-col justify-between"
+      className="relative group cursor-pointer rounded-card overflow-hidden bg-cream-light border border-olive/20 shadow-olive-sm hover:shadow-olive-md hover:border-olive transition-shadow duration-300 flex flex-col justify-between"
     >
+      {/* Picked Ring Pulse Animation */}
+      {isPicked && (
+        <motion.div
+          initial={{ opacity: 0.8, scale: 0.98 }}
+          animate={{ opacity: 0, scale: 1.05 }}
+          transition={{ duration: 0.35, ease: 'easeOut' }}
+          className="absolute inset-0 rounded-card ring-2 ring-olive pointer-events-none z-20"
+        />
+      )}
+
       {/* Product Image Box */}
       <div className="relative aspect-square w-full overflow-hidden bg-cream-deep p-3 flex items-center justify-center">
         <img
@@ -59,22 +87,28 @@ const ProductCard = forwardRef(function ProductCard({ product }, ref) {
               e.currentTarget.src = product.fallbackImage;
             }
           }}
-          className="w-full h-full object-cover rounded-md transition-transform duration-500 group-hover:scale-105"
+          className="w-full h-full object-cover rounded-md transition-transform duration-500 group-hover:scale-104"
         />
 
         {/* Wishlist Heart Toggle Button */}
         <motion.button
+          ref={heartBtnRef}
           whileHover={{ scale: 1.15 }}
           whileTap={{ scale: 0.8 }}
           onClick={handleWishlistToggle}
           className="absolute top-3 right-3 w-9 h-9 rounded-full bg-cream/90 backdrop-blur-xs flex items-center justify-center text-olive border border-olive/20 shadow-olive-sm transition-colors z-10 focus-visible:ring-2 focus-visible:ring-olive"
           aria-label={isWished ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
         >
-          <Heart
-            className={`w-5 h-5 transition-colors ${
-              isWished ? 'fill-olive text-olive' : 'text-olive'
-            }`}
-          />
+          <motion.div
+            animate={isWished ? { scale: [1, 1.35, 1] } : { scale: 1 }}
+            transition={{ type: 'spring', stiffness: 450, damping: 20 }}
+          >
+            <Heart
+              className={`w-5 h-5 transition-colors ${
+                isWished ? 'fill-olive text-olive' : 'text-olive'
+              }`}
+            />
+          </motion.div>
         </motion.button>
 
         {/* Discount Badge */}
@@ -135,7 +169,7 @@ const ProductCard = forwardRef(function ProductCard({ product }, ref) {
           {/* Add to Cart Olive Button */}
           <motion.button
             whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.92 }}
+            whileTap={{ scale: 0.97 }}
             onClick={handleAddToCart}
             className={`px-3.5 py-2 rounded-btn font-semibold text-xs tracking-wide shadow-olive-sm transition-colors duration-200 flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-olive ${
               inCart

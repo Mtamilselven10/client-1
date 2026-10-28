@@ -365,8 +365,8 @@ export default function ProductsPage() {
               /* Amazon/Flipkart Responsive Grid with Fluid Layout Animation */
               <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5">
                 <AnimatePresence mode="popLayout">
-                  {paginatedProducts.map(product => (
-                    <ProductCard key={product.id} product={product} />
+                  {paginatedProducts.map((product, idx) => (
+                    <ProductCard key={product.id} product={product} index={idx} />
                   ))}
                 </AnimatePresence>
               </motion.div>

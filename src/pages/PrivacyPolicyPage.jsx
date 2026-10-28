@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { ShieldCheck, Lock, FileText } from 'lucide-react';
 import { POLICY_SECTIONS } from '../data/policyData';
 import { SHOP_NAME } from '../config';
@@ -10,7 +11,12 @@ export default function PrivacyPolicyPage() {
   return (
     <div className="py-8 px-4 sm:px-8 max-w-4xl mx-auto bg-cream space-y-10">
       {/* Editorial Header */}
-      <div className="space-y-3 border-b border-olive/15 pb-6">
+      <motion.div 
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35 }}
+        className="space-y-3 border-b border-olive/15 pb-6"
+      >
         <span className="text-xs uppercase tracking-widest font-extrabold text-olive">
           {t('privacy.tag')}
         </span>
@@ -22,11 +28,18 @@ export default function PrivacyPolicyPage() {
             ? `கடைசியாக புதுப்பிக்கப்பட்டது: அக்டோபர் 2026. வாடிக்கையாளர் தரவு பாதுகாப்பு, வாட்ஸ்அப் ஆர்டர்கள் மற்றும் தூய்மை உத்தரவாதம் குறித்த ${SHOP_NAME}-ன் தெளிவான வெளிப்படையான கொள்கை.`
             : `Last revised: October 2026. Clear, transparent commitments governing customer data, direct messaging orders, and purity guarantees at ${SHOP_NAME}.`}
         </p>
-      </div>
+      </motion.div>
 
       {/* Trust Highlights */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-4 rounded-btn bg-cream-light border border-olive/20 text-center">
+        <motion.div 
+          initial={{ opacity: 0, y: 14 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.3 }}
+          whileHover={{ y: -4 }}
+          className="p-4 rounded-btn bg-cream-light border border-olive/20 text-center shadow-xs"
+        >
           <Lock className="w-5 h-5 text-olive mx-auto mb-1.5" />
           <h4 className="font-serif text-sm font-bold text-ink">
             {language === 'ta' ? 'தரவு விற்பனை இல்லை' : 'Zero Data Selling'}
@@ -34,8 +47,15 @@ export default function PrivacyPolicyPage() {
           <p className="text-[11px] text-ink/65 mt-0.5">
             {language === 'ta' ? 'உங்கள் தொலைபேசி & முகவரி ரகசியமாக வைக்கப்படும்.' : 'Your phone & address stay strictly confidential.'}
           </p>
-        </div>
-        <div className="p-4 rounded-btn bg-cream-light border border-olive/20 text-center">
+        </motion.div>
+        <motion.div 
+          initial={{ opacity: 0, y: 14 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.3, delay: 0.06 }}
+          whileHover={{ y: -4 }}
+          className="p-4 rounded-btn bg-cream-light border border-olive/20 text-center shadow-xs"
+        >
           <ShieldCheck className="w-5 h-5 text-olive mx-auto mb-1.5" />
           <h4 className="font-serif text-sm font-bold text-ink">
             {language === 'ta' ? '48-மணி நேர உத்தரவாதம்' : '48-Hour Fresh Guarantee'}
@@ -43,8 +63,15 @@ export default function PrivacyPolicyPage() {
           <p className="text-[11px] text-ink/65 mt-0.5">
             {language === 'ta' ? 'நறுமணம் அல்லது தரத்தில் குறை இருந்தால் உடனடி மாற்றீடு.' : 'Full replacement if seal or aroma is compromised.'}
           </p>
-        </div>
-        <div className="p-4 rounded-btn bg-cream-light border border-olive/20 text-center">
+        </motion.div>
+        <motion.div 
+          initial={{ opacity: 0, y: 14 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.3, delay: 0.12 }}
+          whileHover={{ y: -4 }}
+          className="p-4 rounded-btn bg-cream-light border border-olive/20 text-center shadow-xs"
+        >
           <FileText className="w-5 h-5 text-olive mx-auto mb-1.5" />
           <h4 className="font-serif text-sm font-bold text-ink">
             {language === 'ta' ? 'வெளிப்படையான விலை' : 'Transparent Pricing'}
@@ -52,7 +79,7 @@ export default function PrivacyPolicyPage() {
           <p className="text-[11px] text-ink/65 mt-0.5">
             {language === 'ta' ? 'மறைமுக கட்டணங்கள் அல்லது செயற்கை சேர்க்கை இல்லை.' : 'Zero hidden surcharges or synthetic padding.'}
           </p>
-        </div>
+        </motion.div>
       </div>
 
       {/* Policy Sections from policyData.js */}
@@ -62,8 +89,12 @@ export default function PrivacyPolicyPage() {
           const content = language === 'ta' && sec.contentTa ? sec.contentTa : sec.content;
 
           return (
-            <div 
+            <motion.div 
               key={idx}
+              initial={{ opacity: 0, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.38, ease: 'easeOut' }}
               className="p-6 sm:p-8 rounded-card bg-cream-light border border-olive/20 shadow-olive-sm space-y-3"
             >
               <h2 className="font-serif text-xl sm:text-2xl font-bold text-ink flex items-center gap-2.5">
@@ -73,19 +104,25 @@ export default function PrivacyPolicyPage() {
               <p className="text-sm sm:text-base text-ink/80 leading-relaxed pl-4 border-l-2 border-olive/20">
                 {content}
               </p>
-            </div>
+            </motion.div>
           );
         })}
       </div>
 
       {/* Closing note */}
-      <div className="p-6 rounded-card bg-cream-deep border border-olive/15 text-xs text-ink/75 leading-relaxed">
+      <motion.div 
+        initial={{ opacity: 0, y: 14 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.35 }}
+        className="p-6 rounded-card bg-cream-deep border border-olive/15 text-xs text-ink/75 leading-relaxed"
+      >
         <p>
           {language === 'ta'
             ? `${SHOP_NAME}-ன் நேரடி அங்காடி அல்லது வாட்ஸ்அப் மூலம் தொடர்புகொள்வதன் மூலம், இந்த விதிமுறைகளை ஒப்புக்கொள்கிறீர்கள். உங்கள் தகவலை நீக்க கோர எங்கள் உதவி மையத்தை எப்போது வேண்டுமானாலும் அணுகலாம்.`
             : `By engaging with ${SHOP_NAME} in person, on our catalog portal, or via our WhatsApp messaging concierge, you acknowledge and agree to these terms. If you have questions regarding any terms or wish to request data deletion, contact our care desk at any time.`}
         </p>
-      </div>
+      </motion.div>
     </div>
   );
 }

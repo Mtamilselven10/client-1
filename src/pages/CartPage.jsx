@@ -59,7 +59,12 @@ export default function CartPage() {
 
       {/* Empty State */}
       {cart.length === 0 ? (
-        <div className="py-20 text-center max-w-md mx-auto rounded-card bg-cream-light border border-olive/20 p-8 space-y-5 shadow-olive-sm">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+          className="py-20 text-center max-w-md mx-auto rounded-card bg-cream-light border border-olive/20 p-8 space-y-5 shadow-olive-sm"
+        >
           <div className="w-16 h-16 rounded-full bg-olive-soft flex items-center justify-center mx-auto text-olive">
             <ShoppingCart className="w-8 h-8 text-olive" />
           </div>
@@ -76,14 +81,14 @@ export default function CartPage() {
             <span>{t('cart.exploreBtn')}</span>
             <ArrowRight className="w-4 h-4" />
           </NavLink>
-        </div>
+        </motion.div>
       ) : (
         /* Cart Content Grid */
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Cart Items List (8 cols) */}
           <div className="lg:col-span-8 space-y-4">
             <AnimatePresence mode="popLayout">
-              {cart.map((item) => {
+              {cart.map((item, index) => {
                 const itemTotal = item.price * item.quantity;
                 const singleItemOrderUrl = buildSingleProductWhatsAppUrl(item, item.quantity);
 
@@ -91,10 +96,19 @@ export default function CartPage() {
                   <motion.div
                     key={item.id}
                     layout
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, x: -30, scale: 0.95 }}
-                    transition={{ duration: 0.25 }}
+                    initial={{ opacity: 0, x: 28 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ 
+                      opacity: 0, 
+                      scale: 0.95,
+                      height: 0,
+                      marginBottom: 0,
+                      paddingTop: 0,
+                      paddingBottom: 0,
+                      overflow: 'hidden',
+                      transition: { duration: 0.28 }
+                    }}
+                    transition={{ delay: index * 0.04, duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
                     className="p-4 sm:p-5 rounded-card bg-cream-light border border-olive/20 shadow-olive-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 transition-colors hover:border-olive"
                   >
                     {/* Thumbnail and Info */}
@@ -135,7 +149,7 @@ export default function CartPage() {
 
                     {/* Quantity Stepper & Individual WhatsApp Order */}
                     <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto pt-3 sm:pt-0 border-t sm:border-t-0 border-olive/10">
-                      {/* Stepper */}
+                      {/* Stepper with roll/pop */}
                       <div className="flex items-center rounded-btn bg-cream border border-olive/25 overflow-hidden">
                         <motion.button
                           whileTap={{ scale: 0.85 }}
@@ -145,9 +159,15 @@ export default function CartPage() {
                         >
                           <Minus className="w-3.5 h-3.5" />
                         </motion.button>
-                        <span className="px-3 py-1 text-xs font-bold text-ink min-w-[32px] text-center">
+                        <motion.span 
+                          key={item.quantity}
+                          initial={{ scale: 0.8, y: -4 }}
+                          animate={{ scale: 1, y: 0 }}
+                          transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+                          className="px-3 py-1 text-xs font-bold text-ink min-w-[32px] text-center inline-block"
+                        >
                           {item.quantity}
-                        </span>
+                        </motion.span>
                         <motion.button
                           whileTap={{ scale: 0.85 }}
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
@@ -160,9 +180,14 @@ export default function CartPage() {
 
                       {/* Subtotal */}
                       <div className="text-right min-w-[80px]">
-                        <div className="font-serif font-extrabold text-olive text-base">
+                        <motion.div 
+                          key={itemTotal}
+                          initial={{ opacity: 0.7, scale: 0.96 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="font-serif font-extrabold text-olive text-base"
+                        >
                           {formatCurrency(itemTotal)}
-                        </div>
+                        </motion.div>
                         <button
                           onClick={() => removeFromCart(item.id)}
                           className="text-[11px] text-ink/50 hover:text-olive underline transition-colors"
@@ -218,9 +243,15 @@ export default function CartPage() {
 
                 <div className="pt-3 border-t border-olive/20 flex justify-between items-baseline">
                   <span className="font-serif text-lg font-bold text-ink">{t('cart.totalPayable')}</span>
-                  <span className="font-serif text-2xl font-extrabold text-olive">
+                  <motion.span 
+                    key={totalAmount}
+                    initial={{ opacity: 0.6, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.25 }}
+                    className="font-serif text-2xl font-extrabold text-olive inline-block"
+                  >
                     {formatCurrency(totalAmount + (totalAmount >= 499 ? 0 : 40))}
-                  </span>
+                  </motion.span>
                 </div>
               </div>
 

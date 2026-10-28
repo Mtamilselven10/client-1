@@ -20,6 +20,7 @@ import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useToast } from '../context/ToastContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useFlyToCart } from '../animations/useFlyToCart';
 import { SHOP_NAME } from '../config';
 
 export default function ProductDetailPage() {
@@ -30,7 +31,9 @@ export default function ProductDetailPage() {
   const { addToCart, isInCart, getProductQuantity } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { addToast } = useToast();
+  const { triggerFlyToCart, triggerFlyToWishlist } = useFlyToCart();
 
+  const wishlistBtnRef = useRef(null);
   const [product, setProduct] = useState(location.state?.product || null);
   const [loading, setLoading] = useState(!location.state?.product);
   const [error, setError] = useState(null);
@@ -318,10 +321,14 @@ export default function ProductDetailPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
               {/* Add to Cart Button */}
               <motion.button
+                data-testid="detail-add-cart-btn"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.96 }}
-                onClick={() => addToCart(product, quantity)}
-                className="w-full py-3.5 px-6 rounded-btn bg-olive text-cream font-bold text-sm shadow-olive-md hover:bg-olive-dark transition-colors flex items-center justify-center gap-2 border border-olive-dark focus-visible:ring-2 focus-visible:ring-olive"
+                onClick={() => {
+                  triggerFlyToCart(imageContainerRef.current, product, 'image');
+                  addToCart(product, quantity);
+                }}
+                className="w-full py-3.5 px-6 rounded-btn bg-olive text-cream font-bold text-sm shadow-olive-md hover:bg-olive-dark transition-colors flex items-center justify-center gap-2 border border-olive-dark focus-visible:ring-2 focus-visible:ring-olive cursor-pointer"
               >
                 {inCart ? (
                   <>
@@ -352,9 +359,15 @@ export default function ProductDetailPage() {
 
             {/* Wishlist Toggle Button */}
             <motion.button
+              ref={wishlistBtnRef}
               whileTap={{ scale: 0.98 }}
-              onClick={() => toggleWishlist(product)}
-              className={`w-full py-3 px-4 rounded-btn text-xs font-bold transition-all border flex items-center justify-center gap-2 ${
+              onClick={() => {
+                if (!isWished) {
+                  triggerFlyToWishlist(wishlistBtnRef.current, product);
+                }
+                toggleWishlist(product);
+              }}
+              className={`w-full py-3 px-4 rounded-btn text-xs font-bold transition-all border flex items-center justify-center gap-2 cursor-pointer ${
                 isWished
                   ? 'bg-olive text-cream border-olive shadow-olive-sm'
                   : 'bg-cream-light text-olive border-olive/30 hover:border-olive hover:bg-olive-soft'

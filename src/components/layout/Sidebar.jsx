@@ -43,6 +43,30 @@ export default function Sidebar() {
   const { itemCount: wishlistCount } = useWishlist();
   const { t, language, translateCategory } = useLanguage();
 
+  const [cartWiggle, setCartWiggle] = useState(false);
+  const [cartBadgePop, setCartBadgePop] = useState(false);
+  const [wishlistWiggle, setWishlistWiggle] = useState(false);
+  const [wishlistBadgePop, setWishlistBadgePop] = useState(false);
+
+  useEffect(() => {
+    const handleArrival = (e) => {
+      const targetType = e.detail?.targetType;
+      if (targetType === 'wishlist') {
+        setWishlistWiggle(true);
+        setWishlistBadgePop(true);
+        setTimeout(() => setWishlistWiggle(false), 500);
+        setTimeout(() => setWishlistBadgePop(false), 400);
+      } else {
+        setCartWiggle(true);
+        setCartBadgePop(true);
+        setTimeout(() => setCartWiggle(false), 500);
+        setTimeout(() => setCartBadgePop(false), 400);
+      }
+    };
+    window.addEventListener('nav-target-arrived', handleArrival);
+    return () => window.removeEventListener('nav-target-arrived', handleArrival);
+  }, []);
+
   const cartCount = getItemCount();
   const logoUrl = `${import.meta.env.BASE_URL}logo.png`;
   const menuIconUrl = `${import.meta.env.BASE_URL}icons/menu-icon.png`;
@@ -87,7 +111,7 @@ export default function Sidebar() {
     <>
       {/* Universal Top Header (Desktop & Mobile) - Menu icon triggers sidebar */}
       <header className="sticky top-0 z-40 flex items-center justify-between px-3 sm:px-6 py-2.5 bg-cream-deep/95 backdrop-blur-md border-b border-olive/20 shadow-olive-sm">
-        {/* Left: Menu Trigger Button (Image 2) + Brand Logo */}
+        {/* Left: Menu Trigger Button + Brand Logo */}
         <div className="flex items-center gap-3 sm:gap-4">
           <button
             type="button"
@@ -127,28 +151,50 @@ export default function Sidebar() {
           {/* Quick Wishlist */}
           <NavLink
             to="/wishlist"
+            data-nav-target="wishlist"
+            data-nav-target-mobile="mobile-wishlist"
             className="relative p-2 text-olive hover:bg-olive/10 rounded-full transition-colors"
             aria-label={t('nav.wishlist')}
           >
-            <Heart className="w-5 h-5" />
+            <motion.div
+              animate={wishlistWiggle ? { rotate: [0, -14, 14, -8, 8, 0], scale: [1, 1.25, 1] } : { rotate: 0, scale: 1 }}
+              transition={{ duration: 0.45 }}
+            >
+              <Heart className="w-5 h-5" />
+            </motion.div>
             {wishlistCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-olive text-cream text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
+              <motion.span
+                animate={wishlistBadgePop ? { scale: [1, 1.45, 1] } : { scale: 1 }}
+                transition={{ duration: 0.3 }}
+                className="absolute -top-1 -right-1 bg-olive text-cream text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-xs"
+              >
                 {wishlistCount > 99 ? '99+' : wishlistCount}
-              </span>
+              </motion.span>
             )}
           </NavLink>
 
           {/* Quick Cart */}
           <NavLink
             to="/cart"
+            data-nav-target="cart"
+            data-nav-target-mobile="mobile-cart"
             className="relative p-2 text-olive hover:bg-olive/10 rounded-full transition-colors"
             aria-label={t('nav.cart')}
           >
-            <ShoppingCart className="w-5 h-5" />
+            <motion.div
+              animate={cartWiggle ? { rotate: [0, -14, 14, -8, 8, 0], scale: [1, 1.25, 1] } : { rotate: 0, scale: 1 }}
+              transition={{ duration: 0.45 }}
+            >
+              <ShoppingCart className="w-5 h-5" />
+            </motion.div>
             {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-olive text-cream text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
+              <motion.span
+                animate={cartBadgePop ? { scale: [1, 1.45, 1] } : { scale: 1 }}
+                transition={{ duration: 0.3 }}
+                className="absolute -top-1 -right-1 bg-olive text-cream text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-xs"
+              >
                 {cartCount > 99 ? '99+' : cartCount}
-              </span>
+              </motion.span>
             )}
           </NavLink>
         </div>
@@ -220,6 +266,11 @@ export default function Sidebar() {
             const Icon = item.icon;
             const isBaseActive = location.pathname === item.path || 
               (item.path !== '/' && location.pathname.startsWith(item.path));
+            const isCart = item.path === '/cart';
+            const isWishlist = item.path === '/wishlist';
+            const wiggle = isCart ? cartWiggle : isWishlist ? wishlistWiggle : false;
+            const badgePop = isCart ? cartBadgePop : isWishlist ? wishlistBadgePop : false;
+            const navTarget = isCart ? 'drawer-cart' : isWishlist ? 'drawer-wishlist' : undefined;
 
             // Regular Nav Item
             if (!item.isProducts) {
@@ -227,6 +278,7 @@ export default function Sidebar() {
                 <NavLink
                   key={item.path}
                   to={item.path}
+                  data-nav-target={navTarget}
                   onClick={closeSidebar}
                   className={`relative flex items-center justify-between px-3.5 py-2.5 rounded-btn text-sm font-semibold transition-colors duration-200 group ${
                     isBaseActive
@@ -235,26 +287,33 @@ export default function Sidebar() {
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <Icon className={`w-4 h-4 transition-transform duration-200 group-hover:scale-110 ${
-                      isBaseActive ? 'text-cream' : 'text-olive'
-                    }`} />
+                    <motion.div
+                      animate={wiggle ? { rotate: [0, -14, 14, -8, 8, 0], scale: [1, 1.25, 1] } : { rotate: 0, scale: 1 }}
+                      transition={{ duration: 0.45 }}
+                    >
+                      <Icon className={`w-4 h-4 transition-transform duration-200 group-hover:scale-110 ${
+                        isBaseActive ? 'text-cream' : 'text-olive'
+                      }`} />
+                    </motion.div>
                     <span className="tracking-wide">{item.label}</span>
                   </div>
 
                   {item.badge !== undefined && item.badge > 0 && (
-                    <span
+                    <motion.span
+                      animate={badgePop ? { scale: [1, 1.4, 1] } : { scale: 1 }}
+                      transition={{ duration: 0.3 }}
                       className={`inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold rounded-full transition-colors ${
                         isBaseActive ? 'bg-cream text-olive' : 'bg-olive text-cream'
                       }`}
                     >
                       {item.badge > 99 ? '99+' : item.badge}
-                    </span>
+                    </motion.span>
                   )}
                 </NavLink>
               );
             }
 
-            // Products Nav Item WITH Categories Dropdown (Image 1 Chevron Icon)
+            // Products Nav Item WITH Categories Dropdown
             return (
               <div key={item.path} className="space-y-1">
                 <div 
@@ -278,7 +337,7 @@ export default function Sidebar() {
                     <span className="tracking-wide">{item.label}</span>
                   </NavLink>
 
-                  {/* Dropdown Toggle using User's Chevron Icon (Image 1) */}
+                  {/* Dropdown Toggle using User's Chevron Icon */}
                   <button
                     type="button"
                     onClick={(e) => {
@@ -305,7 +364,7 @@ export default function Sidebar() {
                   </button>
                 </div>
 
-                {/* Categories Dropdown Panel (Smooth & Glitch-free) */}
+                {/* Categories Dropdown Panel */}
                 <AnimatePresence initial={false}>
                   {categoriesOpen && (
                     <motion.div
@@ -363,20 +422,6 @@ export default function Sidebar() {
             );
           })}
         </nav>
-
-        {/* Footer info box in sidebar */}
-        <div className="p-3.5 m-3 rounded-card bg-cream-light border border-olive/15 text-xs text-ink/80 space-y-1.5 shrink-0">
-          <div className="flex items-center gap-2 text-olive font-semibold text-xs">
-            <span className="w-2 h-2 rounded-full bg-olive animate-pulse" />
-            <span>{t('brand.storeOpen')}</span>
-          </div>
-          <p className="leading-snug text-[11px] text-ink/70">
-            {t('brand.storeSubtitle')}
-          </p>
-          <div className="text-[10px] text-ink/50 pt-1 border-t border-olive/10">
-            {t('brand.rights')}
-          </div>
-        </div>
       </aside>
     </>
   );

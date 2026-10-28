@@ -5,12 +5,14 @@ import { Heart, ShoppingCart, Trash2, ArrowRight, Star } from 'lucide-react';
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useFlyToCart } from '../animations/useFlyToCart';
 import { formatCurrency, getProductImageUrl } from '../utils/formatters';
 
 export default function WishlistPage() {
   const { wishlist, removeFromWishlist, clearWishlist } = useWishlist();
   const { addToCart } = useCart();
   const { t, translateCategory } = useLanguage();
+  const { triggerFlyToCart } = useFlyToCart();
   const navigate = useNavigate();
 
   return (
@@ -72,6 +74,7 @@ export default function WishlistPage() {
               <motion.div
                 key={item.id}
                 layout
+                data-testid="wishlist-item"
                 initial={{ opacity: 0, scale: 0.92 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.85, transition: { duration: 0.2 } }}
@@ -149,10 +152,15 @@ export default function WishlistPage() {
 
                     {/* Add to Cart button */}
                     <motion.button
+                      data-testid="wishlist-add-cart-btn"
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => addToCart(item, 1)}
-                      className="w-full py-2.5 px-4 rounded-btn bg-olive text-cream font-bold text-xs shadow-olive-sm hover:bg-olive-dark transition-colors flex items-center justify-center gap-2"
+                      onClick={(e) => {
+                        const cardEl = e.currentTarget.closest('[data-testid="wishlist-item"]') || e.currentTarget;
+                        triggerFlyToCart(cardEl, item, 'card');
+                        addToCart(item, 1);
+                      }}
+                      className="w-full py-2.5 px-4 rounded-btn bg-olive text-cream font-bold text-xs shadow-olive-sm hover:bg-olive-dark transition-colors flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <ShoppingCart className="w-4 h-4" />
                       <span>{t('wishlist.addToCart')}</span>

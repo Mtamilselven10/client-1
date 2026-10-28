@@ -148,3 +148,27 @@ Launches a headless browser session, tests all navigation routes, verifies Excel
 4. **Wishlist (`/wishlist`):** Auto-populated saved products with direct "Add to Cart" and "Remove" options.
 5. **Shopping Cart (`/cart`):** Quantity steppers, live subtotal, and dedicated per-item "Order" buttons that pre-format WhatsApp messages with item code, unit, price, and total.
 6. **Editorial Pages:** About Us (`/about`) with Google Maps button, FAQs (`/faqs`) with accessible accordion, Customer Care (`/customer-care`) with tap-to-call and tap-to-email cards, Privacy Policy (`/privacy-policy`), and brand-styled 404 page (`/404`).
+
+---
+
+## ✨ Animations & Motion System
+
+A unified, non-blocking motion system built on Framer Motion and standard CSS transforms.
+
+### 1. Configuration & Global Controls
+All animation values, easings, durations, and master flags are centralized in `src/animations/animationConfig.js`:
+- **`animationsEnabled`** (`true` / `false`): Master switch for the entire site's motion layers.
+- **`flyToCartEnabled`** (`true` / `false`): Toggles the curved fly-to-cart and heart-fly portal animations.
+- **`flyDuration`** (`0.95`s): Global duration for flight trajectories.
+- **`flyEasing`** (`[0.22, 1, 0.36, 1]`): Signature snappy cubic-bezier curve.
+- **`maxSimultaneousFlights`** (`6`): Concurrency cap preventing frame drops during rapid clicks.
+
+### 2. Fly-to-Cart Behavior
+- **Trigger Points:** Product cards ("Add to Cart"), Product Detail page (large image fly), and Wishlist page ("Add to Cart").
+- **Flight Mechanics:** Fixed-position React Portal (`<FlyLayer />`), FLIP transforms, 1.04 lift scale, 2° rotation, parabolic upward arc, fading text early and image last.
+- **Destination:** Smoothly targets the desktop sidebar cart icon (`data-nav-target="cart"`) or the mobile top-bar cart badge (`data-nav-target="mobile-cart"`), triggering icon wiggle and a 1.4x badge pop on arrival.
+- **Asynchronous & Non-Blocking:** Cart state updates immediately upon click; animations run strictly in parallel without blocking user interaction.
+
+### 3. Reduced Motion Support
+- Detects `prefers-reduced-motion: reduce`.
+- Automatically disables flying clones, WhatsApp periodic pulse ring, and extensive transforms, substituting immediate updates and gentle opacity fades.
