@@ -8,7 +8,6 @@ import { useWishlist } from '../../context/WishlistContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useFlyToCart } from '../../animations/useFlyToCart';
 import { useReviews } from '../../context/ReviewsContext';
-import { useProductPreview } from '../../context/ProductPreviewContext';
 
 const ProductCard = forwardRef(function ProductCard({ product, index = 0 }, ref) {
   const navigate = useNavigate();
@@ -17,12 +16,37 @@ const ProductCard = forwardRef(function ProductCard({ product, index = 0 }, ref)
   const { t, translateCategory } = useLanguage();
   const { triggerFlyToCart, triggerFlyToWishlist } = useFlyToCart();
   const { getProductReviewStats } = useReviews();
-  const { showPreview, hidePreview } = useProductPreview();
   const reviewStats = getProductReviewStats(product.id, product.name, product.rating, product.reviewsCount);
 
   const [isPicked, setIsPicked] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [cursorOrigin, setCursorOrigin] = useState('50% 50%');
   const cardContainerRef = useRef(null);
   const heartBtnRef = useRef(null);
+
+  const handleMouseEnter = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) {
+      const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+      const y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
+      setCursorOrigin(`${x.toFixed(1)}% ${y.toFixed(1)}%`);
+    }
+    setIsHovered(true);
+  };
+
+  const handleMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) {
+      const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+      const y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
+      setCursorOrigin(`${x.toFixed(1)}% ${y.toFixed(1)}%`);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    setCursorOrigin('50% 50%');
+  };
 
   const setMergedRef = (el) => {
     cardContainerRef.current = el;
@@ -66,21 +90,22 @@ const ProductCard = forwardRef(function ProductCard({ product, index = 0 }, ref)
       animate={isPicked ? { scale: [1, 0.98, 1], y: 0 } : { opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       whileHover={{ 
-        y: -6, 
-        scale: 1.02, 
-        transition: { duration: 0.32, ease: [0.16, 1, 0.3, 1] } 
+        y: -2, 
+        scale: 1.006, 
+        transition: { duration: 0.28, ease: [0.16, 1, 0.3, 1] } 
       }}
       transition={{ delay: Math.min(index * 0.04, 0.32), duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
       data-testid="product-card"
       onClick={handleCardClick}
-      onMouseEnter={() => showPreview(product, cardContainerRef.current)}
-      onMouseLeave={hidePreview}
-      onFocus={() => showPreview(product, cardContainerRef.current)}
-      onBlur={hidePreview}
-      className="relative group cursor-pointer rounded-card overflow-hidden bg-cream-light border border-olive/20 shadow-olive-sm hover:shadow-ms-store hover:border-olive/50 hover:z-10 transition-shadow transition-colors duration-300 flex flex-col justify-between ms-product-card"
+      onMouseEnter={handleMouseEnter}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{ transformOrigin: cursorOrigin }}
+      className="relative group cursor-pointer rounded-card overflow-hidden bg-cream-light border border-olive/20 shadow-olive-sm hover:shadow-ms-store hover:border-olive/50 transition-all duration-300 flex flex-col justify-between ms-product-card"
     >
       {/* Microsoft Store Fluent Ambient Light Sheen */}
       <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10" />
+
       {/* Picked Ring Pulse Animation */}
       {isPicked && (
         <motion.div
@@ -102,7 +127,8 @@ const ProductCard = forwardRef(function ProductCard({ product, index = 0 }, ref)
               e.currentTarget.src = product.fallbackImage;
             }
           }}
-          className="w-full h-full object-cover rounded-md transition-transform duration-400 ease-out group-hover:scale-106"
+          style={{ transformOrigin: cursorOrigin }}
+          className="w-full h-full object-cover rounded-md transition-transform duration-400 ease-out group-hover:scale-108"
         />
 
         {/* Wishlist Heart Toggle Button */}
@@ -137,6 +163,16 @@ const ProductCard = forwardRef(function ProductCard({ product, index = 0 }, ref)
         <div className="absolute bottom-3 left-3 bg-ink/75 backdrop-blur-xs text-cream text-[10px] font-semibold px-2 py-0.5 rounded-md">
           {product.unit}
         </div>
+
+        {/* In-Stock Live Availability Indicator (reveals in-place inside the card on hover) */}
+        <div 
+          className={`absolute bottom-3 right-3 flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-cream/95 backdrop-blur-xs text-olive text-[10px] font-bold border border-olive/20 shadow-xs transition-all duration-300 ${
+            isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1.5 pointer-events-none'
+          }`}
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-olive animate-pulse" />
+          <span>In Stock</span>
+        </div>
       </div>
 
       {/* Product Content Details */}
@@ -163,6 +199,22 @@ const ProductCard = forwardRef(function ProductCard({ product, index = 0 }, ref)
           <p className="mt-1 text-xs text-ink/75 line-clamp-2 leading-relaxed">
             {product.description}
           </p>
+
+          {/* In-Place Expanded Product Details (contained 100% inside card boundaries) */}
+          {product.details && (
+            <div 
+              className={`transition-all duration-300 ease-out overflow-hidden ${
+                isHovered 
+                  ? 'max-h-12 opacity-100 mt-2 pt-1.5 border-t border-olive/10' 
+                  : 'max-h-0 opacity-0 mt-0 pt-0 border-t-0 pointer-events-none'
+              }`}
+            >
+              <div className="text-[11px] font-medium text-olive flex items-center gap-1 truncate">
+                <span className="font-bold">✓</span>
+                <span className="truncate">{product.details}</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Price & Add to Cart Action */}

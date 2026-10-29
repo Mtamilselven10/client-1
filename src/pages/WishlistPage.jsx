@@ -6,7 +6,6 @@ import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useFlyToCart } from '../animations/useFlyToCart';
-import { useProductPreview } from '../context/ProductPreviewContext';
 import { formatCurrency, getProductImageUrl } from '../utils/formatters';
 
 export default function WishlistPage() {
@@ -14,7 +13,6 @@ export default function WishlistPage() {
   const { addToCart } = useCart();
   const { t, translateCategory } = useLanguage();
   const { triggerFlyToCart } = useFlyToCart();
-  const { showPreview, hidePreview } = useProductPreview();
   const navigate = useNavigate();
 
   return (
@@ -81,16 +79,12 @@ export default function WishlistPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.85, transition: { duration: 0.2 } }}
                 whileHover={{ 
-                  y: -6, 
-                  scale: 1.02, 
-                  transition: { duration: 0.32, ease: [0.16, 1, 0.3, 1] } 
+                  y: -2, 
+                  scale: 1.006, 
+                  transition: { duration: 0.28, ease: [0.16, 1, 0.3, 1] } 
                 }}
                 transition={{ duration: 0.25 }}
-                onMouseEnter={(e) => showPreview(item, e.currentTarget)}
-                onMouseLeave={hidePreview}
-                onFocus={(e) => showPreview(item, e.currentTarget)}
-                onBlur={hidePreview}
-                className="relative rounded-card overflow-hidden bg-cream-light border border-olive/20 shadow-olive-sm hover:shadow-ms-store hover:border-olive/50 hover:z-10 transition-shadow transition-colors duration-300 flex flex-col justify-between group ms-product-card"
+                className="relative rounded-card overflow-hidden bg-cream-light border border-olive/20 shadow-olive-sm hover:shadow-ms-store hover:border-olive/50 transition-shadow transition-colors duration-300 flex flex-col justify-between group ms-product-card"
               >
                 {/* Microsoft Store Fluent Ambient Light Sheen */}
                 <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10" />
