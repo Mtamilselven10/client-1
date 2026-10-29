@@ -358,7 +358,7 @@ export default function Sidebar() {
                     <img
                       src={chevronIconUrl}
                       alt="Toggle Categories"
-                      style={{ filter: isBaseActive ? 'invert(1)' : 'brightness(0) invert(26%) sepia(18%) saturate(1487%) hue-rotate(44deg)' }}
+                      style={{ filter: isBaseActive ? 'invert(1)' : 'brightness(0) saturate(100%) invert(46%) sepia(34%) saturate(952%) hue-rotate(50deg) brightness(97%) contrast(92%)' }}
                       className={`w-3.5 h-3.5 object-contain transition-transform duration-200 ${
                         categoriesOpen ? 'rotate-180' : 'rotate-0'
                       }`}

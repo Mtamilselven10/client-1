@@ -3,18 +3,20 @@
 @tailwind utilities;
 
 :root {
-  --cream: #FFFACD;
-  --cream-deep: #F5ECB7;
-  --cream-light: #FFFDEE;
-  --olive: #CD5C5C;
-  --olive-dark: #A83E3E;
-  --olive-soft: rgba(205, 92, 92, 0.12);
-  --olive-border: rgba(205, 92, 92, 0.25);
-  --ink: #381B1B;
-  --ink-muted: #633939;
+  --cream: #F5F2EB;
+  --cream-deep: #EBE5D8;
+  --cream-light: #FAF8F5;
+  --olive: #558B2F;
+  --olive-dark: #3B631E;
+  --olive-soft: rgba(85, 139, 47, 0.12);
+  --olive-border: rgba(85, 139, 47, 0.25);
+  --ink: #2C1E1A;
+  --ink-muted: #5D4037;
+  --coconut: #5D4037;
+  --palm: #558B2F;
 }
 
-/* Force global Lemon Chiffon background on html and body */
+/* Force global Coconut Cream background on html and body */
 html, body {
   background-color: var(--cream);
   color: var(--ink);
@@ -31,7 +33,7 @@ html, body {
   outline-offset: 2px !important;
 }
 
-/* Custom Scrollbar styled strictly in olive and cream */
+/* Custom Scrollbar styled strictly in palm green and coconut cream */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
