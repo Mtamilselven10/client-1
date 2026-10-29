@@ -6,6 +6,7 @@ import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useFlyToCart } from '../animations/useFlyToCart';
+import { useProductPreview } from '../context/ProductPreviewContext';
 import { formatCurrency, getProductImageUrl } from '../utils/formatters';
 
 export default function WishlistPage() {
@@ -13,6 +14,7 @@ export default function WishlistPage() {
   const { addToCart } = useCart();
   const { t, translateCategory } = useLanguage();
   const { triggerFlyToCart } = useFlyToCart();
+  const { showPreview, hidePreview } = useProductPreview();
   const navigate = useNavigate();
 
   return (
@@ -84,6 +86,10 @@ export default function WishlistPage() {
                   transition: { duration: 0.32, ease: [0.16, 1, 0.3, 1] } 
                 }}
                 transition={{ duration: 0.25 }}
+                onMouseEnter={(e) => showPreview(item, e.currentTarget)}
+                onMouseLeave={hidePreview}
+                onFocus={(e) => showPreview(item, e.currentTarget)}
+                onBlur={hidePreview}
                 className="relative rounded-card overflow-hidden bg-cream-light border border-olive/20 shadow-olive-sm hover:shadow-ms-store hover:border-olive/50 hover:z-10 transition-shadow transition-colors duration-300 flex flex-col justify-between group ms-product-card"
               >
                 {/* Microsoft Store Fluent Ambient Light Sheen */}

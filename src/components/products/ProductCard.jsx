@@ -8,6 +8,7 @@ import { useWishlist } from '../../context/WishlistContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useFlyToCart } from '../../animations/useFlyToCart';
 import { useReviews } from '../../context/ReviewsContext';
+import { useProductPreview } from '../../context/ProductPreviewContext';
 
 const ProductCard = forwardRef(function ProductCard({ product, index = 0 }, ref) {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ const ProductCard = forwardRef(function ProductCard({ product, index = 0 }, ref)
   const { t, translateCategory } = useLanguage();
   const { triggerFlyToCart, triggerFlyToWishlist } = useFlyToCart();
   const { getProductReviewStats } = useReviews();
+  const { showPreview, hidePreview } = useProductPreview();
   const reviewStats = getProductReviewStats(product.id, product.name, product.rating, product.reviewsCount);
 
   const [isPicked, setIsPicked] = useState(false);
@@ -71,6 +73,10 @@ const ProductCard = forwardRef(function ProductCard({ product, index = 0 }, ref)
       transition={{ delay: Math.min(index * 0.04, 0.32), duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
       data-testid="product-card"
       onClick={handleCardClick}
+      onMouseEnter={() => showPreview(product, cardContainerRef.current)}
+      onMouseLeave={hidePreview}
+      onFocus={() => showPreview(product, cardContainerRef.current)}
+      onBlur={hidePreview}
       className="relative group cursor-pointer rounded-card overflow-hidden bg-cream-light border border-olive/20 shadow-olive-sm hover:shadow-ms-store hover:border-olive/50 hover:z-10 transition-shadow transition-colors duration-300 flex flex-col justify-between ms-product-card"
     >
       {/* Microsoft Store Fluent Ambient Light Sheen */}

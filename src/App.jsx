@@ -6,11 +6,13 @@ import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { ReviewsProvider } from './context/ReviewsContext';
+import { ProductPreviewProvider } from './context/ProductPreviewContext';
 
 import Sidebar from './components/layout/Sidebar';
 import FloatingWhatsApp from './components/layout/FloatingWhatsApp';
 import LanguageSwitch from './components/common/LanguageSwitch';
 import FlyLayer from './animations/FlyLayer';
+import ProductPreviewPopover from './components/products/ProductPreviewPopover';
 
 import HomePage from './pages/HomePage';
 import ProductsPage from './pages/ProductsPage';
@@ -77,6 +79,9 @@ function MainLayout() {
 
       {/* High-Performance 60fps Fly-to-Cart Portal Layer */}
       <FlyLayer />
+
+      {/* Microsoft Store-Style Interactive Hover Preview Popover */}
+      <ProductPreviewPopover />
     </div>
   );
 }
@@ -88,9 +93,11 @@ export default function App() {
         <CartProvider>
           <WishlistProvider>
             <ReviewsProvider>
-              <HashRouter>
-                <MainLayout />
-              </HashRouter>
+              <ProductPreviewProvider>
+                <HashRouter>
+                  <MainLayout />
+                </HashRouter>
+              </ProductPreviewProvider>
             </ReviewsProvider>
           </WishlistProvider>
         </CartProvider>
