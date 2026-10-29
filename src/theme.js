@@ -1,25 +1,25 @@
 /**
  * Design System Theme & Color Tokens for Gandhi Shop
- * Coconut & Palm Theme (Fresh Organic Palette)
- * Reference: Coconut Husk Brown #5D4037 (RGB: 93 64 55), Palm Green #558B2F (RGB: 85 139 47)
+ * Coconut Brown Theme (Warm Organic Palette)
+ * Reference: Coconut Brown #5D4037 (RGB: 93 64 55), Coconut Bark #2C1E1A, Coconut Cream #F5F2EB
  */
 export const THEME = {
   colors: {
-    // Primary Brand Identity (Coconut & Palm)
+    // Primary Brand Identity (Coconut Brown & Cream)
     cream: '#F5F2EB',       // Coconut Cream - Global page background
     creamDeep: '#EBE5D8',   // Coconut Husk Linen - separation cards, sidebar drawer
     creamLight: '#FAF8F5',  // Coconut Milk - Elevated surfaces, input fields, modals
 
-    olive: '#558B2F',       // Palm Green / Rich Forest Green (#558B2F, RGB: 85 139 47)
-    oliveDark: '#3B631E',   // Deep Palm Foliage - Hover / pressed state
-    oliveSoft: 'rgba(85, 139, 47, 0.12)', // Subtle tinted surfaces, active-state chips
-    oliveBorder: 'rgba(85, 139, 47, 0.25)',
+    olive: '#5D4037',       // Coconut Brown (#5D4037, RGB: 93 64 55)
+    oliveDark: '#3E2723',   // Deep Roasted Coconut - Hover / pressed state
+    oliveSoft: 'rgba(93, 64, 55, 0.12)', // Subtle tinted surfaces, active-state chips
+    oliveBorder: 'rgba(93, 64, 55, 0.25)',
 
     ink: '#2C1E1A',         // High contrast editorial body text (Deep Coconut Bark)
-    inkMuted: '#5D4037',    // Coconut Husk Brown (#5D4037, RGB: 93 64 55)
+    inkMuted: '#5D4037',    // Coconut Brown (#5D4037, RGB: 93 64 55)
 
     coconut: '#5D4037',
-    palm: '#558B2F'
+    palm: '#5D4037'
   },
   typography: {
     headingFont: '"Playfair Display", Georgia, serif',

@@ -30,7 +30,7 @@ async function runThemeVerification() {
   await page.setViewport({ width: 1400, height: 900 });
 
   try {
-    console.log('\n--- 1. Testing Coconut & Palm Global Styles on Home Page ---');
+    console.log('\n--- 1. Testing Coconut Brown Global Styles on Home Page ---');
     await page.goto(`${BASE_URL}/#/`, { waitUntil: 'domcontentloaded' });
     await new Promise(r => setTimeout(r, 1000));
 
@@ -51,44 +51,44 @@ async function runThemeVerification() {
     });
     console.log('CSS Variables:', cssVars);
 
-    if (cssVars.palm !== '#558B2F' || cssVars.coconut !== '#5D4037') {
-      throw new Error(`CSS Variables not matching Coconut & Palm swatches: ${JSON.stringify(cssVars)}`);
+    if (cssVars.olive !== '#5D4037' || cssVars.coconut !== '#5D4037') {
+      throw new Error(`CSS Variables not matching Coconut Brown swatches: ${JSON.stringify(cssVars)}`);
     }
 
-    await saveScreenshot(page, '45_coconut_palm_home.png');
+    await saveScreenshot(page, '50_coconut_brown_home.png');
 
-    console.log('\n--- 2. Verifying Products Catalog in Coconut & Palm ---');
+    console.log('\n--- 2. Verifying Products Catalog in Coconut Brown ---');
     await page.goto(`${BASE_URL}/#/products`, { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('[data-testid="product-card"]', { timeout: 8000 });
     await new Promise(r => setTimeout(r, 800));
 
-    // Verify Add to Cart button has palm green background
+    // Verify Add to Cart button has coconut brown background rgb(93, 64, 55)
     const addBtnBg = await page.$eval('[data-testid="product-card"] button[aria-label*="cart"]', el => getComputedStyle(el).backgroundColor);
-    console.log(`Add to Cart button background: ${addBtnBg}`); // rgb(85, 139, 47)
+    console.log(`Add to Cart button background: ${addBtnBg}`); // rgb(93, 64, 55)
 
-    await saveScreenshot(page, '46_coconut_palm_products.png');
+    await saveScreenshot(page, '51_coconut_brown_products.png');
 
-    console.log('\n--- 3. Verifying Sidebar Drawer in Coconut & Palm ---');
+    console.log('\n--- 3. Verifying Sidebar Drawer in Coconut Brown ---');
     const menuBtn = await page.$('[data-testid="sidebar-menu-btn"]');
     await menuBtn.click();
     await new Promise(r => setTimeout(r, 600));
 
-    await saveScreenshot(page, '48_coconut_palm_sidebar.png');
+    await saveScreenshot(page, '53_coconut_brown_sidebar.png');
 
-    console.log('\n--- 4. Verifying Reviews Page in Coconut & Palm ---');
+    console.log('\n--- 4. Verifying Reviews Page in Coconut Brown ---');
     await page.goto(`${BASE_URL}/#/reviews`, { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('[data-testid="review-card"]', { timeout: 8000 });
     await new Promise(r => setTimeout(r, 800));
 
-    await saveScreenshot(page, '47_coconut_palm_reviews.png');
+    await saveScreenshot(page, '52_coconut_brown_reviews.png');
 
-    console.log('\n--- 5. Verifying Cart Page in Coconut & Palm ---');
+    console.log('\n--- 5. Verifying Cart Page in Coconut Brown ---');
     await page.goto(`${BASE_URL}/#/cart`, { waitUntil: 'domcontentloaded' });
     await new Promise(r => setTimeout(r, 800));
 
-    await saveScreenshot(page, '49_coconut_palm_cart.png');
+    await saveScreenshot(page, '54_coconut_brown_cart.png');
 
-    console.log('\n🎉 ALL COCONUT & PALM THEME CHECKS PASSED SUCCESSFULLY!');
+    console.log('\n🎉 ALL COCONUT BROWN THEME CHECKS PASSED SUCCESSFULLY!');
   } finally {
     await browser.close();
   }
