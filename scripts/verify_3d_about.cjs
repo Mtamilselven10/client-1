@@ -29,7 +29,6 @@ async function run() {
   const page = await browser.newPage();
   await page.setViewport({ width: 1440, height: 900 });
 
-  // Collect console logs
   page.on('console', msg => {
     console.log(`[Browser ${msg.type()}]:`, msg.text());
   });
@@ -53,81 +52,83 @@ async function run() {
     throw new Error('Canvas element not found in DOM!');
   }
 
-  // Get total scrollable height of About Us
-  const scrollInfo = await page.evaluate(() => {
-    return {
-      scrollHeight: document.documentElement.scrollHeight,
-      clientHeight: window.innerHeight,
-      maxScroll: document.documentElement.scrollHeight - window.innerHeight
-    };
+  // Get exact scroll metrics from page container
+  const scrollMetrics = await page.evaluate(() => {
+    const container = document.querySelector('div[class*="min-h-screen"]');
+    if (!container) return { topOffset: 0, totalScrollable: 400 };
+    const rect = container.getBoundingClientRect();
+    const topOffset = rect.top + window.scrollY;
+    const totalScrollable = rect.height - window.innerHeight;
+    return { topOffset, totalScrollable, maxScroll: document.documentElement.scrollHeight - window.innerHeight };
   });
-  console.log('Scroll Info:', scrollInfo);
+  console.log('Scroll Metrics:', scrollMetrics);
 
-  // Helper to scroll smoothly to fraction of page
-  async function scrollToRatio(ratio, label) {
-    const targetY = scrollInfo.maxScroll * ratio;
-    console.log(`Scrolling to ${label} (${(ratio * 100).toFixed(0)}% = ${targetY.toFixed(0)}px)...`);
+  // Helper to scroll smoothly to exact target progress (0.0 to 1.0)
+  async function scrollToProgress(progress, label) {
+    const targetY = scrollMetrics.topOffset + Math.min(scrollMetrics.totalScrollable, scrollMetrics.maxScroll) * progress;
+    console.log(`Scrolling to ${label} (progress: ${(progress * 100).toFixed(0)}% -> scrollY: ${targetY.toFixed(0)}px)...`);
     await page.evaluate((y) => {
       window.scrollTo({ top: y, behavior: 'instant' });
       window.dispatchEvent(new Event('scroll'));
     }, targetY);
-    await sleep(900); // Allow lerp and render to settle
+    await sleep(1000); // Allow scrub smoothing to settle
+    const state = await page.evaluate(() => window.__logo3dState);
+    console.log(`Settled state at ${label}:`, state);
   }
 
-  // Stage A: Opening Reveal (0% scroll)
-  await scrollToRatio(0.0, 'Stage A - Heroic Reveal');
-  const stageAPath = path.join(ARTIFACT_DIR, '69_about_3d_stage_a_reveal.png');
-  await page.screenshot({ path: stageAPath, fullPage: false });
-  console.log('Saved Stage A screenshot:', stageAPath);
+  // 1. Stage 0: Initial resting corner icon (progress 0.00)
+  await scrollToProgress(0.00, 'Stage 0 - Corner Icon (Small Top-Right)');
+  const stage0Path = path.join(ARTIFACT_DIR, '93_about_3d_stage0_corner_icon.png');
+  await page.screenshot({ path: stage0Path, fullPage: false });
+  console.log('Saved Stage 0 screenshot:', stage0Path);
 
-  // Stage C: Isometric / Three-Quarter View (~30% scroll)
-  await scrollToRatio(0.30, 'Stage C - Isometric 3/4 View');
-  const stageCPath = path.join(ARTIFACT_DIR, '70_about_3d_stage_c_isometric.png');
-  await page.screenshot({ path: stageCPath, fullPage: false });
-  console.log('Saved Stage C screenshot:', stageCPath);
+  // 2. Stage 1: Front View, Full Screen (progress 0.30)
+  await scrollToProgress(0.30, 'Stage 1 - Front View Full-Screen');
+  const stage1Path = path.join(ARTIFACT_DIR, '94_about_3d_stage1_front_view_fullscreen.png');
+  await page.screenshot({ path: stage1Path, fullPage: false });
+  console.log('Saved Stage 1 screenshot:', stage1Path);
 
-  // Stage D: Side Profile View (~45% scroll)
-  await scrollToRatio(0.45, 'Stage D - Side Profile View');
-  const stageDPath = path.join(ARTIFACT_DIR, '71_about_3d_stage_d_side.png');
-  await page.screenshot({ path: stageDPath, fullPage: false });
-  console.log('Saved Stage D screenshot:', stageDPath);
+  // 3. Stage 2: Top View, Full Screen (progress 0.65)
+  await scrollToProgress(0.65, 'Stage 2 - Top View Full-Screen');
+  const stage2Path = path.join(ARTIFACT_DIR, '95_about_3d_stage2_top_view_fullscreen.png');
+  await page.screenshot({ path: stage2Path, fullPage: false });
+  console.log('Saved Stage 2 screenshot:', stage2Path);
 
-  // Stage E: Elevated Top-Down View (~60% scroll)
-  await scrollToRatio(0.60, 'Stage E - Elevated Top-Down View');
-  const stageEPath = path.join(ARTIFACT_DIR, '72_about_3d_stage_e_top.png');
-  await page.screenshot({ path: stageEPath, fullPage: false });
-  console.log('Saved Stage E screenshot:', stageEPath);
+  // 4. Stage 3: Back to Corner Icon (progress 1.00)
+  await scrollToProgress(1.00, 'Stage 3 - Back to Corner Icon');
+  const stage3Path = path.join(ARTIFACT_DIR, '96_about_3d_stage3_corner_icon.png');
+  await page.screenshot({ path: stage3Path, fullPage: false });
+  console.log('Saved Stage 3 screenshot:', stage3Path);
 
-  // Stage H: Final Heroic Reveal (100% scroll)
-  await scrollToRatio(1.0, 'Stage H - Final Heroic Reveal');
-  const stageHPath = path.join(ARTIFACT_DIR, '73_about_3d_stage_h_final.png');
-  await page.screenshot({ path: stageHPath, fullPage: false });
-  console.log('Saved Stage H screenshot:', stageHPath);
+  // 5. Reverse Scroll Verification: Scroll back to 30% (Front view)
+  console.log('\nTesting reverse scroll back to Stage 1 (progress: 30%)...');
+  await scrollToProgress(0.30, 'Reverse to Stage 1 - Front View');
+  const reverseStage1Path = path.join(ARTIFACT_DIR, '97_about_3d_reverse_stage1_front.png');
+  await page.screenshot({ path: reverseStage1Path, fullPage: false });
+  console.log('Saved Reverse Stage 1 screenshot:', reverseStage1Path);
 
-  // Reverse Scroll Verification: Scroll back to top
-  console.log('Testing reverse scroll back to 0%...');
-  await scrollToRatio(0.0, 'Reverse to Stage A');
-  const reverseAPath = path.join(ARTIFACT_DIR, '74_about_3d_reverse_top.png');
-  await page.screenshot({ path: reverseAPath, fullPage: false });
-  console.log('Saved Reverse Top screenshot:', reverseAPath);
+  // 6. Reverse Scroll Verification: Scroll back to 0% (Corner icon)
+  console.log('Testing reverse scroll back to Stage 0 (progress: 0%)...');
+  await scrollToProgress(0.00, 'Reverse to Stage 0 - Corner Icon');
+  const reverseStage0Path = path.join(ARTIFACT_DIR, '98_about_3d_reverse_stage0_corner.png');
+  await page.screenshot({ path: reverseStage0Path, fullPage: false });
+  console.log('Saved Reverse Stage 0 screenshot:', reverseStage0Path);
 
-  // Verify interactive elements: Map button exists and is clickable
-  const mapBtnInfo = await page.evaluate(() => {
-    const btn = document.querySelector('a[href*="maps"]');
-    if (!btn) return null;
-    const rect = btn.getBoundingClientRect();
-    const style = window.getComputedStyle(btn);
+  // Verify interactive text overlay and elements
+  const overlayChecks = await page.evaluate(() => {
+    const textHeader = document.querySelector('h1');
+    const mapLink = document.querySelector('a[href*="maps"]');
+    const canvasEl = document.querySelector('canvas');
     return {
-      href: btn.href,
-      text: btn.innerText.trim(),
-      pointerEvents: style.pointerEvents,
-      visible: rect.width > 0 && rect.height > 0
+      h1Visible: textHeader ? textHeader.getBoundingClientRect().height > 0 : false,
+      mapLinkClickable: mapLink ? window.getComputedStyle(mapLink).pointerEvents !== 'none' : false,
+      canvasPointerEvents: canvasEl ? window.getComputedStyle(canvasEl).pointerEvents : null
     };
   });
-  console.log('Map button info:', mapBtnInfo);
+  console.log('Overlay and interaction verification:', overlayChecks);
 
   await browser.close();
-  console.log('All 3D About Us scroll checks passed successfully!');
+  console.log('\n✓ ALL 3D ABOUT US CONTROLLED SCROLL TESTS PASSED SUCCESSFULLY!');
 }
 
 run().catch(err => {

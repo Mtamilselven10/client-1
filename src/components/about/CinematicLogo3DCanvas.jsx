@@ -2,113 +2,115 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-// 8 Cinematic Camera & Model Choreography Stages (Tuned for readability and visual balance)
-const CINEMATIC_STAGES = [
-  // Stage A: Heroic Opening Reveal (Floating in open space right of the Editorial Headline)
-  {
-    progress: 0.0,
-    cameraPos: [0.6, 0.4, 3.2],
-    cameraTarget: [0.8, 0.4, 0.0],
-    modelPos: [0.8, 0.4, 0.0],
-    modelRot: [0.15, -0.38, 0.04],
-    modelScale: 1.25,
-  },
-  // Stage B: Front View Approach (Gentle frontal alignment as user scrolls into the story)
-  {
-    progress: 0.15,
-    cameraPos: [0.5, 0.2, 3.0],
-    cameraTarget: [0.6, 0.2, 0.0],
-    modelPos: [0.65, 0.2, 0.0],
-    modelRot: [0.02, -0.05, 0.0],
-    modelScale: 1.2,
-  },
-  // Stage C: Three-Quarter / Isometric View (Dimensional structure, framing narrative)
-  {
-    progress: 0.30,
-    cameraPos: [1.8, 0.9, 2.8],
-    cameraTarget: [0.6, 0.1, 0.0],
-    modelPos: [0.6, 0.1, 0.0],
-    modelRot: [-0.22, 0.62, 0.12],
-    modelScale: 1.15,
-  },
-  // Stage D: Side Profile Depth View (Clean extruded edge finish and depth)
-  {
-    progress: 0.45,
-    cameraPos: [2.5, 0.3, 1.2],
-    cameraTarget: [0.55, 0.0, 0.0],
-    modelPos: [0.55, 0.0, 0.0],
-    modelRot: [0.04, 1.54, -0.02],
-    modelScale: 1.2,
-  },
-  // Stage E: Elevated Top-Down View (Contour, symmetry & organic flow)
-  {
-    progress: 0.60,
-    cameraPos: [0.5, 2.8, 1.4],
-    cameraTarget: [0.5, 0.0, 0.0],
-    modelPos: [0.5, 0.0, 0.0],
-    modelRot: [1.3, 0.1, -0.08],
-    modelScale: 1.15,
-  },
-  // Stage F: Opposite Three-Quarter View (Sweeping orbit with warm rim lighting)
-  {
-    progress: 0.75,
-    cameraPos: [-1.4, 0.6, 2.6],
-    cameraTarget: [0.35, 0.1, 0.0],
-    modelPos: [0.35, 0.1, 0.0],
-    modelRot: [0.12, -0.68, -0.05],
-    modelScale: 1.2,
-  },
-  // Stage G: Macro Zoom Detail View (Surface craftsmanship & golden bevel close-up)
-  {
-    progress: 0.88,
-    cameraPos: [0.45, 0.25, 1.9],
-    cameraTarget: [0.35, 0.15, 0.0],
-    modelPos: [0.35, 0.15, 0.0],
-    modelRot: [-0.12, 0.35, 0.04],
-    modelScale: 1.55,
-  },
-  // Stage H: Final Heroic Reveal (Grand anchor framing the Flagship Store section)
-  {
-    progress: 1.0,
-    cameraPos: [0.0, 0.35, 3.1],
-    cameraTarget: [0.0, 0.35, 0.0],
-    modelPos: [0.0, 0.35, 0.0],
-    modelRot: [0.05, 0.0, 0.0],
-    modelScale: 1.35,
-  },
-];
+// ============================================================================
+// SCROLL-DRIVEN 3D CAMERA & MODEL STAGES (CONTROLLED: FRONT VIEW & TOP VIEW ONLY)
+// ============================================================================
+// Stage 0 -> Stage 1: progress 0.00 to 0.30 (Corner icon -> Front view, full-screen)
+// Stage 1 -> Stage 2: progress 0.30 to 0.65 (Front view -> Top view, full-screen)
+// Stage 2 -> Stage 3: progress 0.65 to 1.00 (Top view -> Back to corner icon)
+// ============================================================================
 
-// Helper: Smooth Hermite interpolation
-function smoothStep(t) {
-  return t * t * (3 - 2 * t);
+export const STAGE_CONFIG = {
+  stage0_corner: 0.00, // Initial static icon in top-right corner
+  stage1_front: 0.30,  // Zoomed & rotated into full-screen front view
+  stage2_top: 0.65,    // Smooth transition into full-screen top view
+  stage3_corner: 1.00, // Reverted and shrunk back into top-right corner icon
+};
+
+// Preset exact rotation angles [X, Y, Z] in radians:
+// - Front View: [0, 0, 0] faces camera directly
+// - Top View: [Math.PI / 2, 0, 0] rotates around X axis by +90° (+1.57 rad) to display top view
+// - Corner Pose: [0, 0, 0] clean resting front-facing icon angle
+export const ROTATION_PRESETS = {
+  frontView: [0, 0, 0],
+  topView: [Math.PI / 2, 0, 0],
+  cornerPose: [0, 0, 0],
+};
+
+// Scale presets:
+// - Corner icon: small static icon in top-right
+// - Full-screen background: large background behind text overlay
+const CORNER_SCALE = 0.38;
+const FULLSCREEN_SCALE = 2.15;
+
+// Helper: Power2 In/Out smooth easing curve
+function power2InOut(t) {
+  return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
 }
 
-// Helper: Multi-keyframe linear/smoothstep interpolation
-function sampleStages(stages, progress) {
-  const p = Math.max(0, Math.min(1, progress));
-  
-  if (p <= stages[0].progress) return stages[0];
-  if (p >= stages[stages.length - 1].progress) return stages[stages.length - 1];
+// Compute top-right corner position dynamically based on camera aspect ratio
+function getCornerPosition(aspect) {
+  const vFOV = THREE.MathUtils.degToRad(42);
+  const halfHeight = Math.tan(vFOV / 2) * 3.2;
+  const halfWidth = halfHeight * aspect;
+  // Position neatly inside top-right bounds with comfortable margins on all screen sizes
+  return [halfWidth * 0.62, halfHeight * 0.50, 0];
+}
 
-  let i = 0;
-  while (i < stages.length - 1 && stages[i + 1].progress < p) {
-    i++;
+// Interpolate strictly through the 3 scroll stages
+function interpolateScrollStages(progress, cornerPos) {
+  const p = Math.max(0, Math.min(1, progress));
+  const { stage0_corner, stage1_front, stage2_top, stage3_corner } = STAGE_CONFIG;
+  const { frontView, topView, cornerPose } = ROTATION_PRESETS;
+
+  // --------------------------------------------------------------------------
+  // STAGE 0 to STAGE 1: Corner Icon (0.00) -> Front View Full Screen (0.30)
+  // Zooms and scales from small top-right icon into full-screen front view
+  // --------------------------------------------------------------------------
+  if (p <= stage1_front) {
+    const rawT = (p - stage0_corner) / (stage1_front - stage0_corner);
+    const t = power2InOut(Math.max(0, Math.min(1, rawT)));
+    return {
+      pos: [
+        cornerPos[0] * (1 - t),
+        cornerPos[1] * (1 - t),
+        0
+      ],
+      rot: [
+        cornerPose[0] + (frontView[0] - cornerPose[0]) * t,
+        cornerPose[1] + (frontView[1] - cornerPose[1]) * t,
+        cornerPose[2] + (frontView[2] - cornerPose[2]) * t,
+      ],
+      scale: CORNER_SCALE + (FULLSCREEN_SCALE - CORNER_SCALE) * t,
+    };
   }
 
-  const s0 = stages[i];
-  const s1 = stages[i + 1];
-  const rawRatio = (p - s0.progress) / (s1.progress - s0.progress);
-  const t = smoothStep(rawRatio);
+  // --------------------------------------------------------------------------
+  // STAGE 1 to STAGE 2: Front View Full Screen (0.30) -> Top View Full Screen (0.65)
+  // Stays full-screen background while rotating smoothly from front view to top view
+  // --------------------------------------------------------------------------
+  if (p <= stage2_top) {
+    const rawT = (p - stage1_front) / (stage2_top - stage1_front);
+    const t = power2InOut(Math.max(0, Math.min(1, rawT)));
+    return {
+      pos: [0, 0, 0],
+      rot: [
+        frontView[0] + (topView[0] - frontView[0]) * t,
+        frontView[1] + (topView[1] - frontView[1]) * t,
+        frontView[2] + (topView[2] - frontView[2]) * t,
+      ],
+      scale: FULLSCREEN_SCALE,
+    };
+  }
 
-  const lerp = (a, b) => a + (b - a) * t;
-  const lerp3 = (a, b) => [lerp(a[0], b[0]), lerp(a[1], b[1]), lerp(a[2], b[2])];
-
+  // --------------------------------------------------------------------------
+  // STAGE 2 to STAGE 3: Top View Full Screen (0.65) -> Back to Corner Icon (1.00)
+  // Rotates back from top view and shrinks back into the top-right corner icon
+  // --------------------------------------------------------------------------
+  const rawT = (p - stage2_top) / (stage3_corner - stage2_top);
+  const t = power2InOut(Math.max(0, Math.min(1, rawT)));
   return {
-    cameraPos: lerp3(s0.cameraPos, s1.cameraPos),
-    cameraTarget: lerp3(s0.cameraTarget, s1.cameraTarget),
-    modelPos: lerp3(s0.modelPos, s1.modelPos),
-    modelRot: lerp3(s0.modelRot, s1.modelRot),
-    modelScale: lerp(s0.modelScale, s1.modelScale),
+    pos: [
+      cornerPos[0] * t,
+      cornerPos[1] * t,
+      0
+    ],
+    rot: [
+      topView[0] + (cornerPose[0] - topView[0]) * t,
+      topView[1] + (cornerPose[1] - topView[1]) * t,
+      topView[2] + (cornerPose[2] - topView[2]) * t,
+    ],
+    scale: FULLSCREEN_SCALE + (CORNER_SCALE - FULLSCREEN_SCALE) * t,
   };
 }
 
@@ -133,7 +135,8 @@ export default function CinematicLogo3DCanvas({ containerRef }) {
       0.1,
       100
     );
-    camera.position.set(1.2, 0.4, 3.4);
+    camera.position.set(0, 0, 3.2);
+    camera.lookAt(0, 0, 0);
 
     const renderer = new THREE.WebGLRenderer({
       canvas,
@@ -180,12 +183,10 @@ export default function CinematicLogo3DCanvas({ containerRef }) {
     const loader = new GLTFLoader();
     const modelUrl = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/models/logo_3d_color.glb`;
 
-    let logoModel = null;
-
     loader.load(
       modelUrl,
       (gltf) => {
-        logoModel = gltf.scene;
+        const logoModel = gltf.scene;
 
         // Enhance materials without altering original geometry or textures
         logoModel.traverse((child) => {
@@ -208,6 +209,14 @@ export default function CinematicLogo3DCanvas({ containerRef }) {
         logoModel.position.z = -center.z;
 
         logoGroup.add(logoModel);
+
+        // Position initial state immediately
+        const initialCornerPos = getCornerPosition(camera.aspect);
+        const initialTransform = interpolateScrollStages(0, initialCornerPos);
+        logoGroup.position.set(...initialTransform.pos);
+        logoGroup.rotation.set(...initialTransform.rot);
+        logoGroup.scale.setScalar(initialTransform.scale);
+
         setLoading(false);
       },
       undefined,
@@ -218,13 +227,9 @@ export default function CinematicLogo3DCanvas({ containerRef }) {
       }
     );
 
-    // Interactive Scroll & Parallax State
+    // Scroll Progress State (Single scrubbed progress, NO mouse-follow, NO continuous spin)
     let targetProgress = 0;
     let lerpedProgress = 0;
-    let targetMouseX = 0;
-    let targetMouseY = 0;
-    let mouseX = 0;
-    let mouseY = 0;
 
     // Calculate Scroll Progress inside the About Us container
     const updateScrollProgress = () => {
@@ -240,8 +245,8 @@ export default function CinematicLogo3DCanvas({ containerRef }) {
         return;
       }
 
-      // Calculate how far container has scrolled into and through viewport
-      const scrolled = -rect.top;
+      // Calculate how far container has scrolled through viewport
+      const scrolled = Math.max(0, -rect.top);
       const rawProgress = scrolled / totalScrollable;
       targetProgress = Math.max(0, Math.min(1, rawProgress));
     };
@@ -250,14 +255,7 @@ export default function CinematicLogo3DCanvas({ containerRef }) {
       updateScrollProgress();
     };
 
-    const handleMouseMove = (e) => {
-      // Normalized coordinates: -1 to 1
-      targetMouseX = (e.clientX / window.innerWidth) * 2 - 1;
-      targetMouseY = -(e.clientY / window.innerHeight) * 2 + 1;
-    };
-
     window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('mousemove', handleMouseMove, { passive: true });
     updateScrollProgress();
 
     // Resize Handler
@@ -287,71 +285,35 @@ export default function CinematicLogo3DCanvas({ containerRef }) {
       intersectionObserver.observe(containerRef.current);
     }
 
-    // Animation Loop with 60fps lerp interpolation
-    let clock = new THREE.Clock();
-
+    // Animation Loop with smooth scrubbed interpolation (scrub: 1 feel, reversible)
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
 
       if (!isVisible) return;
 
-      const elapsedTime = clock.getElapsedTime();
+      // Smooth scrub smoothing (equivalent to scrub: 1)
+      lerpedProgress += (targetProgress - lerpedProgress) * 0.15;
 
-      // Smooth buttery lerping for scroll progress (responsive yet cinematic)
-      lerpedProgress += (targetProgress - lerpedProgress) * 0.085;
+      // Compute dynamic corner position based on current aspect ratio
+      const cornerPos = getCornerPosition(camera.aspect);
 
-      // Mouse parallax lerp
-      mouseX += (targetMouseX - mouseX) * 0.05;
-      mouseY += (targetMouseY - mouseY) * 0.05;
+      // Sample exact pose: position, rotation, and scale for current scroll progress
+      const { pos, rot, scale } = interpolateScrollStages(lerpedProgress, cornerPos);
 
-      // Sample choreographed stages
-      const current = sampleStages(CINEMATIC_STAGES, lerpedProgress);
-
-      // Subtle atmospheric breathing motion
-      const breath = Math.sin(elapsedTime * 1.6) * 0.02;
-      const microTilt = Math.cos(elapsedTime * 1.2) * 0.015;
-
-      // Position, Rotation & Scale
-      logoGroup.position.set(
-        current.modelPos[0] + mouseX * 0.06,
-        current.modelPos[1] + mouseY * 0.05 + breath,
-        current.modelPos[2]
-      );
-
-      logoGroup.rotation.set(
-        current.modelRot[0] + mouseY * 0.08 + microTilt,
-        current.modelRot[1] + mouseX * 0.12,
-        current.modelRot[2]
-      );
-
-      logoGroup.scale.setScalar(current.modelScale);
-
-      // Camera orchestration
-      camera.position.set(
-        current.cameraPos[0] + mouseX * 0.12,
-        current.cameraPos[1] + mouseY * 0.08,
-        current.cameraPos[2]
-      );
-      camera.lookAt(
-        current.cameraTarget[0],
-        current.cameraTarget[1],
-        current.cameraTarget[2]
-      );
-
-      // Dynamic light movement following the logo
-      keyLight.position.x = 3.5 + mouseX * 0.8;
-      keyLight.position.y = 4.0 + mouseY * 0.8;
+      // Apply to 3D logo group (Static when stationary; strictly scroll-driven)
+      logoGroup.position.set(pos[0], pos[1], pos[2]);
+      logoGroup.rotation.set(rot[0], rot[1], rot[2]);
+      logoGroup.scale.setScalar(scale);
 
       renderer.render(scene, camera);
     };
 
     animate();
 
-    // Cleanup
+    // Cleanup on unmount
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('mousemove', handleMouseMove);
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
 
