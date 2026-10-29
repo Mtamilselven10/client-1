@@ -21,15 +21,19 @@ const ProductCard = forwardRef(function ProductCard({ product, index = 0 }, ref)
   const [isPicked, setIsPicked] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [cursorOrigin, setCursorOrigin] = useState('50% 50%');
+  const [cursorOffset, setCursorOffset] = useState({ x: 0, y: 0 });
   const cardContainerRef = useRef(null);
   const heartBtnRef = useRef(null);
 
   const handleMouseEnter = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
     if (rect.width > 0 && rect.height > 0) {
-      const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
-      const y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
-      setCursorOrigin(`${x.toFixed(1)}% ${y.toFixed(1)}%`);
+      const pctX = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+      const pctY = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
+      setCursorOrigin(`${pctX.toFixed(1)}% ${pctY.toFixed(1)}%`);
+      const normX = (pctX - 50) / 50; // -1 to 1
+      const normY = (pctY - 50) / 50; // -1 to 1
+      setCursorOffset({ x: normX * 2, y: normY * 1.5 });
     }
     setIsHovered(true);
   };
@@ -37,15 +41,41 @@ const ProductCard = forwardRef(function ProductCard({ product, index = 0 }, ref)
   const handleMouseMove = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
     if (rect.width > 0 && rect.height > 0) {
-      const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
-      const y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
-      setCursorOrigin(`${x.toFixed(1)}% ${y.toFixed(1)}%`);
+      const pctX = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+      const pctY = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
+      setCursorOrigin(`${pctX.toFixed(1)}% ${pctY.toFixed(1)}%`);
+      const normX = (pctX - 50) / 50;
+      const normY = (pctY - 50) / 50;
+      setCursorOffset({ x: normX * 2, y: normY * 1.5 });
     }
   };
 
   const handleMouseLeave = () => {
     setIsHovered(false);
     setCursorOrigin('50% 50%');
+    setCursorOffset({ x: 0, y: 0 });
+  };
+
+  const handleFocus = () => {
+    setCursorOrigin('50% 50%');
+    setCursorOffset({ x: 0, y: 0 });
+    setIsHovered(true);
+  };
+
+  const handleBlur = (e) => {
+    if (!e.currentTarget.contains(e.relatedTarget)) {
+      setIsHovered(false);
+      setCursorOffset({ x: 0, y: 0 });
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      if (e.target === e.currentTarget) {
+        e.preventDefault();
+        handleCardClick();
+      }
+    }
   };
 
   const setMergedRef = (el) => {
@@ -87,21 +117,43 @@ const ProductCard = forwardRef(function ProductCard({ product, index = 0 }, ref)
       ref={setMergedRef}
       layout
       initial={{ opacity: 0, y: 16 }}
-      animate={isPicked ? { scale: [1, 0.98, 1], y: 0 } : { opacity: 1, y: 0 }}
+      animate={
+        isPicked 
+          ? { scale: [1, 0.98, 1], y: 0, x: 0, opacity: 1 } 
+          : isHovered
+          ? { 
+              scale: 1.025, 
+              y: -4 + cursorOffset.y, 
+              x: cursorOffset.x,
+              opacity: 1,
+              transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] }
+            }
+          : { 
+              scale: 1, 
+              y: 0, 
+              x: 0,
+              opacity: 1,
+              transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] } 
+            }
+      }
       exit={{ opacity: 0, scale: 0.95 }}
-      whileHover={{ 
-        y: -2, 
-        scale: 1.006, 
-        transition: { duration: 0.28, ease: [0.16, 1, 0.3, 1] } 
-      }}
       transition={{ delay: Math.min(index * 0.04, 0.32), duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
       data-testid="product-card"
+      tabIndex={0}
+      role="article"
       onClick={handleCardClick}
+      onKeyDown={handleKeyDown}
       onMouseEnter={handleMouseEnter}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      style={{ transformOrigin: cursorOrigin }}
-      className="relative group cursor-pointer rounded-card overflow-hidden bg-cream-light border border-olive/20 shadow-olive-sm hover:shadow-ms-store hover:border-olive/50 transition-all duration-300 flex flex-col justify-between ms-product-card"
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      style={{ 
+        transformOrigin: cursorOrigin,
+        transformStyle: 'preserve-3d',
+        willChange: 'transform, box-shadow'
+      }}
+      className="relative group cursor-pointer rounded-card overflow-hidden bg-cream-light border border-olive/20 shadow-olive-sm hover:shadow-ms-store hover:border-olive/50 transition-shadow transition-colors duration-300 flex flex-col justify-between ms-product-card"
     >
       {/* Microsoft Store Fluent Ambient Light Sheen */}
       <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10" />

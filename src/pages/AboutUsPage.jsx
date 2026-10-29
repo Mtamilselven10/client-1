@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, ShieldCheck, Award, Clock, Phone, ExternalLink } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
@@ -9,12 +9,20 @@ import {
   WORKING_HOURS, 
   CUSTOMER_CARE_PHONES 
 } from '../config';
+import CinematicLogo3DCanvas from '../components/about/CinematicLogo3DCanvas';
 
 export default function AboutUsPage() {
   const { t } = useLanguage();
+  const pageRef = useRef(null);
 
   return (
-    <div className="py-8 px-4 sm:px-8 max-w-7xl mx-auto bg-cream space-y-16">
+    <div ref={pageRef} className="relative min-h-screen bg-cream">
+      {/* Sticky Cinematic 3D Logo Canvas (Only active in About Us) */}
+      <div className="sticky top-0 h-screen -mb-[100vh] pointer-events-none z-0 overflow-hidden">
+        <CinematicLogo3DCanvas containerRef={pageRef} />
+      </div>
+
+      <div className="relative z-10 py-8 px-4 sm:px-8 max-w-7xl mx-auto space-y-16">
       {/* Editorial Header */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
@@ -174,6 +182,7 @@ export default function AboutUsPage() {
           </div>
         </div>
       </motion.div>
+      </div>
     </div>
   );
 }
