@@ -78,10 +78,17 @@ export default function WishlistPage() {
                 initial={{ opacity: 0, scale: 0.92 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.85, transition: { duration: 0.2 } }}
-                whileHover={{ y: -6 }}
+                whileHover={{ 
+                  y: -6, 
+                  scale: 1.02, 
+                  transition: { duration: 0.32, ease: [0.16, 1, 0.3, 1] } 
+                }}
                 transition={{ duration: 0.25 }}
-                className="rounded-card overflow-hidden bg-cream-light border border-olive/20 shadow-olive-sm flex flex-col justify-between group hover:border-olive transition-shadow"
+                className="relative rounded-card overflow-hidden bg-cream-light border border-olive/20 shadow-olive-sm hover:shadow-ms-store hover:border-olive/50 hover:z-10 transition-shadow transition-colors duration-300 flex flex-col justify-between group ms-product-card"
               >
+                {/* Microsoft Store Fluent Ambient Light Sheen */}
+                <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10" />
+
                 {/* Image & Remove Action */}
                 <div 
                   onClick={() => navigate(`/products/${item.id}`, { state: { product: item } })}
@@ -96,7 +103,7 @@ export default function WishlistPage() {
                         e.currentTarget.src = item.fallbackImage;
                       }
                     }}
-                    className="w-full h-full object-cover rounded-md group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover rounded-md group-hover:scale-106 transition-transform duration-400 ease-out"
                   />
                   <motion.button
                     whileHover={{ scale: 1.15 }}

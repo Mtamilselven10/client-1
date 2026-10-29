@@ -63,12 +63,18 @@ const ProductCard = forwardRef(function ProductCard({ product, index = 0 }, ref)
       initial={{ opacity: 0, y: 16 }}
       animate={isPicked ? { scale: [1, 0.98, 1], y: 0 } : { opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      whileHover={{ y: -4 }}
+      whileHover={{ 
+        y: -6, 
+        scale: 1.02, 
+        transition: { duration: 0.32, ease: [0.16, 1, 0.3, 1] } 
+      }}
       transition={{ delay: Math.min(index * 0.04, 0.32), duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
       data-testid="product-card"
       onClick={handleCardClick}
-      className="relative group cursor-pointer rounded-card overflow-hidden bg-cream-light border border-olive/20 shadow-olive-sm hover:shadow-olive-md hover:border-olive transition-shadow duration-300 flex flex-col justify-between"
+      className="relative group cursor-pointer rounded-card overflow-hidden bg-cream-light border border-olive/20 shadow-olive-sm hover:shadow-ms-store hover:border-olive/50 hover:z-10 transition-shadow transition-colors duration-300 flex flex-col justify-between ms-product-card"
     >
+      {/* Microsoft Store Fluent Ambient Light Sheen */}
+      <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10" />
       {/* Picked Ring Pulse Animation */}
       {isPicked && (
         <motion.div
@@ -90,7 +96,7 @@ const ProductCard = forwardRef(function ProductCard({ product, index = 0 }, ref)
               e.currentTarget.src = product.fallbackImage;
             }
           }}
-          className="w-full h-full object-cover rounded-md transition-transform duration-500 group-hover:scale-104"
+          className="w-full h-full object-cover rounded-md transition-transform duration-400 ease-out group-hover:scale-106"
         />
 
         {/* Wishlist Heart Toggle Button */}
@@ -143,7 +149,7 @@ const ProductCard = forwardRef(function ProductCard({ product, index = 0 }, ref)
           </div>
 
           {/* Product Name */}
-          <h3 className="font-serif font-bold text-ink text-base line-clamp-2 leading-snug group-hover:text-olive transition-colors">
+          <h3 className="font-serif font-bold text-ink text-base line-clamp-2 leading-snug group-hover:text-olive transition-colors duration-250">
             {product.name}
           </h3>
 
