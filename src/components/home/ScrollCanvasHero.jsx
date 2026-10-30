@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, ChevronDown, Sparkles } from 'lucide-react';
+import { ArrowRight, ChevronDown } from 'lucide-react';
 import { SHOP_NAME, SHOP_TAGLINE } from '../../config';
 import { useLanguage } from '../../context/LanguageContext';
 import frameManifest from '../../home/frameManifest.js';
@@ -13,7 +13,7 @@ export default function ScrollCanvasHero() {
   const canvasRef = useRef(null);
 
   const TOTAL_FRAMES = frameManifest.totalFrames;
-  const [loadProgress, setLoadProgress] = useState(0);
+
   const [isLoaded, setIsLoaded] = useState(false);
   const [currentFrameDisplay, setCurrentFrameDisplay] = useState(0);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -129,8 +129,8 @@ export default function ScrollCanvasHero() {
         if (isCancelled) return;
         images[i - 1] = img;
         loadedCount++;
-        const pct = Math.round((loadedCount / TOTAL_FRAMES) * 100);
-        setLoadProgress(pct);
+
+
 
         if (loadedCount >= 10 && !hasUnlocked) {
           unlock();
@@ -246,52 +246,6 @@ export default function ScrollCanvasHero() {
 
   return (
     <>
-      {/* Preloader Screen */}
-      {!isLoaded && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-cream px-6">
-          <div className="w-full max-w-md text-center space-y-6">
-            <div className="w-20 h-20 mx-auto rounded-card bg-cream-light p-2 border border-olive/20 shadow-olive-md flex items-center justify-center">
-              <img 
-                src={`${import.meta.env.BASE_URL}logo.png`} 
-                alt="Gandhi Shop Logo" 
-                className="w-full h-full object-contain animate-pulse" 
-              />
-            </div>
-
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-olive-soft text-olive text-sm font-semibold tracking-wider">
-              <Sparkles className="w-4 h-4 animate-spin" />
-              <span>{t('hero.heritageTag')}</span>
-            </div>
-
-            <h2 className="font-serif text-3xl sm:text-4xl font-bold text-olive">
-              {t('hero.preparing')}
-            </h2>
-
-            <p className="text-ink text-sm sm:text-base font-medium">
-              {t('hero.loadingSequence')} ({loadProgress}%)
-            </p>
-
-            {/* Olive Progress Bar */}
-            <div className="w-full h-3 rounded-full bg-cream-deep overflow-hidden border border-olive/20 shadow-inner">
-              <div 
-                className="h-full bg-olive rounded-full transition-all duration-150 ease-out"
-                style={{ width: `${loadProgress}%` }}
-              />
-            </div>
-
-            {/* Skip Button during preloading */}
-            <div className="pt-2">
-              <button
-                onClick={handleExploreStore}
-                className="text-xs uppercase tracking-widest text-olive hover:text-olive-dark underline underline-offset-4 font-semibold"
-              >
-                {t('hero.skipIntro')}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Pinned Full-Screen Hero Viewport */}
       <section 
         className="relative w-full h-screen overflow-hidden bg-cream select-none"

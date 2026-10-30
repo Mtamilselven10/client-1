@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ToastProvider } from './context/ToastContext';
@@ -6,6 +6,8 @@ import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { ReviewsProvider } from './context/ReviewsContext';
+
+import IntroVideo from './components/intro/IntroVideo';
 
 import Sidebar from './components/layout/Sidebar';
 import FloatingWhatsApp from './components/layout/FloatingWhatsApp';
@@ -82,15 +84,36 @@ function MainLayout() {
 }
 
 export default function App() {
+  const [introDone, setIntroDone] = useState(() => {
+    try {
+      const hasSeen = sessionStorage.getItem('gandhi_intro_seen');
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      return Boolean(hasSeen || prefersReduced);
+    } catch {
+      return false;
+    }
+  });
+
+  const handleIntroComplete = () => {
+    try {
+      sessionStorage.setItem('gandhi_intro_seen', 'true');
+    } catch {}
+    setIntroDone(true);
+  };
+
   return (
     <LanguageProvider>
       <ToastProvider>
         <CartProvider>
           <WishlistProvider>
             <ReviewsProvider>
-              <HashRouter>
-                <MainLayout />
-              </HashRouter>
+              {!introDone ? (
+                <IntroVideo onComplete={handleIntroComplete} />
+              ) : (
+                <HashRouter>
+                  <MainLayout />
+                </HashRouter>
+              )}
             </ReviewsProvider>
           </WishlistProvider>
         </CartProvider>

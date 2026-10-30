@@ -44,6 +44,7 @@ export default {
         'olive-sm': '0 2px 8px rgba(93, 64, 55, 0.12)',
         'olive-md': '0 4px 16px rgba(93, 64, 55, 0.16)',
         'olive-lg': '0 8px 30px rgba(93, 64, 55, 0.22)',
+        'ms-store': '0 16px 32px -8px rgba(93, 64, 55, 0.22), 0 6px 14px -2px rgba(93, 64, 55, 0.12), 0 0 0 1px rgba(93, 64, 55, 0.28)',
       },
       borderRadius: {
         'card': '16px',

@@ -123,12 +123,15 @@ export default function FeaturedCategories() {
                 }
               }}
               whileHover={{ 
-                y: -8, 
-                transition: { type: "spring", stiffness: 350, damping: 22 } 
+                y: -6, 
+                scale: 1.015, 
+                transition: { duration: 0.32, ease: [0.16, 1, 0.3, 1] } 
               }}
               onClick={() => handleCategoryClick(cat.name)}
-              className="group cursor-pointer rounded-card overflow-hidden bg-cream-light border border-olive/20 shadow-olive-sm hover:shadow-olive-lg hover:border-olive transition-colors duration-300 flex flex-col"
+              className="relative group cursor-pointer rounded-card overflow-hidden bg-cream-light border border-olive/20 shadow-olive-sm hover:shadow-ms-store hover:border-olive/50 hover:z-10 transition-shadow transition-colors duration-300 flex flex-col ms-product-card"
             >
+              {/* Microsoft Store Fluent Ambient Light Sheen */}
+              <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10" />
               <div className="relative h-48 w-full overflow-hidden bg-cream-deep">
                 <img
                   src={getProductImageUrl(cat.image)}

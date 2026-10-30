@@ -71,3 +71,22 @@ input:focus, textarea:focus, select:focus {
 input[type="range"] {
   accent-color: var(--olive);
 }
+
+/* Microsoft Store-Style Interactive Product Card Hover */
+@media (hover: hover) and (pointer: fine) {
+  .ms-product-card {
+    will-change: transform, box-shadow;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+}
+
+/* Accessible reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .ms-product-card,
+  .ms-product-card * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    transform: none !important;
+  }
+}
