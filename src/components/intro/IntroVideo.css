@@ -1,0 +1,74 @@
+/* Intro Video Transition Styles */
+.intro-video-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background-color: #000000; /* Video edge color (pure black) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  opacity: 1;
+  /* FADE TIMING: Change duration below (currently 0.5s) */
+  transition: opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+  user-select: none;
+}
+
+/* Smooth fade-out state triggered when the video ends or is skipped */
+.intro-video-overlay.is-fading-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Centered responsive video element */
+.intro-video-element {
+  width: 100%;
+  height: 100%;
+  max-width: 100vw;
+  max-height: 100vh;
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 0.3s ease-in;
+  display: block;
+}
+
+/* Video reveals smoothly once loaded to avoid any black frame or flicker */
+.intro-video-element.is-ready {
+  opacity: 1;
+}
+
+/* Skip Button: sleek, semi-transparent pill in bottom-right corner */
+.intro-video-skip-btn {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 10000;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #FFFFFF;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.intro-video-skip-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.45);
+  transform: translateY(-1px);
+}
+
+.intro-video-skip-btn:focus-visible {
+  outline: 2px solid #C5A059;
+  outline-offset: 2px;
+}

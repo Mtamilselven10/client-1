@@ -7,7 +7,7 @@ import { WishlistProvider } from './context/WishlistContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { ReviewsProvider } from './context/ReviewsContext';
 
-import IntroMorph from './components/intro/IntroMorph';
+import IntroVideo from './components/intro/IntroVideo';
 
 import Sidebar from './components/layout/Sidebar';
 import FloatingWhatsApp from './components/layout/FloatingWhatsApp';
@@ -108,7 +108,7 @@ export default function App() {
           <WishlistProvider>
             <ReviewsProvider>
               {!introDone ? (
-                <IntroMorph onComplete={handleIntroComplete} />
+                <IntroVideo onComplete={handleIntroComplete} />
               ) : (
                 <HashRouter>
                   <MainLayout />
