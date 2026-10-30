@@ -2,6 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
+// Section ID where the 3D model fades out and stops following
+export const TRAVEL_END_SECTION_ID = 'footer';
+
 // ============================================================================
 // SCROLL-DRIVEN 3D CAMERA & MODEL STAGES (CONTROLLED: FRONT VIEW & TOP VIEW ONLY)
 // ============================================================================
@@ -217,6 +220,7 @@ export default function CinematicLogo3DCanvas({ containerRef }) {
         logoGroup.rotation.set(...initialTransform.rot);
         logoGroup.scale.setScalar(initialTransform.scale);
 
+        isDirty = true;
         setLoading(false);
       },
       undefined,
@@ -227,11 +231,13 @@ export default function CinematicLogo3DCanvas({ containerRef }) {
       }
     );
 
-    // Scroll Progress State (Single scrubbed progress, NO mouse-follow, NO continuous spin)
+    // Scroll Progress & Travel State
     let targetProgress = 0;
     let lerpedProgress = 0;
+    let currentOpacity = 1;
+    let isDirty = true;
 
-    // Calculate Scroll Progress inside the About Us container
+    // Calculate Scroll Progress inside the About Us container & Check Stop Section
     const updateScrollProgress = () => {
       const container = containerRef?.current;
       if (!container) return;
@@ -242,16 +248,42 @@ export default function CinematicLogo3DCanvas({ containerRef }) {
 
       if (totalScrollable <= 0) {
         targetProgress = 0;
-        return;
+      } else {
+        // Calculate how far container has scrolled through viewport
+        const scrolled = Math.max(0, -rect.top);
+        const rawProgress = scrolled / totalScrollable;
+        // When scrolled past About Us, keep pinned at Stage 3 corner pose (progress = 1.0)
+        targetProgress = Math.max(0, Math.min(1, rawProgress));
       }
 
-      // Calculate how far container has scrolled through viewport
-      const scrolled = Math.max(0, -rect.top);
-      const rawProgress = scrolled / totalScrollable;
-      targetProgress = Math.max(0, Math.min(1, rawProgress));
+      // Check if Stop Section (e.g. footer) has entered viewport
+      let targetOpacity = 1;
+      const stopElement = document.getElementById(TRAVEL_END_SECTION_ID) || 
+                          document.querySelector(`footer, #${TRAVEL_END_SECTION_ID}`);
+      if (stopElement) {
+        const stopRect = stopElement.getBoundingClientRect();
+        if (stopRect.top < viewportHeight) {
+          const fadeDistance = 250;
+          const fadeProgress = (viewportHeight - stopRect.top) / fadeDistance;
+          targetOpacity = Math.max(0, Math.min(1, 1 - fadeProgress));
+        }
+      }
+
+      if (Math.abs(targetOpacity - currentOpacity) > 0.005) {
+        currentOpacity = targetOpacity;
+        if (canvas) {
+          canvas.style.opacity = loading ? '0' : String(currentOpacity);
+        }
+        isDirty = true;
+      }
+
+      if (Math.abs(targetProgress - lerpedProgress) > 0.0001) {
+        isDirty = true;
+      }
     };
 
     const handleScroll = () => {
+      isDirty = true;
       updateScrollProgress();
     };
 
@@ -268,31 +300,32 @@ export default function CinematicLogo3DCanvas({ containerRef }) {
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       renderer.setSize(width, height, false);
+      isDirty = true;
       updateScrollProgress();
     };
 
     const resizeObserver = new ResizeObserver(() => handleResize());
     resizeObserver.observe(canvas);
 
-    // IntersectionObserver to pause render loop when off-screen
-    const intersectionObserver = new IntersectionObserver(
-      ([entry]) => {
-        isVisible = entry.isIntersecting;
-      },
-      { threshold: 0.01 }
-    );
-    if (containerRef?.current) {
-      intersectionObserver.observe(containerRef.current);
-    }
-
-    // Animation Loop with smooth scrubbed interpolation (scrub: 1 feel, reversible)
+    // Animation Loop with on-demand rendering (zero GPU waste when stationary)
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
 
-      if (!isVisible) return;
+      // If faded out completely, pause rendering
+      if (currentOpacity <= 0) return;
 
       // Smooth scrub smoothing (equivalent to scrub: 1)
-      lerpedProgress += (targetProgress - lerpedProgress) * 0.15;
+      const diff = targetProgress - lerpedProgress;
+      if (Math.abs(diff) > 0.0001) {
+        lerpedProgress += diff * 0.15;
+        isDirty = true;
+      } else if (lerpedProgress !== targetProgress) {
+        lerpedProgress = targetProgress;
+        isDirty = true;
+      }
+
+      // Performance optimization: when stationary, do not call renderer.render()
+      if (!isDirty) return;
 
       // Compute dynamic corner position based on current aspect ratio
       const cornerPos = getCornerPosition(camera.aspect);
@@ -306,6 +339,7 @@ export default function CinematicLogo3DCanvas({ containerRef }) {
       logoGroup.scale.setScalar(scale);
 
       renderer.render(scene, camera);
+      isDirty = false;
     };
 
     animate();
@@ -315,7 +349,6 @@ export default function CinematicLogo3DCanvas({ containerRef }) {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('scroll', handleScroll);
       resizeObserver.disconnect();
-      intersectionObserver.disconnect();
 
       // Dispose Three.js objects
       scene.traverse((obj) => {

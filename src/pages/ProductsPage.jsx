@@ -1,21 +1,15 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  AlertCircle, 
-  RefreshCw, 
-  Filter, 
-  ChevronLeft, 
-  ChevronRight, 
-  X
-} from 'lucide-react';
+import { Filter, X, ChevronLeft, ChevronRight, SlidersHorizontal } from 'lucide-react';
 import { loadProductsCatalog } from '../utils/excelParser';
 import ProductCard from '../components/products/ProductCard';
 import ProductFilters from '../components/products/ProductFilters';
 import SearchBar from '../components/products/SearchBar';
 import { useLanguage } from '../context/LanguageContext';
 
-const ITEMS_PER_PAGE = 16;
+// PAGE_SIZE: Number of products displayed per page (default: 10)
+const PAGE_SIZE = 10;
 
 export default function ProductsPage() {
   const { t, translateCategory } = useLanguage();
@@ -35,13 +29,20 @@ export default function ProductsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
-  // Sync category from URL param
+  // Sync category and page from URL searchParams
   useEffect(() => {
     const cat = searchParams.get('category');
     if (cat) {
       setSelectedCategory(cat);
     } else {
       setSelectedCategory('All');
+    }
+
+    const pageParam = parseInt(searchParams.get('page'), 10);
+    if (!isNaN(pageParam) && pageParam >= 1) {
+      setCurrentPage(pageParam);
+    } else {
+      setCurrentPage(1);
     }
   }, [searchParams]);
 
@@ -75,16 +76,52 @@ export default function ProductsPage() {
     return Array.from(set).sort();
   }, [products]);
 
+  // Handle Search Input Change (stable reference, only resets page if query actually changed)
+  const handleSearchChange = useCallback((val) => {
+    setSearchQuery((prev) => {
+      if (prev !== val) {
+        setCurrentPage(1);
+        return val;
+      }
+      return prev;
+    });
+  }, []);
+
   // Handle Category Selection
   const handleSelectCategory = (cat) => {
+    if (cat === selectedCategory) return;
     setSelectedCategory(cat);
     setCurrentPage(1);
+    const newParams = new URLSearchParams(searchParams);
+    newParams.delete('page');
     if (cat === 'All') {
-      searchParams.delete('category');
-      setSearchParams(searchParams);
+      newParams.delete('category');
     } else {
-      setSearchParams({ category: cat });
+      newParams.set('category', cat);
     }
+    setSearchParams(newParams);
+  };
+
+  // Handle Price Change
+  const handlePriceChange = (val) => {
+    setPriceRange((prev) => {
+      if (prev !== val) {
+        setCurrentPage(1);
+        return val;
+      }
+      return prev;
+    });
+  };
+
+  // Handle Sort Change
+  const handleSortChange = (val) => {
+    setSortBy((prev) => {
+      if (prev !== val) {
+        setCurrentPage(1);
+        return val;
+      }
+      return prev;
+    });
   };
 
   // Reset Filters
@@ -94,8 +131,7 @@ export default function ProductsPage() {
     setPriceRange(maxPriceLimit);
     setSortBy('featured');
     setCurrentPage(1);
-    searchParams.delete('category');
-    setSearchParams(searchParams);
+    setSearchParams({});
   };
 
   const hasActiveFilters = searchQuery !== '' || selectedCategory !== 'All' || priceRange < maxPriceLimit || sortBy !== 'featured';
@@ -146,16 +182,61 @@ export default function ProductsPage() {
     return result;
   }, [products, searchQuery, selectedCategory, priceRange, sortBy]);
 
-  // Pagination calculation
-  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE) || 1;
+  // Pagination calculation using PAGE_SIZE (10 products per page)
+  const totalPages = Math.ceil(filteredProducts.length / PAGE_SIZE) || 1;
   const paginatedProducts = useMemo(() => {
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredProducts.slice(start, start + ITEMS_PER_PAGE);
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredProducts.slice(start, start + PAGE_SIZE);
   }, [filteredProducts, currentPage]);
 
+  // Ensure currentPage does not exceed totalPages when filters reduce result count
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
   const handlePageChange = (newPage) => {
-    setCurrentPage(newPage);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const validPage = Math.max(1, Math.min(newPage, totalPages));
+    setCurrentPage(validPage);
+    const newParams = new URLSearchParams(searchParams);
+    if (validPage === 1) {
+      newParams.delete('page');
+    } else {
+      newParams.set('page', String(validPage));
+    }
+    setSearchParams(newParams);
+
+    // Smooth scroll to top of product grid on page change
+    const gridEl = document.getElementById('products-grid');
+    if (gridEl) {
+      gridEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  // Compact pagination helper: e.g. [1, '...', 4, 5, 6, '...', 30]
+  const getPageNumbers = () => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    const pages = [];
+    const left = Math.max(2, currentPage - 1);
+    const right = Math.min(totalPages - 1, currentPage + 1);
+
+    pages.push(1);
+    if (left > 2) {
+      pages.push('...');
+    }
+    for (let p = left; p <= right; p++) {
+      pages.push(p);
+    }
+    if (right < totalPages - 1) {
+      pages.push('...');
+    }
+    pages.push(totalPages);
+    return pages;
   };
 
   return (
@@ -179,7 +260,7 @@ export default function ProductsPage() {
           <SearchBar 
             value={searchQuery}
             placeholder={t('products.searchPlaceholder')}
-            onChange={(val) => { setSearchQuery(val); setCurrentPage(1); }}
+            onChange={handleSearchChange}
           />
         </div>
 
@@ -197,166 +278,179 @@ export default function ProductsPage() {
         </button>
       </div>
 
-      {/* Loading State */}
-      {loading && (
-        <div className="py-20 flex flex-col items-center justify-center space-y-4">
-          <div className="w-12 h-12 border-4 border-olive/20 border-t-olive rounded-full animate-spin" />
-          <p className="font-serif text-lg font-bold text-olive">{t('products.readingInventory')}</p>
-        </div>
-      )}
-
-      {/* Error State */}
-      {!loading && error && (
-        <div className="my-12 p-8 rounded-card bg-cream-light border-2 border-olive/30 text-center max-w-xl mx-auto space-y-4 shadow-olive-md">
-          <div className="w-12 h-12 rounded-full bg-olive-soft flex items-center justify-center mx-auto text-olive">
-            <AlertCircle className="w-6 h-6" />
-          </div>
-          <h2 className="font-serif text-2xl font-bold text-ink">Catalog Synchronization Issue</h2>
-          <p className="text-sm text-ink/80 leading-relaxed">{error}</p>
-          <p className="text-xs text-ink/60">
-            Please verify that <code className="bg-cream-deep px-1.5 py-0.5 rounded text-ink font-semibold">/public/data/products.xlsx</code> exists and contains product columns.
-          </p>
+      {/* Category Pills Slider / Filter Strip */}
+      <div className="mb-8 overflow-x-auto pb-2 scrollbar-none">
+        <div className="flex items-center gap-2 min-w-max">
           <button
-            onClick={loadCatalog}
-            className="px-6 py-2.5 rounded-btn bg-olive text-cream font-bold text-sm shadow-olive-sm hover:bg-olive-dark transition-colors inline-flex items-center gap-2"
+            onClick={() => handleSelectCategory('All')}
+            className={`px-4 py-2 rounded-btn text-xs font-bold transition-all shadow-xs ${
+              selectedCategory === 'All'
+                ? 'bg-olive text-cream shadow-olive-sm scale-102'
+                : 'bg-cream-light text-ink hover:bg-olive-soft border border-olive/20'
+            }`}
           >
-            <RefreshCw className="w-4 h-4" />
-            <span>Retry Loading Spreadsheet</span>
+            {t('common.allCategories')}
+          </button>
+          {categories.map(cat => (
+            <button
+              key={cat}
+              onClick={() => handleSelectCategory(cat)}
+              className={`px-4 py-2 rounded-btn text-xs font-bold transition-all shadow-xs ${
+                selectedCategory === cat
+                  ? 'bg-olive text-cream shadow-olive-sm scale-102'
+                  : 'bg-cream-light text-ink hover:bg-olive-soft border border-olive/20'
+              }`}
+            >
+              {translateCategory(cat)}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Content Layout: Filters + Product Grid */}
+      {loading ? (
+        <div className="py-24 text-center">
+          <div className="w-12 h-12 border-4 border-olive/30 border-t-olive rounded-full animate-spin mx-auto mb-4" />
+          <p className="font-serif text-lg text-ink/70">{t('products.loading')}</p>
+        </div>
+      ) : error ? (
+        <div className="py-16 text-center max-w-md mx-auto bg-cream-light p-8 rounded-card border border-olive/20">
+          <p className="text-red-700 font-semibold mb-4">{error}</p>
+          <button 
+            onClick={loadCatalog}
+            className="px-6 py-2.5 bg-olive text-cream rounded-btn font-bold text-xs shadow-olive-sm"
+          >
+            {t('products.retry')}
           </button>
         </div>
-      )}
+      ) : (
+        <div id="products-grid" className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+          {/* Desktop Filter Sidebar */}
+          <aside className="hidden lg:block lg:col-span-1 sticky top-24 bg-cream-light p-6 rounded-card border border-olive/20 shadow-olive-sm space-y-6">
+            <div className="flex items-center justify-between pb-4 border-b border-olive/15">
+              <span className="font-serif font-bold text-lg text-ink flex items-center gap-2">
+                <SlidersHorizontal className="w-4 h-4 text-olive" />
+                {t('products.filtersTitle')}
+              </span>
+              {hasActiveFilters && (
+                <button
+                  onClick={handleResetFilters}
+                  className="text-xs text-olive font-bold hover:underline"
+                >
+                  {t('products.clearAll')}
+                </button>
+              )}
+            </div>
 
-      {/* Main Content Layout */}
-      {!loading && !error && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Desktop Filter Sidebar (3 cols) */}
-          <aside className="hidden lg:block lg:col-span-3 sticky top-6">
-            <ProductFilters
+            <ProductFilters 
               categories={categories}
               selectedCategory={selectedCategory}
               onSelectCategory={handleSelectCategory}
               priceRange={priceRange}
               maxPriceLimit={maxPriceLimit}
-              onChangePrice={(p) => { setPriceRange(p); setCurrentPage(1); }}
+              onChangePrice={handlePriceChange}
               sortBy={sortBy}
-              onChangeSort={(s) => { setSortBy(s); setCurrentPage(1); }}
-              onResetFilters={handleResetFilters}
-              hasActiveFilters={hasActiveFilters}
-              totalResults={filteredProducts.length}
+              onChangeSort={handleSortChange}
             />
           </aside>
 
-          {/* Mobile Filter Drawer */}
+          {/* Mobile Filter Drawer Overlay */}
           <AnimatePresence>
             {mobileFilterOpen && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="lg:hidden fixed inset-0 z-50 flex bg-ink/40 backdrop-blur-xs"
-              >
-                <motion.div
+              <>
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setMobileFilterOpen(false)}
+                  className="fixed inset-0 bg-ink/40 z-50 backdrop-blur-xs lg:hidden"
+                />
+                <motion.div 
                   initial={{ x: '100%' }}
                   animate={{ x: 0 }}
                   exit={{ x: '100%' }}
-                  transition={{ type: 'spring', damping: 26, stiffness: 260 }}
-                  className="w-full max-w-sm h-full bg-cream-deep p-6 overflow-y-auto ml-auto flex flex-col justify-between border-l border-olive/30 shadow-olive-lg"
+                  transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                  className="fixed inset-y-0 right-0 w-full max-w-xs bg-cream-light z-50 p-6 overflow-y-auto shadow-2xl flex flex-col justify-between lg:hidden"
                 >
-                  <div className="flex items-center justify-between pb-4 border-b border-olive/20 mb-4">
-                    <h3 className="font-serif text-lg font-bold text-olive">Filters & Sorting</h3>
-                    <button
-                      onClick={() => setMobileFilterOpen(false)}
-                      className="p-1 text-olive hover:bg-olive-soft rounded-btn"
-                      aria-label="Close filters"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between pb-4 border-b border-olive/15">
+                      <span className="font-serif font-bold text-lg text-ink">
+                        {t('products.filtersTitle')}
+                      </span>
+                      <button 
+                        onClick={() => setMobileFilterOpen(false)}
+                        className="p-1 rounded-btn hover:bg-olive-soft text-ink/70"
+                        aria-label="Close filters"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
 
-                  <div className="flex-1 overflow-y-auto pr-1">
-                    <ProductFilters
+                    <ProductFilters 
                       categories={categories}
                       selectedCategory={selectedCategory}
                       onSelectCategory={handleSelectCategory}
                       priceRange={priceRange}
                       maxPriceLimit={maxPriceLimit}
-                      onChangePrice={(p) => { setPriceRange(p); setCurrentPage(1); }}
+                      onChangePrice={handlePriceChange}
                       sortBy={sortBy}
-                      onChangeSort={(s) => { setSortBy(s); setCurrentPage(1); }}
-                      onResetFilters={handleResetFilters}
-                      hasActiveFilters={hasActiveFilters}
-                      totalResults={filteredProducts.length}
+                      onChangeSort={handleSortChange}
                     />
                   </div>
 
-                  <div className="pt-4 border-t border-olive/20 mt-4">
+                  <div className="pt-6 border-t border-olive/15 mt-6 flex gap-3">
+                    {hasActiveFilters && (
+                      <button
+                        onClick={handleResetFilters}
+                        className="flex-1 py-3 rounded-btn border border-olive/30 text-olive font-bold text-xs"
+                      >
+                        {t('products.clearAll')}
+                      </button>
+                    )}
                     <button
                       onClick={() => setMobileFilterOpen(false)}
-                      className="w-full py-3 rounded-btn bg-olive text-cream font-bold text-sm shadow-olive-sm"
+                      className="flex-1 py-3 rounded-btn bg-olive text-cream font-bold text-xs shadow-olive-sm"
                     >
-                      {t('products.viewResults')} ({filteredProducts.length})
+                      {t('products.showResults', { count: filteredProducts.length })}
                     </button>
                   </div>
                 </motion.div>
-              </motion.div>
+              </>
             )}
           </AnimatePresence>
 
-          {/* Product Grid Area (9 cols) */}
-          <main className="lg:col-span-9 space-y-8">
-            {/* Active Filter Chips Bar */}
-            <AnimatePresence>
-              {hasActiveFilters && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  layout
-                  className="flex items-center gap-2 flex-wrap text-xs bg-cream-deep/70 p-3 rounded-btn border border-olive/15"
-                >
-                  <span className="font-bold text-ink/70">{t('products.activeFilters')}</span>
-                  {selectedCategory !== 'All' && (
-                    <motion.span layout className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-olive text-cream font-medium">
-                      {t('products.categoryLabel')} {translateCategory(selectedCategory)}
-                      <button onClick={() => handleSelectCategory('All')}>×</button>
-                    </motion.span>
-                  )}
-                  {searchQuery && (
-                    <motion.span layout className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-olive text-cream font-medium">
-                      {t('products.searchLabel')} "{searchQuery}"
-                      <button onClick={() => setSearchQuery('')}>×</button>
-                    </motion.span>
-                  )}
-                  {priceRange < maxPriceLimit && (
-                    <motion.span layout className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-olive text-cream font-medium">
-                      {t('products.underPrice')} ₹{priceRange}
-                      <button onClick={() => setPriceRange(maxPriceLimit)}>×</button>
-                    </motion.span>
-                  )}
-                  <button
-                    onClick={handleResetFilters}
-                    className="text-xs font-bold text-olive hover:underline ml-auto"
-                  >
-                    {t('products.clearAll')}
-                  </button>
-                </motion.div>
+          {/* Products Grid Area */}
+          <main className="lg:col-span-3 space-y-6">
+            <div className="flex items-center justify-between text-xs text-ink/70">
+              <span className="font-medium">
+                {t('products.showingCount', {
+                  count: paginatedProducts.length,
+                  total: filteredProducts.length
+                })}
+              </span>
+              {totalPages > 1 && (
+                <span className="font-semibold text-olive">
+                  {t('products.pageIndicator', { current: currentPage, total: totalPages })}
+                </span>
               )}
-            </AnimatePresence>
+            </div>
 
-            {/* Empty State when no matches */}
             {paginatedProducts.length === 0 ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.96 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="py-16 text-center rounded-card bg-cream-light border border-olive/20 p-8 space-y-4"
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="py-16 text-center bg-cream-light rounded-card border border-olive/20 p-8 space-y-4"
               >
-                <h3 className="font-serif text-2xl font-bold text-ink">{t('products.noMatchesTitle')}</h3>
-                <p className="text-sm text-ink/75 max-w-md mx-auto">
-                  {t('products.noMatchesDesc')}
+                <div className="w-16 h-16 rounded-full bg-olive-soft flex items-center justify-center mx-auto text-olive">
+                  <Filter className="w-8 h-8" />
+                </div>
+                <h3 className="font-serif text-xl font-bold text-ink">{t('products.noProductsFound')}</h3>
+                <p className="text-xs text-ink/70 max-w-sm mx-auto">
+                  {t('products.noProductsDesc')}
                 </p>
                 <button
                   onClick={handleResetFilters}
-                  className="px-6 py-2.5 rounded-btn bg-olive text-cream font-bold text-sm shadow-olive-sm hover:bg-olive-dark transition-colors"
+                  className="px-6 py-2.5 rounded-btn bg-olive text-cream text-xs font-bold shadow-olive-sm hover:bg-olive-dark transition-all"
                 >
                   {t('products.resetFilters')}
                 </button>
@@ -376,48 +470,50 @@ export default function ProductsPage() {
             {totalPages > 1 && (
               <div className="pt-8 border-t border-olive/15 flex items-center justify-between gap-4">
                 <button
+                  type="button"
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
                   className="px-4 py-2.5 rounded-btn border border-olive/30 text-xs font-bold text-olive hover:bg-olive-soft disabled:opacity-40 disabled:pointer-events-none flex items-center gap-1.5 transition-colors"
+                  aria-label="Previous Page"
                 >
                   <ChevronLeft className="w-4 h-4" />
                   <span>{t('products.previous')}</span>
                 </button>
 
                 <div className="flex items-center gap-1">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => {
-                    if (
-                      page === 1 || 
-                      page === totalPages || 
-                      (page >= currentPage - 1 && page <= currentPage + 1)
-                    ) {
+                  {getPageNumbers().map((item, idx) => {
+                    if (item === '...') {
                       return (
-                        <button
-                          key={page}
-                          onClick={() => handlePageChange(page)}
-                          className={`w-9 h-9 rounded-btn text-xs font-bold transition-all ${
-                            currentPage === page
-                              ? 'bg-olive text-cream shadow-olive-sm'
-                              : 'bg-cream-light text-ink hover:bg-olive-soft'
-                          }`}
-                        >
-                          {page}
-                        </button>
+                        <span key={`ellipsis-${idx}`} className="px-1 text-ink/40 font-bold select-none">
+                          ...
+                        </span>
                       );
-                    } else if (
-                      page === currentPage - 2 || 
-                      page === currentPage + 2
-                    ) {
-                      return <span key={page} className="px-1 text-ink/40">...</span>;
                     }
-                    return null;
+                    return (
+                      <button
+                        key={`page-${item}`}
+                        type="button"
+                        onClick={() => handlePageChange(item)}
+                        className={`w-9 h-9 rounded-btn text-xs font-bold transition-all ${
+                          currentPage === item
+                            ? 'bg-olive text-cream shadow-olive-sm'
+                            : 'bg-cream-light text-ink hover:bg-olive-soft'
+                        }`}
+                        aria-label={`Page ${item}`}
+                        aria-current={currentPage === item ? 'page' : undefined}
+                      >
+                        {item}
+                      </button>
+                    );
                   })}
                 </div>
 
                 <button
+                  type="button"
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
                   className="px-4 py-2.5 rounded-btn border border-olive/30 text-xs font-bold text-olive hover:bg-olive-soft disabled:opacity-40 disabled:pointer-events-none flex items-center gap-1.5 transition-colors"
+                  aria-label="Next Page"
                 >
                   <span>{t('products.next')}</span>
                   <ChevronRight className="w-4 h-4" />

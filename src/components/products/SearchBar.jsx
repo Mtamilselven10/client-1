@@ -6,12 +6,13 @@ export default function SearchBar({ value, onChange, placeholder = "Search pure 
 
   // Debounce input to prevent UI lag on large datasets
   useEffect(() => {
+    if (localValue === value) return;
     const handler = setTimeout(() => {
       onChange(localValue);
     }, 250);
 
     return () => clearTimeout(handler);
-  }, [localValue, onChange]);
+  }, [localValue, value, onChange]);
 
   useEffect(() => {
     setLocalValue(value);

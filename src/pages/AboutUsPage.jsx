@@ -17,8 +17,8 @@ export default function AboutUsPage() {
 
   return (
     <div ref={pageRef} className="relative min-h-screen bg-cream">
-      {/* Sticky Cinematic 3D Logo Canvas (Only active in About Us) */}
-      <div className="sticky top-0 h-screen -mb-[100vh] pointer-events-none z-0 overflow-hidden">
+      {/* Fixed Cinematic 3D Logo Canvas — travels seamlessly down the page */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <CinematicLogo3DCanvas containerRef={pageRef} />
       </div>
 

@@ -1,4 +1,4 @@
-import React, { forwardRef, useRef, useState } from 'react';
+import React, { forwardRef, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Heart, ShoppingCart, Star, Check } from 'lucide-react';
@@ -8,6 +8,9 @@ import { useWishlist } from '../../context/WishlistContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useFlyToCart } from '../../animations/useFlyToCart';
 import { useReviews } from '../../context/ReviewsContext';
+
+// Configurable delay before 16:9 hover morph animation triggers (1.8s)
+const HOVER_DELAY_MS = 1800;
 
 const ProductCard = forwardRef(function ProductCard({ product, index = 0 }, ref) {
   const navigate = useNavigate();
@@ -25,8 +28,26 @@ const ProductCard = forwardRef(function ProductCard({ product, index = 0 }, ref)
   const [cursorOffset, setCursorOffset] = useState({ x: 0, y: 0 });
   const cardCellRef = useRef(null);
   const heartBtnRef = useRef(null);
+  const hoverTimerRef = useRef(null);
+  const isInsideCardRef = useRef(false);
+
+  // Clean up any pending hover timer on unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimerRef.current) {
+        clearTimeout(hoverTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleMouseEnter = (e) => {
+    // Touch / mobile: Touch events should NOT trigger the hover animation
+    if (e.nativeEvent && e.nativeEvent.pointerType && e.nativeEvent.pointerType !== 'mouse') {
+      return;
+    }
+
+    isInsideCardRef.current = true;
+
     const rect = e.currentTarget.getBoundingClientRect();
     if (rect.width > 0 && rect.height > 0) {
       const pctX = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
@@ -40,10 +61,24 @@ const ProductCard = forwardRef(function ProductCard({ product, index = 0 }, ref)
       const spaceOnRight = window.innerWidth - rect.right;
       setIsRightEdge(spaceOnRight < 220);
     }
-    setIsHovered(true);
+
+    // Cancel any previous pending timer
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+    }
+
+    // Start 1.8s delay timer; only trigger if cursor stays continuously on card
+    hoverTimerRef.current = setTimeout(() => {
+      if (isInsideCardRef.current) {
+        setIsHovered(true);
+      }
+    }, HOVER_DELAY_MS);
   };
 
   const handleMouseMove = (e) => {
+    if (e.nativeEvent && e.nativeEvent.pointerType && e.nativeEvent.pointerType !== 'mouse') {
+      return;
+    }
     const rect = e.currentTarget.getBoundingClientRect();
     if (rect.width > 0 && rect.height > 0) {
       const pctX = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
@@ -56,6 +91,13 @@ const ProductCard = forwardRef(function ProductCard({ product, index = 0 }, ref)
   };
 
   const handleMouseLeave = () => {
+    isInsideCardRef.current = false;
+    // Immediately cancel pending timer if cursor leaves before 1.8s
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+    // Closes / reverses back to normal immediately (no exit delay)
     setIsHovered(false);
     setCursorOrigin('50% 50%');
     setCursorOffset({ x: 0, y: 0 });
@@ -69,6 +111,11 @@ const ProductCard = forwardRef(function ProductCard({ product, index = 0 }, ref)
 
   const handleBlur = (e) => {
     if (!e.currentTarget.contains(e.relatedTarget)) {
+      isInsideCardRef.current = false;
+      if (hoverTimerRef.current) {
+        clearTimeout(hoverTimerRef.current);
+        hoverTimerRef.current = null;
+      }
       setIsHovered(false);
       setCursorOffset({ x: 0, y: 0 });
     }
