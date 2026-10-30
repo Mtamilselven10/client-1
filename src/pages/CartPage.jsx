@@ -19,16 +19,65 @@ import {
   buildCartWhatsAppUrl,
   getProductImageUrl
 } from '../utils/formatters';
-import { SHOP_NAME } from '../config';
+import { SHOP_NAME, WHATSAPP_NUMBER, getCleanWhatsAppNumber } from '../config';
 
 export default function CartPage() {
   const { cart, updateQuantity, removeFromCart, clearCart, getCartTotal, getItemCount } = useCart();
   const { t, translateCategory } = useLanguage();
   const navigate = useNavigate();
 
+  const [isOrdering, setIsOrdering] = React.useState(false);
+  const [orderError, setOrderError] = React.useState('');
+
   const totalAmount = getCartTotal();
   const totalItems = getItemCount();
-  const fullCartWhatsAppUrl = buildCartWhatsAppUrl(cart);
+  const deliveryFee = totalAmount >= 499 || totalAmount === 0 ? 0 : 40;
+  const payableAmount = totalAmount + deliveryFee;
+
+  const handleOrderNow = (e) => {
+    if (e) e.preventDefault();
+    setOrderError('');
+
+    // Validation 1: Cart is not empty
+    if (!cart || cart.length === 0) {
+      setOrderError('Your cart is empty. Please add products before checking out.');
+      return;
+    }
+
+    // Validation 2: Cart items validity
+    const hasInvalidItem = cart.some(
+      item => !item || !item.name || typeof item.price !== 'number' || item.quantity <= 0
+    );
+    if (hasInvalidItem) {
+      setOrderError('Some items in your cart have invalid details. Please refresh or adjust quantities.');
+      return;
+    }
+
+    // Validation 3: WhatsApp phone number configured
+    const cleanNumber = getCleanWhatsAppNumber(WHATSAPP_NUMBER);
+    if (!cleanNumber) {
+      setOrderError('Store WhatsApp phone number is not properly configured.');
+      return;
+    }
+
+    setIsOrdering(true);
+
+    try {
+      const url = buildCartWhatsAppUrl(cart, deliveryFee);
+      // Safe popup / tab opener
+      const openedWindow = window.open(url, '_blank', 'noopener,noreferrer');
+      if (!openedWindow || openedWindow.closed || typeof openedWindow.closed === 'undefined') {
+        window.location.href = url;
+      }
+    } catch (err) {
+      console.error('Error opening WhatsApp URL:', err);
+      setOrderError('Could not open WhatsApp. Please check your browser popup settings.');
+    } finally {
+      setTimeout(() => {
+        setIsOrdering(false);
+      }, 1500);
+    }
+  };
 
   return (
     <div className="py-8 px-4 sm:px-8 max-w-7xl mx-auto bg-cream">
@@ -250,21 +299,31 @@ export default function CartPage() {
                     transition={{ duration: 0.25 }}
                     className="font-serif text-2xl font-extrabold text-olive inline-block"
                   >
-                    {formatCurrency(totalAmount + (totalAmount >= 499 ? 0 : 40))}
+                    {formatCurrency(payableAmount)}
                   </motion.span>
                 </div>
               </div>
 
+              {orderError && (
+                <div className="p-3 text-xs rounded-btn bg-red-100 text-red-800 border border-red-200 text-center font-medium">
+                  {orderError}
+                </div>
+              )}
+
               {/* Order Full Cart via WhatsApp Button */}
-              <a
-                href={fullCartWhatsAppUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full py-4 px-6 rounded-btn bg-olive text-cream font-bold text-sm shadow-olive-md hover:bg-olive-dark active:scale-98 transition-all flex items-center justify-center gap-2 border border-olive-dark text-center focus-visible:ring-2 focus-visible:ring-olive"
+              <button
+                type="button"
+                onClick={handleOrderNow}
+                disabled={isOrdering || cart.length === 0}
+                className={`w-full py-4 px-6 rounded-btn font-bold text-sm shadow-olive-md transition-all flex items-center justify-center gap-2 border text-center focus-visible:ring-2 focus-visible:ring-olive ${
+                  isOrdering || cart.length === 0
+                    ? 'bg-olive/60 text-cream cursor-not-allowed border-olive/50'
+                    : 'bg-olive text-cream hover:bg-olive-dark active:scale-98 border-olive-dark cursor-pointer'
+                }`}
               >
                 <MessageCircle className="w-5 h-5 text-cream" />
-                <span>{t('cart.checkoutWhatsApp')}</span>
-              </a>
+                <span>{isOrdering ? 'Opening WhatsApp...' : 'Order Now'}</span>
+              </button>
 
               <p className="text-[11px] text-ink/65 text-center leading-relaxed">
                 {t('cart.orderHint')}

@@ -1,4 +1,4 @@
-import { WHATSAPP_NUMBER, SHOP_NAME, CURRENCY_SYMBOL } from '../config';
+import { WHATSAPP_NUMBER, SHOP_NAME, CURRENCY_SYMBOL, getCleanWhatsAppNumber } from '../config';
 
 export function formatCurrency(amount) {
   const num = typeof amount === 'number' ? amount : parseFloat(amount) || 0;
@@ -6,78 +6,119 @@ export function formatCurrency(amount) {
 }
 
 /**
+ * Builds the standardized WhatsApp plain-text order message for cart checkout
+ */
+export function buildCartWhatsAppOrderMessage(cartItems, deliveryFee = 0) {
+  if (!cartItems || !Array.isArray(cartItems) || cartItems.length === 0) {
+    return '';
+  }
+
+  // Filter valid items
+  const validItems = cartItems.filter(item => item && item.name && item.quantity > 0);
+  if (validItems.length === 0) return '';
+
+  const itemsCount = validItems.reduce((sum, item) => sum + (parseInt(item.quantity, 10) || 0), 0);
+  const itemsSubtotal = validItems.reduce((acc, item) => {
+    const price = typeof item.price === 'number' ? item.price : parseFloat(item.price) || 0;
+    const qty = parseInt(item.quantity, 10) || 1;
+    return acc + (price * qty);
+  }, 0);
+
+  const lines = [
+    'Hello! I would like to place a grocery order.',
+    '',
+    '*MY ORDER*',
+    ''
+  ];
+
+  validItems.forEach((item, index) => {
+    const qty = parseInt(item.quantity, 10) || 1;
+    const price = typeof item.price === 'number' ? item.price : parseFloat(item.price) || 0;
+    const lineSubtotal = price * qty;
+    const unitText = item.unit ? ` (${item.unit})` : '';
+
+    lines.push(`${index + 1}. ${item.name}${unitText}`);
+    lines.push(`   Quantity: ${qty}`);
+    lines.push(`   Unit Price: ${CURRENCY_SYMBOL}${price}`);
+    lines.push(`   Subtotal: ${CURRENCY_SYMBOL}${lineSubtotal}`);
+    lines.push('');
+  });
+
+  lines.push('--------------------------------');
+  lines.push('');
+
+  const numDeliveryFee = typeof deliveryFee === 'number' ? deliveryFee : parseFloat(deliveryFee) || 0;
+  if (numDeliveryFee > 0) {
+    lines.push(`Subtotal: ${CURRENCY_SYMBOL}${itemsSubtotal}`);
+    lines.push(`Delivery: ${CURRENCY_SYMBOL}${numDeliveryFee}`);
+  }
+
+  const finalTotal = itemsSubtotal + numDeliveryFee;
+  lines.push(`Total Items: ${itemsCount} unit${itemsCount === 1 ? '' : 's'}`);
+  lines.push(`Total Amount: ${CURRENCY_SYMBOL}${finalTotal}`);
+  lines.push('');
+  lines.push('Please confirm my order. Thank you!');
+
+  return lines.join('\n');
+}
+
+/**
  * Builds neatly formatted WhatsApp order URL for an individual item
  */
 export function buildSingleProductWhatsAppUrl(product, quantity = 1) {
+  const cleanNumber = getCleanWhatsAppNumber(WHATSAPP_NUMBER);
   const qty = Math.max(1, parseInt(quantity, 10) || 1);
-  const total = product.price * qty;
+  const price = typeof product.price === 'number' ? product.price : parseFloat(product.price) || 0;
+  const total = price * qty;
+  const unitText = product.unit ? ` (${product.unit})` : '';
 
   const lines = [
-    `🌿 *ORDER INQUIRY - ${SHOP_NAME.toUpperCase()}* 🌿`,
-    ``,
-    `Hello! I would like to place an order for the following item:`,
-    ``,
-    `*Product:* ${product.name}`,
-    `*Item Code:* ${product.id}`,
-    `*Unit/Pack:* ${product.unit || '1 unit'}`,
-    `*Unit Price:* ${formatCurrency(product.price)}`,
-    `*Quantity:* ${qty}`,
-    `*Total Amount:* ${formatCurrency(total)}`,
+    'Hello! I would like to place a grocery order.',
+    '',
+    '*MY ORDER*',
+    '',
+    `1. ${product.name}${unitText}`,
+    `   Quantity: ${qty}`,
+    `   Unit Price: ${CURRENCY_SYMBOL}${price}`,
+    `   Subtotal: ${CURRENCY_SYMBOL}${total}`,
+    '',
+    '--------------------------------',
+    '',
+    `Total Items: ${qty} unit${qty === 1 ? '' : 's'}`,
+    `Total Amount: ${CURRENCY_SYMBOL}${total}`,
+    '',
+    'Please confirm my order. Thank you!'
   ];
 
-  if (product.image && product.image.startsWith('http')) {
-    lines.push(`*Image Reference:* ${product.image}`);
-  }
-
-  lines.push(``);
-  lines.push(`Kindly confirm availability, delivery timeline, and payment details.`);
-  lines.push(`Thank you!`);
-
   const message = lines.join('\n');
-  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+  return `https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`;
 }
 
 /**
  * Builds neatly formatted WhatsApp order URL for the entire Cart
  */
-export function buildCartWhatsAppUrl(cartItems) {
-  if (!cartItems || cartItems.length === 0) {
-    return `https://wa.me/${WHATSAPP_NUMBER}`;
+export function buildCartWhatsAppUrl(cartItems, deliveryFee = 0) {
+  const cleanNumber = getCleanWhatsAppNumber(WHATSAPP_NUMBER);
+  if (!cleanNumber) {
+    console.error('WhatsApp phone number is not configured');
+    return '#';
   }
 
-  const grandTotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  const message = buildCartWhatsAppOrderMessage(cartItems, deliveryFee);
+  if (!message) {
+    return `https://wa.me/${cleanNumber}`;
+  }
 
-  const lines = [
-    `🌿 *NEW ORDER - ${SHOP_NAME.toUpperCase()}* 🌿`,
-    ``,
-    `Hello! I would like to place an order for the following cart items:`,
-    ``
-  ];
-
-  cartItems.forEach((item, index) => {
-    lines.push(`${index + 1}. *${item.name}* (${item.id})`);
-    lines.push(`   • Qty: ${item.quantity} × ${formatCurrency(item.price)} = ${formatCurrency(item.price * item.quantity)} [${item.unit || 'Unit'}]`);
-  });
-
-  lines.push(``);
-  lines.push(`------------------------------`);
-  lines.push(`*Total Items:* ${cartItems.reduce((sum, i) => sum + i.quantity, 0)}`);
-  lines.push(`*Grand Total:* ${formatCurrency(grandTotal)}`);
-  lines.push(`------------------------------`);
-  lines.push(``);
-  lines.push(`Please let me know payment methods and estimated delivery.`);
-  lines.push(`Thank you!`);
-
-  const message = lines.join('\n');
-  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+  return `https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`;
 }
 
 /**
  * General shop query WhatsApp URL
  */
 export function buildGeneralInquiryWhatsAppUrl(query = "") {
+  const cleanNumber = getCleanWhatsAppNumber(WHATSAPP_NUMBER);
   const text = query || `Hello ${SHOP_NAME}, I would like to inquire about your products and delivery!`;
-  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
+  return `https://wa.me/${cleanNumber}?text=${encodeURIComponent(text)}`;
 }
 
 /**
