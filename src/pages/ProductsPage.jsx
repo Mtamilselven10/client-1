@@ -240,13 +240,13 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="py-8 px-4 sm:px-8 max-w-7xl mx-auto bg-cream">
+    <div className="py-6 sm:py-8 px-3 sm:px-8 max-w-7xl mx-auto bg-cream w-full max-w-full overflow-x-hidden">
       {/* Header Banner */}
-      <div className="mb-8 space-y-2">
+      <div className="mb-6 sm:mb-8 space-y-2">
         <span className="text-xs uppercase tracking-widest font-extrabold text-olive">
           {t('products.catalogTag')}
         </span>
-        <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-extrabold text-ink">
+        <h1 className="font-serif text-2xl sm:text-4xl md:text-5xl font-extrabold text-ink">
           {t('products.catalogTitle')}
         </h1>
         <p className="text-sm text-ink/75 max-w-2xl">
@@ -468,19 +468,25 @@ export default function ProductsPage() {
 
             {/* Pagination Controls */}
             {totalPages > 1 && (
-              <div className="pt-8 border-t border-olive/15 flex items-center justify-between gap-4">
+              <div className="pt-6 sm:pt-8 border-t border-olive/15 flex items-center justify-between gap-2 sm:gap-4 w-full">
                 <button
                   type="button"
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="px-4 py-2.5 rounded-btn border border-olive/30 text-xs font-bold text-olive hover:bg-olive-soft disabled:opacity-40 disabled:pointer-events-none flex items-center gap-1.5 transition-colors"
+                  className="px-3 py-2 sm:px-4 sm:py-2.5 rounded-btn border border-olive/30 text-xs font-bold text-olive hover:bg-olive-soft disabled:opacity-40 disabled:pointer-events-none flex items-center gap-1 transition-colors shrink-0"
                   aria-label="Previous Page"
                 >
                   <ChevronLeft className="w-4 h-4" />
-                  <span>{t('products.previous')}</span>
+                  <span className="hidden sm:inline">{t('products.previous')}</span>
                 </button>
 
-                <div className="flex items-center gap-1">
+                {/* Mobile compact page indicator */}
+                <div className="sm:hidden text-xs font-bold text-olive px-2 text-center">
+                  {currentPage} / {totalPages}
+                </div>
+
+                {/* Desktop numbered page buttons */}
+                <div className="hidden sm:flex items-center gap-1">
                   {getPageNumbers().map((item, idx) => {
                     if (item === '...') {
                       return (
@@ -512,10 +518,10 @@ export default function ProductsPage() {
                   type="button"
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className="px-4 py-2.5 rounded-btn border border-olive/30 text-xs font-bold text-olive hover:bg-olive-soft disabled:opacity-40 disabled:pointer-events-none flex items-center gap-1.5 transition-colors"
+                  className="px-3 py-2 sm:px-4 sm:py-2.5 rounded-btn border border-olive/30 text-xs font-bold text-olive hover:bg-olive-soft disabled:opacity-40 disabled:pointer-events-none flex items-center gap-1 transition-colors shrink-0"
                   aria-label="Next Page"
                 >
-                  <span>{t('products.next')}</span>
+                  <span className="hidden sm:inline">{t('products.next')}</span>
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>

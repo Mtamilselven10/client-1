@@ -39,14 +39,14 @@ function MainLayout() {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen bg-cream text-ink flex flex-col antialiased">
+    <div className="min-h-screen bg-cream text-ink flex flex-col antialiased w-full max-w-full overflow-x-hidden">
       <ScrollToTop />
       {/* Navigation Header and Slide-out Sidebar Drawer */}
       <Sidebar />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-h-screen">
-        <main className="flex-1 flex flex-col relative">
+      <div className="flex-1 flex flex-col min-h-screen w-full max-w-full overflow-x-hidden">
+        <main className="flex-1 flex flex-col relative w-full max-w-full overflow-x-hidden">
           <AnimatePresence mode="sync">
             <motion.div
               key={location.pathname}
@@ -107,12 +107,11 @@ export default function App() {
         <CartProvider>
           <WishlistProvider>
             <ReviewsProvider>
-              {!introDone ? (
+              <HashRouter>
+                <MainLayout />
+              </HashRouter>
+              {!introDone && (
                 <IntroVideo onComplete={handleIntroComplete} />
-              ) : (
-                <HashRouter>
-                  <MainLayout />
-                </HashRouter>
               )}
             </ReviewsProvider>
           </WishlistProvider>

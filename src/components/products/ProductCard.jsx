@@ -41,8 +41,11 @@ const ProductCard = forwardRef(function ProductCard({ product, index = 0 }, ref)
   }, []);
 
   const handleMouseEnter = (e) => {
-    // Touch / mobile: Touch events should NOT trigger the hover animation
+    // Touch / mobile: Touch events or mobile viewports should NOT trigger the hover animation
     if (e.nativeEvent && e.nativeEvent.pointerType && e.nativeEvent.pointerType !== 'mouse') {
+      return;
+    }
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
       return;
     }
 
@@ -69,7 +72,7 @@ const ProductCard = forwardRef(function ProductCard({ product, index = 0 }, ref)
 
     // Start 1.8s delay timer; only trigger if cursor stays continuously on card
     hoverTimerRef.current = setTimeout(() => {
-      if (isInsideCardRef.current) {
+      if (isInsideCardRef.current && (typeof window === 'undefined' || window.innerWidth >= 1024)) {
         setIsHovered(true);
       }
     }, HOVER_DELAY_MS);
@@ -77,6 +80,9 @@ const ProductCard = forwardRef(function ProductCard({ product, index = 0 }, ref)
 
   const handleMouseMove = (e) => {
     if (e.nativeEvent && e.nativeEvent.pointerType && e.nativeEvent.pointerType !== 'mouse') {
+      return;
+    }
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
       return;
     }
     const rect = e.currentTarget.getBoundingClientRect();
@@ -104,6 +110,7 @@ const ProductCard = forwardRef(function ProductCard({ product, index = 0 }, ref)
   };
 
   const handleFocus = () => {
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) return;
     setCursorOrigin('50% 50%');
     setCursorOffset({ x: 0, y: 0 });
     setIsHovered(true);

@@ -16,13 +16,13 @@ export default function AboutUsPage() {
   const pageRef = useRef(null);
 
   return (
-    <div ref={pageRef} className="relative min-h-screen bg-cream">
+    <div ref={pageRef} className="relative min-h-screen bg-cream w-full max-w-full overflow-x-hidden">
       {/* Fixed Cinematic 3D Logo Canvas — travels seamlessly down the page */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <CinematicLogo3DCanvas containerRef={pageRef} />
       </div>
 
-      <div className="relative z-10 py-8 px-4 sm:px-8 max-w-7xl mx-auto space-y-16">
+      <div className="relative z-10 py-8 px-4 sm:px-8 max-w-7xl mx-auto space-y-16 w-full max-w-full overflow-x-hidden">
       {/* Editorial Header */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
@@ -42,7 +42,7 @@ export default function AboutUsPage() {
             {t('about.tag')}
           </span>
         </div>
-        <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-extrabold text-ink leading-tight">
+        <h1 className="font-serif text-3xl sm:text-5xl md:text-6xl font-extrabold text-ink leading-tight">
           {t('about.title')}
         </h1>
         <p 
@@ -54,8 +54,8 @@ export default function AboutUsPage() {
       {/* Main Narrative Split */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
         <motion.div
-          initial={{ opacity: 0, x: -24 }}
-          whileInView={{ opacity: 1, x: 0 }}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-60px' }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
           className="lg:col-span-6 relative"
@@ -72,18 +72,18 @@ export default function AboutUsPage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2, duration: 0.4 }}
-            className="absolute -bottom-6 -right-3 sm:right-6 bg-cream-light border border-olive/25 p-5 rounded-card shadow-olive-md max-w-xs"
+            className="absolute -bottom-6 right-2 sm:right-6 bg-cream-light border border-olive/25 p-4 sm:p-5 rounded-card shadow-olive-md max-w-[280px] sm:max-w-xs"
           >
-            <p className="font-serif text-sm italic text-ink font-semibold">
+            <p className="font-serif text-xs sm:text-sm italic text-ink font-semibold">
               "{t('about.founderQuote') || 'When you consume pure food harvested with care, peace enters the home.'}"
             </p>
-            <p className="text-xs text-olive font-bold mt-2">— {t('about.founderPrinciple') || "Founder's Principle"}</p>
+            <p className="text-[11px] sm:text-xs text-olive font-bold mt-2">— {t('about.founderPrinciple') || "Founder's Principle"}</p>
           </motion.div>
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, x: 24 }}
-          whileInView={{ opacity: 1, x: 0 }}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-60px' }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
           className="lg:col-span-6 space-y-6"

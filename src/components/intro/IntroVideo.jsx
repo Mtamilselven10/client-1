@@ -7,8 +7,8 @@ import './IntroVideo.css';
  * - FADE_OUT_DURATION_MS: Duration (ms) of the overlay opacity fade-out before unmounting (default 500ms).
  * - SAFETY_TIMEOUT_MS: Maximum time (ms) before forcing completion if the video stalls or hangs (default 10000ms / 10s).
  */
-const FADE_OUT_DURATION_MS = 500; // <-- Change fade duration here (must match IntroVideo.css transition)
-const SAFETY_TIMEOUT_MS = 10000;  // <-- Change safety fallback timeout here (default 10s)
+const FADE_OUT_DURATION_MS = 800; // 800ms smooth cinematic dissolve transition into home page
+const SAFETY_TIMEOUT_MS = 16000;  // 16s safety timeout so the full 9.96s video plays completely
 
 export default function IntroVideo({ onComplete }) {
   const videoRef = useRef(null);
@@ -74,7 +74,8 @@ export default function IntroVideo({ onComplete }) {
   };
 
   const baseUrl = import.meta.env.BASE_URL || '/';
-  const videoSrc = `${baseUrl}intro.mp4`;
+  const cleanBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+  const videoSrc = `${cleanBase}Logo_transformation_animation_eca72f38_1080p.mp4`;
 
   return (
     <div 
