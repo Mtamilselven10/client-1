@@ -17,10 +17,6 @@ export default function AboutUsPage() {
 
   return (
     <div ref={pageRef} className="relative min-h-screen bg-cream w-full max-w-full overflow-x-hidden">
-      {/* Fixed Cinematic 3D Logo Canvas — travels seamlessly down the page */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <CinematicLogo3DCanvas containerRef={pageRef} />
-      </div>
 
       <div className="relative z-10 py-8 px-4 sm:px-8 max-w-7xl mx-auto space-y-16 w-full max-w-full overflow-x-hidden">
       {/* Editorial Header */}

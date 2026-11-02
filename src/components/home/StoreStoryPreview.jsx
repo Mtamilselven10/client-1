@@ -9,7 +9,7 @@ export default function StoreStoryPreview() {
   const { language, t } = useLanguage();
 
   return (
-    <section className="py-20 px-4 sm:px-8 bg-cream-deep border-y border-olive/15">
+    <section className="py-8 sm:py-14 px-4 sm:px-8 bg-transparent">
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
         {/* Left Column: Image with editorial framing & parallel float */}
         <motion.div 

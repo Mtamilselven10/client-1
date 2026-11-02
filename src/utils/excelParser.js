@@ -1,5 +1,6 @@
 import * as XLSX from 'xlsx';
 import { SEED_PRODUCTS } from '../data/seedProducts';
+import { supabase, isSupabaseConfigured } from '../services/supabaseClient';
 
 const CATEGORY_FALLBACK_IMAGES = {
   'Aachi Masala & Podi': 'products/001_Aachi_Chilli_Powder.jpg',
@@ -147,9 +148,9 @@ export function parseProductsFromSheet(data) {
 }
 
 /**
- * Fetches and parses products.xlsx using relative base URL, with automatic fallback
+ * Loads products from local Excel file via SheetJS (guaranteed fallback)
  */
-export async function loadProductsCatalog(url = `${import.meta.env.BASE_URL}data/products.xlsx`) {
+export async function loadProductsFromExcel(url = `${import.meta.env.BASE_URL}data/products.xlsx`) {
   try {
     const response = await fetch(url);
     if (!response.ok) {
@@ -162,4 +163,52 @@ export async function loadProductsCatalog(url = `${import.meta.env.BASE_URL}data
     console.warn("Spreadsheet parsing/fetch fallback triggered:", error);
     return SEED_PRODUCTS;
   }
+}
+
+/**
+ * Universal catalog loader:
+ * 1. Checks Supabase products table first if Supabase credentials are configured.
+ * 2. If database is offline, unconfigured, or empty, seamlessly falls back to products.xlsx.
+ * @param {string} [url] - Optional Excel URL for fallback
+ * @returns {Promise<Array>}
+ */
+export async function loadProductsCatalog(url = `${import.meta.env.BASE_URL}data/products.xlsx`) {
+  if (isSupabaseConfigured) {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (!error && Array.isArray(data) && data.length > 0) {
+        return data.map(row => ({
+          id: row.sku || row.id,
+          dbId: row.id,
+          sku: row.sku || row.id,
+          name: row.name,
+          tamilName: row.name_ta || '',
+          category: row.category_name || 'General Grocery',
+          categoryId: row.category_id || null,
+          price: Number(row.price) || 0,
+          mrp: Number(row.mrp) || Math.round((Number(row.price) || 0) * 1.2),
+          discountPercent: row.discount_percent || 0,
+          unit: row.unit || '1 unit',
+          rating: Number(row.rating) || 4.8,
+          reviewsCount: Number(row.reviews_count) || 0,
+          image: row.image_url || '',
+          imageUrl: row.image_url || '',
+          description: row.description || '',
+          details: row.details || '',
+          inStock: row.in_stock !== undefined ? row.in_stock : true,
+          stockQuantity: row.stock_quantity !== undefined ? row.stock_quantity : 100,
+        }));
+      }
+    } catch (err) {
+      console.warn('[excelParser] Supabase primary fetch error, falling back to local Excel:', err.message);
+    }
+  }
+
+  // Fall back to Excel
+  return loadProductsFromExcel(url);
 }

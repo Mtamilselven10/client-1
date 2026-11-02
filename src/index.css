@@ -22,9 +22,9 @@ html, body {
   color: var(--ink);
   font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
   overflow-x: hidden;
-  scroll-behavior: smooth;
   margin: 0;
   padding: 0;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* Accessible focus ring for all interactive elements */
@@ -90,3 +90,37 @@ input[type="range"] {
     transform: none !important;
   }
 }
+
+/* Hide scrollbar for Chrome, Safari, Edge and Firefox */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Playing Cards Stacking Scroll Architecture */
+.card-stack-deck {
+  position: relative;
+  width: 100%;
+}
+
+.playing-card-section {
+  position: sticky;
+  border-top-left-radius: 28px;
+  border-top-right-radius: 28px;
+  box-shadow: 0 -14px 32px rgba(44, 30, 26, 0.12);
+  border-top: 1.5px solid rgba(93, 64, 55, 0.18);
+  background-color: var(--cream);
+  will-change: transform;
+}
+
+@media (min-width: 640px) {
+  .playing-card-section {
+    border-top-left-radius: 36px;
+    border-top-right-radius: 36px;
+    box-shadow: 0 -18px 40px rgba(44, 30, 26, 0.16);
+  }
+}
+

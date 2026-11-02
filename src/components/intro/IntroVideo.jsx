@@ -64,7 +64,7 @@ export default function IntroVideo({ onComplete }) {
 
     return () => {
       clearTimeout(safetyTimer);
-      document.body.style.overflow = originalOverflow;
+      document.body.style.overflow = '';
     };
   }, [handleFinish, onComplete]);
 

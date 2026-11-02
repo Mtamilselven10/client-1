@@ -122,14 +122,15 @@ export function buildGeneralInquiryWhatsAppUrl(query = "") {
 }
 
 /**
- * Resolves local and remote product image URLs with Vite BASE_URL support
+ * Resolves local and remote product image URLs with Vite BASE_URL support and graceful fallback
  */
-export function getProductImageUrl(img) {
-  if (!img) return '';
-  if (img.startsWith('http://') || img.startsWith('https://') || img.startsWith('data:')) {
-    return img;
+export function getProductImageUrl(img, fallback = 'products/001_Aachi_Chilli_Powder.jpg') {
+  const target = img || fallback;
+  if (!target) return '';
+  if (target.startsWith('http://') || target.startsWith('https://') || target.startsWith('data:')) {
+    return target;
   }
-  const clean = img.startsWith('/') ? img.slice(1) : img;
+  const clean = target.startsWith('/') ? target.slice(1) : target;
   const base = import.meta.env.BASE_URL || './';
   return base.endsWith('/') ? `${base}${clean}` : `${base}/${clean}`;
 }

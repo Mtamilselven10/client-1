@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, NavLink } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -12,7 +12,8 @@ import {
   Share2, 
   Check, 
   MessageCircle,
-  ChevronRight
+  ChevronRight,
+  ClipboardList
 } from 'lucide-react';
 import { loadProductsCatalog } from '../utils/excelParser';
 import { formatCurrency, buildSingleProductWhatsAppUrl, getProductImageUrl } from '../utils/formatters';
@@ -22,6 +23,13 @@ import { useToast } from '../context/ToastContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useFlyToCart } from '../animations/useFlyToCart';
 import { useReviews } from '../context/ReviewsContext';
+import { useRecentlyViewed } from '../context/RecentlyViewedContext';
+import { useShoppingList } from '../context/ShoppingListContext';
+import { useOrderHistory } from '../context/OrderHistoryContext';
+import RecentlyViewedSection from '../components/recentlyViewed/RecentlyViewedSection';
+import OftenPairedTogether from '../components/recommendations/OftenPairedTogether';
+import SimilarProductsSection from '../components/recommendations/SimilarProductsSection';
+import { getOftenPairedProducts } from '../utils/recommendationEngine';
 import { SHOP_NAME } from '../config';
 
 export default function ProductDetailPage() {
@@ -34,38 +42,55 @@ export default function ProductDetailPage() {
   const { addToast } = useToast();
   const { triggerFlyToCart, triggerFlyToWishlist } = useFlyToCart();
   const { getProductReviewStats } = useReviews();
-  
+  const { recordView } = useRecentlyViewed();
+  const { addItemToList, activeListId } = useShoppingList();
+  const { recordOrder } = useOrderHistory();
 
   const wishlistBtnRef = useRef(null);
   const [product, setProduct] = useState(location.state?.product || null);
+  const [catalog, setCatalog] = useState([]);
   const reviewStats = product ? getProductReviewStats(product.id, product.name, product.rating, product.reviewsCount) : { rating: 4.8, reviewsCount: 0, reviews: [] };
   const [loading, setLoading] = useState(!location.state?.product);
   const [error, setError] = useState(null);
   const [quantity, setQuantity] = useState(1);
 
+  // Automatically record product view into recently viewed history
+  useEffect(() => {
+    if (product && product.id) {
+      recordView(product.id);
+    }
+  }, [product, recordView]);
+
+  // Load catalog to power complementary recommendations and hydrate product
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    loadProductsCatalog()
+      .then(cat => {
+        setCatalog(cat || []);
+        const found = (cat || []).find(p => String(p.id).toLowerCase() === String(id).toLowerCase());
+        if (found) {
+          setProduct(found);
+        } else if (!product) {
+          setError(`Product "${id}" could not be found.`);
+        }
+      })
+      .catch(err => {
+        if (!product) {
+          setError("Failed to load product specifications from catalog.");
+        }
+      })
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  // Calculate rule-based complementary grocery products ("Often Paired Together")
+  const pairedProducts = useMemo(() => {
+    if (!product || !catalog || catalog.length === 0) return [];
+    return getOftenPairedProducts(product, catalog, 2);
+  }, [product, catalog]);
+
   // Image Hover Zoom State
   const [zoomStyle, setZoomStyle] = useState({ transform: 'scale(1)', transformOrigin: 'center center' });
   const imageContainerRef = useRef(null);
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    if (!product) {
-      setLoading(true);
-      loadProductsCatalog()
-        .then(catalog => {
-          const found = catalog.find(p => String(p.id).toLowerCase() === String(id).toLowerCase());
-          if (found) {
-            setProduct(found);
-          } else {
-            setError(`Product "${id}" could not be found.`);
-          }
-        })
-        .catch(err => {
-          setError("Failed to load product specifications from catalog.");
-        })
-        .finally(() => setLoading(false));
-    }
-  }, [id, product]);
 
   const handleMouseMove = (e) => {
     const container = imageContainerRef.current;
@@ -357,6 +382,16 @@ export default function ProductDetailPage() {
                 href={whatsAppOrderUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => {
+                  if (product) {
+                    recordOrder({
+                      items: [{ ...product, quantity }],
+                      subtotal: product.price * quantity,
+                      deliveryFee: 0,
+                      total: product.price * quantity
+                    });
+                  }
+                }}
                 className="w-full py-3.5 px-6 rounded-btn border-1.5 border-olive text-olive font-bold text-sm hover:bg-olive-soft transition-colors flex items-center justify-center gap-2 focus-visible:ring-2 focus-visible:ring-olive"
               >
                 <MessageCircle className="w-5 h-5 text-olive" />
@@ -383,9 +418,28 @@ export default function ProductDetailPage() {
               <Heart className={`w-4 h-4 ${isWished ? 'fill-cream text-cream' : 'text-olive'}`} />
               <span>{isWished ? t('productDetail.savedWishlist') : t('productDetail.saveWishlist')}</span>
             </motion.button>
+
+            {/* Add to Shopping List Button */}
+            <button
+              type="button"
+              onClick={() => {
+                addItemToList(activeListId, product, quantity);
+                addToast(t('shoppingList.itemAddedToast', { name: product.name }) || `Added "${product.name}" to your shopping list`, 'success');
+              }}
+              className="w-full py-2.5 px-4 rounded-btn text-xs font-bold transition-all border border-olive/30 bg-cream hover:bg-olive-soft text-olive flex items-center justify-center gap-2 cursor-pointer mt-2"
+              data-testid="add-to-shopping-list-btn"
+            >
+              <ClipboardList className="w-4 h-4" />
+              <span>{t('shoppingList.addToListBtn') || 'Add to Shopping List'}</span>
+            </button>
           </div>
         </motion.div>
       </div>
+
+      {/* Often Paired Together Complementary Bundle */}
+      {pairedProducts.length > 0 && (
+        <OftenPairedTogether currentProduct={product} pairedProducts={pairedProducts} />
+      )}
 
       {/* Customer Reviews for this Product */}
       <div className="mt-14 pt-8 border-t border-olive/20 space-y-6">
@@ -445,6 +499,18 @@ export default function ProductDetailPage() {
           </div>
         )}
       </div>
+
+      {/* Similar Products in Same Category or Brand */}
+      <SimilarProductsSection
+        currentProduct={product}
+        className="mt-12 pt-8 border-t border-olive/15"
+      />
+
+      {/* Recently Viewed Products (excluding currently active product) */}
+      <RecentlyViewedSection
+        currentProductId={product?.id}
+        className="mt-8 pt-8 border-t border-olive/15"
+      />
     </div>
   );
 }

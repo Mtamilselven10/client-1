@@ -43,15 +43,15 @@ export default function CustomerReviews() {
   const { language, t } = useLanguage();
 
   return (
-    <section className="py-20 px-4 sm:px-8 max-w-7xl mx-auto bg-cream">
-      <div className="text-center max-w-2xl mx-auto mb-14 space-y-3">
+    <section className="py-8 sm:py-12 px-4 sm:px-8 max-w-7xl mx-auto bg-transparent">
+      <div className="text-center max-w-2xl mx-auto mb-8 space-y-2">
         <span className="text-xs uppercase tracking-widest font-bold text-olive">
           {t('home.reviewsBadge')}
         </span>
-        <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-ink">
+        <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl font-bold text-ink">
           {t('home.reviewsTitle')}
         </h2>
-        <p className="text-sm text-ink/75">
+        <p className="text-xs sm:text-sm text-ink/75">
           {t('home.reviewsSubtitle')}
         </p>
       </div>

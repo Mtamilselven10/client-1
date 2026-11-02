@@ -71,25 +71,25 @@ export default function FeaturedCategories() {
   };
 
   return (
-    <section className="py-20 px-4 sm:px-8 max-w-7xl mx-auto bg-cream">
+    <section className="py-8 sm:py-12 px-4 sm:px-8 max-w-7xl mx-auto bg-transparent">
       {/* Editorial Section Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-8 gap-4">
         <div>
           <span className="text-xs uppercase tracking-widest font-bold text-olive">
             {t('home.categoriesBadge')}
           </span>
-          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-ink mt-2">
+          <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl font-bold text-ink mt-1">
             {t('home.categoriesTitle')}
           </h2>
-          <p className="text-sm text-ink/75 mt-1 max-w-xl">
+          <p className="text-xs sm:text-sm text-ink/75 mt-1 max-w-xl">
             {t('home.categoriesSubtitle')}
           </p>
         </div>
         <button
           onClick={() => navigate('/products')}
-          className="inline-flex items-center gap-2 text-olive hover:text-olive-dark font-semibold text-sm group"
+          className="inline-flex items-center gap-2 text-olive hover:text-olive-dark font-semibold text-xs sm:text-sm group"
         >
-          <span>{language === 'ta' ? 'அனைத்து 120+ பொருட்களையும் காண்க' : 'View All 120+ Grocery Products'}</span>
+          <span>{language === 'ta' ? 'அனைத்து பொருட்களையும் காண்க' : 'View All Provisions'}</span>
           <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
         </button>
       </div>
@@ -98,16 +98,16 @@ export default function FeaturedCategories() {
       <motion.div 
         initial="hidden"
         whileInView="visible"
-        viewport={{ once: true, margin: "-60px" }}
+        viewport={{ once: true, margin: "-40px" }}
         variants={{
           hidden: {},
           visible: {
             transition: {
-              staggerChildren: 0.1
+              staggerChildren: 0.08
             }
           }
         }}
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+        className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6"
       >
         {CATEGORIES.map((cat) => {
           const Icon = cat.icon;

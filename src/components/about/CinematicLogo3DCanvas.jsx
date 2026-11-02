@@ -117,7 +117,7 @@ function interpolateScrollStages(progress, cornerPos) {
   };
 }
 
-export default function CinematicLogo3DCanvas({ containerRef }) {
+export default function CinematicLogo3DCanvas({ containerRef = null, opacity = 0.22, className = '' }) {
   const canvasRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
@@ -234,30 +234,34 @@ export default function CinematicLogo3DCanvas({ containerRef }) {
     // Scroll Progress & Travel State
     let targetProgress = 0;
     let lerpedProgress = 0;
-    let currentOpacity = 1;
+    let currentOpacity = opacity;
     let isDirty = true;
 
-    // Calculate Scroll Progress inside the About Us container & Check Stop Section
+    // Calculate Scroll Progress globally across all pages or inside containerRef
     const updateScrollProgress = () => {
-      const container = containerRef?.current;
-      if (!container) return;
-
-      const rect = container.getBoundingClientRect();
+      let totalScrollable = 0;
+      let scrolled = 0;
       const viewportHeight = window.innerHeight;
-      const totalScrollable = rect.height - viewportHeight;
+
+      if (containerRef && containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        totalScrollable = rect.height - viewportHeight;
+        scrolled = Math.max(0, -rect.top);
+      } else {
+        // Global document scroll across any page
+        totalScrollable = (document.documentElement.scrollHeight || document.body.scrollHeight) - viewportHeight;
+        scrolled = window.scrollY || window.pageYOffset || 0;
+      }
 
       if (totalScrollable <= 0) {
         targetProgress = 0;
       } else {
-        // Calculate how far container has scrolled through viewport
-        const scrolled = Math.max(0, -rect.top);
         const rawProgress = scrolled / totalScrollable;
-        // When scrolled past About Us, keep pinned at Stage 3 corner pose (progress = 1.0)
         targetProgress = Math.max(0, Math.min(1, rawProgress));
       }
 
       // Check if Stop Section (e.g. footer) has entered viewport
-      let targetOpacity = 1;
+      let targetOpacity = opacity;
       const stopElement = document.getElementById(TRAVEL_END_SECTION_ID) || 
                           document.querySelector(`footer, #${TRAVEL_END_SECTION_ID}`);
       if (stopElement) {
@@ -265,7 +269,7 @@ export default function CinematicLogo3DCanvas({ containerRef }) {
         if (stopRect.top < viewportHeight) {
           const fadeDistance = 250;
           const fadeProgress = (viewportHeight - stopRect.top) / fadeDistance;
-          targetOpacity = Math.max(0, Math.min(1, 1 - fadeProgress));
+          targetOpacity = Math.max(0, Math.min(opacity, opacity * (1 - fadeProgress)));
         }
       }
 
@@ -369,14 +373,14 @@ export default function CinematicLogo3DCanvas({ containerRef }) {
 
   return (
     <div 
-      className="w-full h-full pointer-events-none overflow-hidden relative"
+      className={`w-full h-full pointer-events-none overflow-hidden relative ${className}`}
       aria-hidden="true"
     >
       <canvas
         ref={canvasRef}
         className="w-full h-full block"
         style={{
-          opacity: loading ? 0 : 1,
+          opacity: loading ? 0 : opacity,
           transition: 'opacity 0.6s ease-in-out',
         }}
       />

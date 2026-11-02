@@ -10,6 +10,7 @@
     "frames:scan": "node scripts/scan_frames.mjs"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.118.0",
     "framer-motion": "^11.18.2",
     "lucide-react": "^0.475.0",
     "react": "^18.3.1",

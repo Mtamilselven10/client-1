@@ -12,6 +12,7 @@ import {
   Minus
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useOrderHistory } from '../context/OrderHistoryContext';
 import { useLanguage } from '../context/LanguageContext';
 import { 
   formatCurrency, 
@@ -23,6 +24,7 @@ import { SHOP_NAME, WHATSAPP_NUMBER, getCleanWhatsAppNumber } from '../config';
 
 export default function CartPage() {
   const { cart, updateQuantity, removeFromCart, clearCart, getCartTotal, getItemCount } = useCart();
+  const { recordOrder } = useOrderHistory();
   const { t, translateCategory } = useLanguage();
   const navigate = useNavigate();
 
@@ -63,6 +65,14 @@ export default function CartPage() {
     setIsOrdering(true);
 
     try {
+      // Record completed checkout order in purchase history
+      recordOrder({
+        items: cart,
+        subtotal: totalAmount,
+        deliveryFee,
+        total: payableAmount
+      });
+
       const url = buildCartWhatsAppUrl(cart, deliveryFee);
       // Safe popup / tab opener
       const openedWindow = window.open(url, '_blank', 'noopener,noreferrer');
@@ -252,6 +262,14 @@ export default function CartPage() {
                         href={singleItemOrderUrl}
                         target="_blank"
                         rel="noopener noreferrer"
+                        onClick={() => {
+                          recordOrder({
+                            items: [{ ...item, quantity: item.quantity }],
+                            subtotal: item.price * item.quantity,
+                            deliveryFee: 0,
+                            total: item.price * item.quantity
+                          });
+                        }}
                         className="px-4 py-2.5 rounded-btn bg-olive text-cream font-bold text-xs shadow-olive-sm hover:bg-olive-dark transition-colors flex items-center gap-1.5 shrink-0 focus-visible:ring-2 focus-visible:ring-olive"
                         title="Order this specific item on WhatsApp"
                       >
